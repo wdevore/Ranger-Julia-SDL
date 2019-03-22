@@ -1,8 +1,7 @@
 module Transforms
 
-include("../geometry/point.jl")
-
-using .Geometry
+using ..Geometry:
+    Point
 
 export AffineTransform
 export copy
@@ -56,7 +55,7 @@ function set!(aft::AffineTransform, a::T, b::T, c::T, d::T, tx::T, ty::T) where 
 end
 
 # transforms
-function transform_vector!{T}(aft::AffineTransform, v::Point) where {T <: AbstractFloat}
+function transform_vector!(aft::AffineTransform{T}, v::Point{T}) where {T <: AbstractFloat}
     v.x = (aft.a * v.x) + (aft.c * v.y) + aft.tx;
     v.y = (aft.b * v.x) + (aft.d * v.y) + aft.ty;
 end
