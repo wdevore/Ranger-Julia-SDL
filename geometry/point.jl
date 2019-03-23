@@ -1,5 +1,3 @@
-module Geometry
-
 import Base.copy
 
 export Point
@@ -19,5 +17,3 @@ end
 
 # copy specializations
 copy(p::Point) = Point{Float64}(p.x, p.y)
-
-end

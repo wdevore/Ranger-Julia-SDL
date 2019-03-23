@@ -1,7 +1,7 @@
 module Ranger
 
-include("geometry/point.jl")
+include("geometry/geometry.jl")
 
-include("math/transforms.jl")
+include("math/math.jl")
 
 end
