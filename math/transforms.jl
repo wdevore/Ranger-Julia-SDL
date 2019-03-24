@@ -5,12 +5,12 @@ using ..Geometry:
 
 export AffineTransform
 export copy
-export to_identity, set, transform
-export translate, make_translate
-export scale, make_scale
-export rotate, set_rotate, make_rotate
-export multiply, invert
-export transpose
+export to_identity!, set!, transform!
+export translate!, make_translate!
+export scale!, make_scale!
+export rotate!, set_rotate!, make_rotate!
+export multiply!, invert!
+export transpose!
 
 # A minified affine transform.
 # Column major
