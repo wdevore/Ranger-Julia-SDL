@@ -1,32 +1,43 @@
 module Game
 
-include("world.jl")
 include("sdl.jl")
+include("io.jl")
 
 export initialize, run
 
-sdl = nothing
+using ..Nodes
+    NodeManager, pre_visit, post_visit
+
+using ..Ranger:
+    World
+
+manager = nothing
 
 function initialize(title::String, build::Function)
     world = World(title)
 
-    sdl = SDL(world, title)
+    SDL(world)
 
     build(world)
+
+    global manager = NodeManager(world)
 
     world
 end
 
 function run(world::World)
     println("running...")
-    cnt = 0
 
     running = true
 
-    while running && cnt < 100
+    # Main game loop
+    while running
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
         # Handle Events
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
         haveEvents = true
-        
+
+        # Process any events that have been queued.
         while haveEvents
             event, haveEvents = poll_event!()
             ev_type = get_event_type(event)
@@ -39,52 +50,36 @@ function run(world::World)
                 end
             end
             
+            # Route event to registered Nodes
+            # route_event(nodes)
+
             handle_events!(event, ev_type)
         end        
+
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
+        # Update
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
+
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
+        # Render
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
+        pre_visit(manager)
+
+        post_visit(manager)
+
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
+        # Present
+        # ^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--^--
         # println("Sleep")
         # sleep(0.1)
     end
-end
 
-function run2(world::World)
-    println("running...")
-    cnt = 0
-
-    running = true
-
-    while running && cnt < 100
-        event = SDL2.Event(ntuple(i->UInt8(0),56))
-        println("-----------------------------")
-        SDL2.PollEvent(pointer_from_objref(event))
-        println(event)
-        
-        # if state == SDL2.QUIT
-        #     running = false
-        # end
-        t = UInt32(0)
-        for x in event._Event[4:-1:1]
-            println("x: ", bitstring(x))
-            t = t << (sizeof(x)*8)
-            println("t: ", bitstring(t))
-            t |= x
-        end
-
-        evtype = SDL2.Event(t)
-        evtype == nothing && return nothing
-
-        evtype == SDL2.KeyboardEvent && info(event)
-
-        unsafe_load( Ptr{evtype}(pointer_from_objref(event)) )
-
-        sleep(0.5)
-    end
-
-    sleep(1.0)
+    exit();
 end
 
 function exit()
     SDL2.Quit()
-    println("Game exited")
+    println("Game exited");
 end
 
 end
