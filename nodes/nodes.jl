@@ -1,7 +1,8 @@
 module Nodes
 
-export visit
-export enter, exit
+export AbstractNode
+
+abstract type AbstractNode end
 
 include("transition_properties.jl")
 include("timing_properties.jl")
@@ -10,7 +11,6 @@ include("node.jl")
 include("node_stack.jl")
 include("scenes/scenes.jl")
 include("node_manager.jl")
-
 
 using .Scenes
     AbstractScene

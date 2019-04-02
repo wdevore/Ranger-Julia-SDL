@@ -1,11 +1,8 @@
 import Base.show
 
-export Node, AbstractNode
-export has_parent
+export NodeData, NodeNil, is_nil
 
-abstract type AbstractNode end
-
-mutable struct Node <: AbstractNode
+mutable struct NodeData
     # Properties
     id::UInt32
     name::String
@@ -14,11 +11,11 @@ mutable struct Node <: AbstractNode
 
     parent::AbstractNode
 
-    function Node()
-        Node(UInt32(0), "_NoName_")
+    function NodeData()
+        NodeData(UInt32(0), "_NoName_")
     end
 
-    function Node(id::UInt32, name::String)
+    function NodeData(id::UInt32, name::String)
         obj = new()
 
         obj.id = id
@@ -26,13 +23,13 @@ mutable struct Node <: AbstractNode
         obj.visible = true
         obj.dirty = true
 
-        obj.parent = obj    # default to self
+        obj.parent = NodeNil()    # default to self
         
         obj
     end
 
-    function Node(id::UInt32, name::String, parent::AbstractNode)
-        obj = Node(id, name)
+    function NodeData(id::UInt32, name::String, parent::AbstractNode)
+        obj = NodeData(id, name)
         # obj.transform = TransformProperties{Float64}()
 
         obj.parent = parent
@@ -40,7 +37,20 @@ mutable struct Node <: AbstractNode
     end
 end
 
-function Base.show(io::IO, node::Node)
+struct NodeNil <: AbstractNode
+    id::UInt32
+    name::String
+
+    function NodeNil()
+        new(0, "_Nil_")
+    end
+end
+
+function is_nil(node::AbstractNode)
+    node.id == 0
+end
+
+function Base.show(io::IO, node::NodeData)
     print(io, "'", node.name, "' (", node.id, ")");
 end
 

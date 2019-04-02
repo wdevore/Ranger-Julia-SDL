@@ -35,7 +35,6 @@ mutable struct SDL
         world.renderer = SDL2.CreateRenderer(world.window, Int32(-1),
             UInt32(SDL2.RENDERER_ACCELERATED | SDL2.RENDERER_PRESENTVSYNC))
 
-        # new(win, renderer)
         new()
     end
 end

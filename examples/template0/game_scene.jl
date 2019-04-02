@@ -1,10 +1,10 @@
 export SplashScene
 
 using .Ranger.Nodes:
-    Node, AbstractNode
+    NodeData, NodeNil, AbstractNode
 
 using .Ranger.Nodes.Scenes:
-    AbstractScene, SceneActions
+    AbstractScene, SceneActions, SceneNil
 
 using .Ranger:
     gen_id
@@ -16,19 +16,19 @@ using .Ranger.Rendering:
     RenderContext
 
 mutable struct GameScene <: AbstractScene
-    base::Node
+    base::NodeData
 
     replacement::AbstractScene
 
-    # transform::TransformProperties
+    # children::
 
     function GameScene(world::World, name::String)
         obj = new()
 
         # We use "obj" to represent a lack of parent.
-        obj.base = Node(gen_id(world), name, obj)
+        obj.base = NodeData(gen_id(world), name, NodeNil())
         # obj.transform = TransformProperties{Float64}()
-        obj.replacement = obj   # default to self/obj = No replacement present
+        obj.replacement = SceneNil()
 
         obj
     end
@@ -44,11 +44,11 @@ end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter(node::GameScene)
+function enter_node(node::GameScene)
     println("enter ", node);
 end
 
-function exit(node::GameScene)
+function exit_node(node::GameScene)
     println("exit ", node);
 end
 

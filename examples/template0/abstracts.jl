@@ -1,11 +1,11 @@
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter(node::AbstractScene)
+function enter_node(node::AbstractScene)
     println("AbstractScene::enter ", node);
 end
 
-function exit(node::AbstractScene)
+function exit_node(node::AbstractScene)
     println("AbstractScene::exit ", node);
 end
 

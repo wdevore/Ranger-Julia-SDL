@@ -1,14 +1,14 @@
 export CrossNode
 
-using ..Nodes
-    Node, AbstractNode
+using ..Nodes:
+    NodeData, AbstractNode
 
 mutable struct CrossNode <: AbstractNode
-    base::Node
+    base::NodeData
 
     function CrossNode(id::UInt32, name::String, parent::AbstractNode)
         new(
-            Node(id, name, parent)
+            NodeData(id, name, parent)
         )
     end
 end

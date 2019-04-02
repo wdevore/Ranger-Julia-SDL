@@ -1,7 +1,7 @@
-export SplashScene
+export SplashScene, transition
 
 using .Ranger.Nodes:
-    Node, AbstractNode, NodeManager
+    NodeData, NodeNil, AbstractNode, NodeManager
 
 using .Ranger.Nodes.Scenes:
     AbstractScene, SceneActions
@@ -13,7 +13,7 @@ using .Ranger.Game:
     World
 
 mutable struct SplashScene <: AbstractScene
-    base::Node
+    base::NodeData
 
     replacement::AbstractScene
 
@@ -23,7 +23,7 @@ mutable struct SplashScene <: AbstractScene
         obj = new()
 
         # We use "obj" to represent a lack of parent.
-        obj.base = Node(gen_id(world), name, obj)
+        obj.base = NodeData(gen_id(world), name, NodeNil())
         # obj.transform = TransformProperties{Float64}()
         obj.replacement = replacement   # default to self/obj = No replacement present
 
@@ -41,11 +41,11 @@ end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter(node::SplashScene)
+function enter_node(node::SplashScene)
     println("enter ", node);
 end
 
-function exit(node::SplashScene)
+function exit_node(node::SplashScene)
     println("exit ", node);
 end
 

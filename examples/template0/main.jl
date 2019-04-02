@@ -2,12 +2,13 @@
 # include(ranger_path * "ranger.jl")
 
 include("../../ranger.jl")
+
+const RGame = Ranger.Game
+
 include("build.jl")
 
 using .Ranger.Game:
     World
-
-const RGame = Ranger.Game
 
 println("Running Template 0")
 
@@ -17,5 +18,5 @@ function go()
     RGame.run(world);
 end
 
-# using Debugger
-go()
+using Debugger
+# go()

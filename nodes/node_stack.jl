@@ -1,5 +1,5 @@
-using .Nodes
-    AbstractNode
+using .Nodes:
+    AbstractNode, NodeNil, is_nil
 
 mutable struct NodeStack
     nodes::Array{AbstractNode, 1}
@@ -10,39 +10,38 @@ mutable struct NodeStack
     function NodeStack()
         o = new()
 
-        o.node = AbstractNode[]
-        o.next_node = o     # Setting node to stack == not present
-        o.running_node = o
+        o.nodes = AbstractNode[]
+        o.next_node = NodeNil()
+        o.running_node = NodeNil()
 
         o
     end
 end
 
 function is_empty(stack::NodeStack)
-    length(stack) == 0
+    length(stack.nodes) == 0
 end
 
 function has_next_node(stack::NodeStack)
-    # If node == stack then node isn't considered present
-    !(stack.next_node === stack)
+    !is_nil(stack.next_node)
 end
 
 function has_running_node(stack::NodeStack)
-    !(stack.running_node === stack)
+    !is_nil(stack.running_node)
 end
 
 function set_next_node_nil(stack::NodeStack)
     # Setting node to stack means nil
-    stack.next_node == stack;
+    stack.next_node = NodeNil();
 end
 
 function set_running_node_nil(stack::NodeStack)
     # Setting node to stack means nil
-    stack.running_node == stack;
+    stack.running_node = NodeNil();
 end
 
 function set_running_node(stack::NodeStack)
-    stack.running_node == stack.next_node;
+    stack.running_node = stack.next_node;
 end
 
 function push(stack::NodeStack, node::AbstractNode)

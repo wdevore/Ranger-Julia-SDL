@@ -3,7 +3,7 @@ export SceneBoot
 export transition, get_replacement
 
 using ..Nodes:
-    Node
+    NodeData, NodeNil
 
 using .Scenes:
     AbstractScene, SceneActions
@@ -14,19 +14,15 @@ using ...Ranger:
 using ...Ranger:
     World 
 
-using ...Rendering:
-    RenderContext
-
 mutable struct SceneBoot <: AbstractScene
-    base::Node
+    base::NodeData
 
     replacement::AbstractScene
 
     function SceneBoot(world::World, name::String, replacement::AbstractScene)
         obj = new()
 
-        # We use "obj" to represent a lack of parent.
-        obj.base = Node(gen_id(world), name, obj)
+        obj.base = NodeData(gen_id(world), name, NodeNil())
         obj.replacement = replacement
 
         obj

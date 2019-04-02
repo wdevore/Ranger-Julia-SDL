@@ -19,21 +19,19 @@ function build(world::World)
 
     splash = SplashScene(world, "SplashScene", game)
     println(splash)
-    println("splash scene has parent: ", RNodes.has_parent(splash))
+    # println("splash scene has parent: ", RNodes.has_parent(splash))
     # enter(splash)
     # exit(splash)
 
-    scene = RScenes.SceneBoot(world, "SceneBoot", splash)
-    println(scene)
-    println("boot scene has parent: ", RNodes.has_parent(scene))
+    boot = RScenes.SceneBoot(world, "SceneBoot", splash)
+    println(boot)
+    # println("boot scene has parent: ", RNodes.has_parent(boot))
     # enter(scene)
     # exit(scene)
 
+    # TODO should we auto add SceneBoot on behalf of user?????
+    RGame.push(boot)
     # println(RNodes.has_replacement(scene))
-
-    println("Node:")
-    node = RNodes.Node()
-    # println(RNodes.has_parent(node))
 
     println("Built");
 end
