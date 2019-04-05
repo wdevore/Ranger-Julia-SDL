@@ -4,6 +4,7 @@
 include("../../ranger.jl")
 
 const REngine = Ranger.Engine
+const RBasicFont = Ranger.Rendering
 
 include("build.jl")
 

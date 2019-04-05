@@ -1,12 +1,12 @@
+# ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
+# Node API interface
+# ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
 module Nodes
 
 export
     Nodes,
     enter_node
 
-# ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-# Node API interface
-# ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
 export 
     AbstractNode,
     AbstractScene,
@@ -18,12 +18,16 @@ abstract type AbstractScene <: AbstractNode end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter_node end
-function exit_node end
+function enter_node(node::AbstractScene)
+    println("AbstractScene::enter nodes ", node);
+end
+
+function exit_node(node::AbstractScene)
+    println("AbstractScene::exit nodes ", node);
+end
 function transition end
 function get_replacement end
 function take_replacement end
-# function visit end
 
 # -----------------------------------------------------------
 # Abstract Nodes
@@ -53,14 +57,6 @@ end
 
 function has_parent(node::AbstractScene)
     !is_nil(node.base.parent)
-end
-
-function enter_node(node::AbstractScene)
-    println("AbstractScene::enter nodes ", node);
-end
-
-function exit_node(node::AbstractScene)
-    println("AbstractScene::exit nodes ", node);
 end
 
 # ---------- INCLUDES --------------------------------------------------

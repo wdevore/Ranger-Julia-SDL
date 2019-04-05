@@ -11,12 +11,12 @@ include("game_scene.jl")
 using .Ranger.Engine:
     World
 
-const RGeo = Ranger.Geometry
-const RMath = Ranger.Math
-const RAnim = Ranger.Animation
-const RRendering = Ranger.Rendering
-const RNodes = Ranger.Nodes
-const RScenes = Ranger.Nodes.Scenes
+# const RGeo = Ranger.Geometry
+# const RMath = Ranger.Math
+# const RAnim = Ranger.Animation
+# const RRendering = Ranger.Rendering
+# const RNodes = Ranger.Nodes
+# const RScenes = Ranger.Nodes.Scenes
 const REngine = Ranger.Engine
 
 function build(world::World)

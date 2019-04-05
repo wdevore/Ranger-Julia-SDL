@@ -5,7 +5,8 @@ export
 
 using ..Rendering:
     RenderContext,
-    save, restore, pre, post
+    save, restore, pre, post,
+    initialize
 
 using ...Ranger:
     World
@@ -36,6 +37,7 @@ mutable struct NodeManager
         
         o.clear_background = true
         o.context = RenderContext(world)
+        initialize(o.context, world)
         o.stack = NodeStack()
 
         o

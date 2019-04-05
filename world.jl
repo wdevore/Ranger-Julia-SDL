@@ -20,10 +20,10 @@ mutable struct World
     window_position_y::UInt32
     window_width::UInt32
     window_height::UInt32
-    window_centered::Bool
 
     view_width::Float64
     view_height::Float64
+    view_centered::Bool
 
     ids::UInt32
 
@@ -37,7 +37,7 @@ mutable struct World
         o.window_position_y = WINDOW_POSITION[2]
         o.window_width = WIDTH
         o.window_height = UInt32(Float64(WIDTH) / DISPLAY_RATIO)
-        o.window_centered = false
+        o.view_centered = true
         o.view_width = Float64(o.window_width) * VIEW_SCALE
         o.view_height = Float64(o.window_height) * VIEW_SCALE
         o.ids = 0

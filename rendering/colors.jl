@@ -2,27 +2,22 @@ export Palette,
     Gray
     
 struct Palette
-    r::UInt8
-    g::UInt8
-    b::UInt8
-    a::UInt8
-
-    r64::Int64
-    g64::Int64
-    b64::Int64
-    a64::Int64
+    # SDL requires Int64 not UInt8
+    r::Int64
+    g::Int64
+    b::Int64
+    a::Int64
 
     function Palette()
         new(0, 0, 0, 255)
     end
 
     function Palette(r::Integer, g::Integer, b::Integer)
-        new(UInt8(r), UInt8(g), UInt8(b), 255)
+        new(Int64(r), Int64(g), Int64(b), 255)
     end
 
     function Palette(r::Integer, g::Integer, b::Integer, a::Integer)
-        new(UInt8(r), UInt8(g), UInt8(b), UInt8(a),
-            Int64(r), Int64(g), Int64(b), Int64(a))
+        new(Int64(r), Int64(g), Int64(b), Int64(a))
     end
 
     # 0xrrggbbaa
@@ -31,8 +26,7 @@ struct Palette
         g = Integer((color & 0x00ff0000) >> 16)
         b = Integer((color & 0x0000ff00) >> 8)
         a = Integer(color & 0x000000ff)
-        new(r, g, b, a, 
-        Int64(r), Int64(g), Int64(b), Int64(a))
+        new(Int64(r), Int64(g), Int64(b), Int64(a))
     end
 end
 
@@ -56,8 +50,16 @@ function Blue()
     Palette(0, 0, 255)
 end
 
-function DarkGray()
+function DarkerGray()
     Palette(64, 64, 64)
+end
+
+function DarkGray()
+    Palette(80, 80, 80)
+end
+
+function LightGray()
+    Palette(100, 100, 100)
 end
 
 function Gray()

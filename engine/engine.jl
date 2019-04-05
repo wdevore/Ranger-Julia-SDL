@@ -30,6 +30,7 @@ function initialize(title::String, build::Function)
 
     global manager = NodeManager(world)
 
+    # Allow client to build game
     build(world)
 
     world
