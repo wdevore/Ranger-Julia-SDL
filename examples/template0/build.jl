@@ -4,6 +4,7 @@
 # import .Ranger.Nodes:
 #     transition, get_replacement, visit
 
+include("scene_boot.jl")
 include("splash_scene.jl")
 include("game_scene.jl")
 
@@ -32,7 +33,7 @@ function build(world::World)
     # enter(splash)
     # exit(splash)
 
-    boot = RNodes.SceneBoot(world, "SceneBoot", splash)
+    boot = SceneBoot(world, "SceneBoot", splash)
     println(boot)
     # println("boot scene has parent: ", RNodes.has_parent(boot))
     # enter(scene)

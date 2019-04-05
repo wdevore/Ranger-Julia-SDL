@@ -11,5 +11,3 @@ end
 function is_nil(node::AbstractScene)
     node.base.id == 0
 end
-
-

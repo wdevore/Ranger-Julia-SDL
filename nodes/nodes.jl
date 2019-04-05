@@ -74,7 +74,6 @@ include("node_stack.jl")
 
 include("scenes/scenes.jl")
 include("scenes/scene_nil.jl")
-include("scenes/scene_boot.jl")
 
 include("node_manager.jl")
 
