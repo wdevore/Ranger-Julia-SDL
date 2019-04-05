@@ -139,7 +139,6 @@ function run(world::World)
 end
 
 function push(scene::AbstractScene)
-    # Auto-add SceneBoot
     push_node(manager, scene)
 end
 

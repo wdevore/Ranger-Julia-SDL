@@ -16,7 +16,7 @@ using .Nodes:
     transition
 
 using .Scenes:AbstractScene,
-    REPLACE_TAKE
+    REPLACE_TAKE, NO_ACTION
 
 import .Nodes:
     visit
@@ -72,10 +72,10 @@ function visit(man::NodeManager, interpolation::Float64)
     if action == REPLACE_TAKE
         repl = get_replacement(man.stack.running_node)
         replace(man.stack, repl)
+    else
+        # Visit the running node
+        visit(man.stack.running_node, man.context, interpolation)
     end
-
-    # Visit the running node
-    visit(man.stack.running_node, man.context, interpolation)
 
     restore(man.context)
 
@@ -95,7 +95,7 @@ function set_next_node(man::NodeManager)
 
     set_next_node_nil(man.stack)
 
-    println("--- Running node --- ", man.stack.running_node)
+    println("Running node ", man.stack.running_node)
 
     enter_node(man.stack.running_node);
 end

@@ -65,13 +65,11 @@ end
 function replace(stack::NodeStack, replacement::AbstractNode)
     stack.next_node = replacement
 
-    println("Replacing with : ", replacement)
-
     # Replacement is the act of popping and pushing. i.e. replacing
     # the stack top with the new node.
     if !is_empty(stack)
         top = pop!(stack.nodes)
-        println("NodeStack: popped for replacement: ", top);
+        println("NodeStack: popped ", top, " for replacement with ", replacement);
     else
         println("NodeStack: replace WARNING, nothing popped");
     end

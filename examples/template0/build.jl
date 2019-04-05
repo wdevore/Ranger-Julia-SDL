@@ -24,22 +24,15 @@ function build(world::World)
 
     game = GameScene(world, "GameScene")
     println(game)
-    # enter(game)
-    # exit(game)
 
     splash = SplashScene(world, "SplashScene", game)
     println(splash)
     # println("splash scene has parent: ", RNodes.has_parent(splash))
-    # enter(splash)
-    # exit(splash)
 
     boot = SceneBoot(world, "SceneBoot", splash)
     println(boot)
     # println("boot scene has parent: ", RNodes.has_parent(boot))
-    # enter(scene)
-    # exit(scene)
 
-    # TODO should we auto add SceneBoot on behalf of user?????
     REngine.push(boot)
     # println(RNodes.has_replacement(scene))
 
