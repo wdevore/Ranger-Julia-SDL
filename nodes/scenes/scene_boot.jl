@@ -3,16 +3,13 @@ export SceneBoot
 export transition, get_replacement
 
 using ..Nodes:
-    NodeData, NodeNil
+    NodeData, NodeNil, AbstractScene
 
 using .Scenes:
-    AbstractScene, SceneActions
+    REPLACE_TAKE
 
 using ...Ranger:
-    gen_id
-
-using ...Ranger:
-    World 
+    World, gen_id
 
 mutable struct SceneBoot <: AbstractScene
     base::NodeData
@@ -32,10 +29,10 @@ end
 # --------------------------------------------------------
 # Transitioning
 # --------------------------------------------------------
-function transition(node::SceneBoot)
+function Nodes.transition(node::SceneBoot)
     REPLACE_TAKE
 end
 
-function get_replacement(node::SceneBoot)
+function Nodes.get_replacement(node::SceneBoot)
     node.replacement
 end

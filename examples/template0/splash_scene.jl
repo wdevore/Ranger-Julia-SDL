@@ -1,15 +1,16 @@
 export SplashScene, transition
 
 using .Ranger.Nodes:
-    NodeData, NodeNil, AbstractNode, NodeManager
+    NodeData, NodeNil, AbstractNode, NodeManager,
+    AbstractScene
 
 using .Ranger.Nodes.Scenes:
-    AbstractScene, SceneActions
-
+    REPLACE_TAKE
+    
 using .Ranger:
     gen_id
 
-using .Ranger.Game:
+using .Ranger.Engine:
     World
 
 mutable struct SplashScene <: AbstractScene
@@ -34,25 +35,25 @@ end
 # --------------------------------------------------------
 # Visits
 # --------------------------------------------------------
-function visit(node::SplashScene, man::NodeManager, interpolation::Float64)
-    println("visit ", node);
+function Ranger.Nodes.visit(node::SplashScene, man::NodeManager, interpolation::Float64)
+    println("SplashScene visit ", node);
 end
 
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter_node(node::SplashScene)
+function Ranger.Nodes.enter_node(node::SplashScene)
     println("enter ", node);
 end
 
-function exit_node(node::SplashScene)
+function Ranger.Nodes.exit_node(node::SplashScene)
     println("exit ", node);
 end
 
-function transition(node::SplashScene)
+function Ranger.Nodes.transition(node::SplashScene)
     REPLACE_TAKE
 end
 
-function get_replacement(node::SplashScene)
+function Ranger.Nodes.get_replacement(node::SplashScene)
     node.replacement
 end

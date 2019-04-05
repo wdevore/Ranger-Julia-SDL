@@ -1,6 +1,6 @@
 import Base.show
 
-export NodeData, NodeNil, is_nil
+export NodeData
 
 mutable struct NodeData
     # Properties
@@ -35,19 +35,6 @@ mutable struct NodeData
         obj.parent = parent
         obj
     end
-end
-
-struct NodeNil <: AbstractNode
-    id::UInt32
-    name::String
-
-    function NodeNil()
-        new(0, "_Nil_")
-    end
-end
-
-function is_nil(node::AbstractNode)
-    node.id == 0
 end
 
 function Base.show(io::IO, node::NodeData)

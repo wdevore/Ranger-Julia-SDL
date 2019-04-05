@@ -1,4 +1,4 @@
-module Game
+module Engine
 
 include("sdl.jl")
 include("io.jl")
@@ -6,11 +6,10 @@ include("io.jl")
 export initialize, run
 
 using ..Nodes:
-    NodeManager, pre_visit, post_visit, visit,
+    AbstractScene,
+    NodeManager,
+    pre_visit, post_visit, visit,
     push_node, update
-
-using ..Nodes.Scenes:
-    AbstractScene
 
 using ..Ranger:
     World

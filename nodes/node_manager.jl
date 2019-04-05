@@ -1,27 +1,24 @@
-using SimpleDirectMediaLayer
-const SDL2 = SimpleDirectMediaLayer
-
-export NodeManager
-export pre_visit, post_visit, visit, update
-export pop_node, push_node
+export
+    NodeManager,
+    pre_visit, post_visit, visit, update,
+    pop_node, push_node
 
 using ..Rendering:
     RenderContext,
     save, restore, pre, post
 
-using ..Ranger:
+using ...Ranger:
     World
 
 using .Nodes:
     NodeStack,
-    has_running_node, has_next_node, set_running_node
+    has_running_node, has_next_node, set_running_node,
+    transition
 
-using .Scenes:
-    AbstractScene,
-    enter_node, transition,
+using .Scenes:AbstractScene,
     REPLACE_TAKE
 
-import .Scenes:
+import .Nodes:
     visit
 
 mutable struct NodeManager
@@ -70,9 +67,7 @@ function visit(man::NodeManager, interpolation::Float64)
 
     # If mouse coords changed then update view coords.
     # self.global_data.update_view_coords(&mut self.context);
-    println("Transition..........")
     action = transition(man.stack.running_node)
-    println("action ", action)
 
     if action == REPLACE_TAKE
         repl = get_replacement(man.stack.running_node)

@@ -2,7 +2,7 @@ using .Nodes:
     AbstractNode, NodeNil, is_nil
 
 mutable struct NodeStack
-    nodes::Array{AbstractNode, 1}
+    nodes::Array{AbstractNode,1}
 
     next_node::AbstractNode
     running_node::AbstractNode
@@ -55,7 +55,7 @@ end
 function pop(stack::NodeStack)
     if !is_empty(stack)
         top = pop!(stack.nodes)
-        stack.next_node = node
+        stack.next_node = top
         println("NodeStack: popped: ", top);
     else
         println("NodeStack -- no nodes to pop.");

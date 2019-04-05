@@ -3,20 +3,17 @@
 
 include("../../ranger.jl")
 
-const RGame = Ranger.Game
+const REngine = Ranger.Engine
 
 include("build.jl")
-
-using .Ranger.Game:
-    World
 
 println("Running Template 0")
 
 function go()
-    world = RGame.initialize("Template 0", build)
+    world = REngine.initialize("Template 0", build)
 
-    RGame.run(world);
+    REngine.run(world);
 end
 
-using Debugger
-# go()
+# using Debugger
+go()

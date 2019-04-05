@@ -4,8 +4,9 @@ const SDL2 = SimpleDirectMediaLayer
 import SimpleDirectMediaLayer:
     Renderer
 
-export RenderContext
-export save, restore, post, pre
+export 
+    RenderContext,
+    save, restore, post, pre
 
 using ..Ranger:
     World

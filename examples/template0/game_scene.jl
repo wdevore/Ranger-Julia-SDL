@@ -1,15 +1,16 @@
 export SplashScene
 
 using .Ranger.Nodes:
-    NodeData, NodeNil, AbstractNode
+    NodeData, SceneNil, AbstractNode, NodeManager,
+    AbstractScene
 
 using .Ranger.Nodes.Scenes:
-    AbstractScene, SceneActions, SceneNil
+    NO_ACTION
 
 using .Ranger:
     gen_id
 
-using .Ranger.Game:
+using .Ranger.Engine:
     World
 
 using .Ranger.Rendering:
@@ -37,25 +38,25 @@ end
 # --------------------------------------------------------
 # Visits
 # --------------------------------------------------------
-function visit(node::GameScene, context::RenderContext, interpolation::Float64)
-    println("visit ", node);
+function Ranger.Nodes.visit(node::GameScene, context::RenderContext, interpolation::Float64)
+    # println("GameScene visit ", node);
 end
 
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter_node(node::GameScene)
+function Ranger.Nodes.enter_node(node::GameScene)
     println("enter ", node);
 end
 
-function exit_node(node::GameScene)
+function Ranger.Nodes.exit_node(node::GameScene)
     println("exit ", node);
 end
 
-function transition(node::GameScene)
-    REPLACE_TAKE
+function Ranger.Nodes.transition(node::GameScene)
+    NO_ACTION
 end
 
-function get_replacement(node::GameScene)
+function Ranger.Nodes.get_replacement(node::GameScene)
     node.replacement
 end
