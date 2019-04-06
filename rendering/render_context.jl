@@ -12,7 +12,8 @@ using ..Ranger:
     World
 
 using .Rendering:
-    Palette, Gray, get_glyph, get_glyph_width
+    Palette, get_glyph, get_glyph_width,
+    DarkGray, Orange
 
 using ..Math:
     AffineTransform, make_translate!, scale!, multiply!
@@ -44,7 +45,7 @@ mutable struct RenderContext
         o.renderer = world.renderer
         o.state = []
         o.stack_top = 1
-        o.clear_color = Gray()
+        o.clear_color = DarkGray()
         o.draw_color = Orange()
         o.width = world.window_width
         o.height = world.window_height
@@ -106,37 +107,7 @@ function pre(context::RenderContext)
 
     # Draw checkered board as an clear indicator for debugging
     # NOTE: disable this code for release builds
-    flip = false
-    size = 200
-    col = 0
-    row = 0
-    rect = SDL2.Rect(0, 0, 1, 1)
-
-    while row < context.height 
-        while col < context.width 
-            if flip 
-                SDL2.SetRenderDrawColor(context.renderer, 100, 100, 100, 255)
-            else 
-                SDL2.SetRenderDrawColor(context.renderer, 80, 80, 80, 255)
-            end
-
-            rect.x = col
-            rect.y = row
-            rect.w = col + size
-            rect.h = row + size
-            
-            SDL2.RenderFillRect(context.renderer, pointer_from_objref(rect))
-
-            flip = !flip;
-            col += size;
-        end
-
-        flip = !flip;
-        col = 0;
-        row += size;
-    end
-
-    nothing
+    draw_checkerboard(context);
 end
 
 # Push the current state onto the stack
@@ -150,14 +121,14 @@ function save(context::RenderContext)
     context.stack_top += 1;
 
     # debugging
-    rect = SDL2.Rect(0, 0, 1, 1)
-    rect.x = 100
-    rect.y = 100
-    rect.w = 400
-    rect.h = 400
+    # rect = SDL2.Rect(0, 0, 1, 1)
+    # rect.x = 100
+    # rect.y = 100
+    # rect.w = 400
+    # rect.h = 400
 
-    SDL2.SetRenderDrawColor(context.renderer, 255, 127, 0, 255)
-    draw_text(context, 100, 100, "Ranger", 3, 2, false)
+    # SDL2.SetRenderDrawColor(context.renderer, 255, 127, 0, 255)
+    # draw_text(context, 100, 100, "Ranger", 3, 2, false)
     # draw_filled_rectangle(context, rect)
     # SDL2.SetRenderDrawColor(context.renderer, 255, 255, 255, 255)
     # draw_outlined_rectangle(context, rect)
@@ -185,6 +156,11 @@ end
 # Draw functions render directly to the device.
 # The Render functions use the Draw functions.
 # ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.
+function set_draw_color(context::RenderContext, color::Palette) 
+    context.draw_color = color
+    SDL2.SetRenderDrawColor(context.renderer, color.r, color.g, color.b, color.a)
+end
+
 
 function draw_point(context::RenderContext, x::Int32, y::Int32)
     SDL2.RenderDrawPoint(context.renderer, x, y);
@@ -228,9 +204,10 @@ function draw_vert_line(context::RenderContext, x::Int32, y1::Int32, y2::Int32)
     SDL2.RenderDrawLine(context.renderer, x, y1, x, y2);
 end
 
+const shifts = [0,1,2,3,4,5,6,7]
+
 # This type of font doesn't support transforms. It will always be axis aligned.
 function draw_text(context::RenderContext, x::Integer, y::Integer, text::String, scale::Integer, fill::Integer, invert::Bool)
-    shifts = [0,1,2,3,4,5,6,7]
     cx = Int32(x)
     s = Int32(scale)
     row_width = Int32(get_glyph_width())
@@ -239,6 +216,11 @@ function draw_text(context::RenderContext, x::Integer, y::Integer, text::String,
     bit_invert = invert ? 0 : 1
 
     for char in text
+        if char == ' '
+            cx += row_width * s # move to next column/char/glyph
+            continue
+        end
+
         gy = Int32(y) # move y back to the "top" for each char
         glyph = get_glyph(char)
         for g in glyph
@@ -261,12 +243,42 @@ function draw_text(context::RenderContext, x::Integer, y::Integer, text::String,
                         end
                     end
                 end
-                
                 gx += s
             end
             gy += s # move to next pixel-row in char
         end
         cx += row_width * s # move to next column/char/glyph
     end
+end
 
+function draw_checkerboard(context::RenderContext)
+    flip = false
+    size = 200
+    col = 0
+    row = 0
+    rect = SDL2.Rect(0, 0, 1, 1)
+
+    while row < context.height 
+        while col < context.width 
+            if flip 
+                SDL2.SetRenderDrawColor(context.renderer, 100, 100, 100, 255)
+            else 
+                SDL2.SetRenderDrawColor(context.renderer, 80, 80, 80, 255)
+            end
+
+            rect.x = col
+            rect.y = row
+            rect.w = col + size
+            rect.h = row + size
+            
+            SDL2.RenderFillRect(context.renderer, pointer_from_objref(rect))
+
+            flip = !flip;
+            col += size;
+        end
+
+        flip = !flip;
+        col = 0;
+        row += size;
+    end
 end

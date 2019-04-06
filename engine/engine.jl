@@ -1,9 +1,13 @@
+export Engine
+
 module Engine
 
 include("sdl.jl")
 include("io.jl")
 
 export initialize, run
+
+using Printf
 
 using ..Nodes:
     AbstractScene,
@@ -13,6 +17,11 @@ using ..Nodes:
 
 using ..Ranger:
     World
+
+using ..Rendering:
+    Orange, White,
+    draw_text, set_draw_color,
+    draw_filled_rectangle, draw_outlined_rectangle
 
 manager = nothing
 
@@ -48,10 +57,12 @@ function run(world::World)
     println("frame_dt: ", frame_dt, "ms")
 
     lag = 0
-    ups_cnt = 0
-    fps_cnt = 0
+    fps_cnt = fps = 0
+    ups_cnt = ups = 0
     previous_t = time_ns()
     second_cnt = 0
+    avg_render = 0.0
+    render_elapsed_cnt = 0
 
     # Main game loop
     while running
@@ -104,9 +115,13 @@ function run(world::World)
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         # Render
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-        interpolation = Float64(lag) / Float64(ns_per_update)
-
         pre_visit(manager)
+
+        # Capture time after pre_visit when vsync is enabled otherwise
+        # the time includes the vertical refresh which ~16.667ms
+        render_t = time_ns()
+
+        interpolation = Float64(lag) / Float64(ns_per_update)
 
         more_scenes = visit(manager, interpolation)
 
@@ -115,25 +130,35 @@ function run(world::World)
             continue
         end
 
-        post_visit(manager)
+        second_cnt += elapsed_t
+
+        draw_stats(fps, ups, avg_render, world)
+        # sleep(1.0)
+
+        render_elapsed_t =  time_ns() - render_t
+        render_elapsed_cnt += render_elapsed_t
+
+        if second_cnt >= SECOND
+            avg_render = (Float64(render_elapsed_cnt) /  Float64(fps_cnt)) / 1000000.0
+            fps = fps_cnt
+            ups = ups_cnt
+            # text = @sprintf("fps (%2d), ups(%2d) %2.4f", fps, ups, avg_render)
+            # println(text)
+            # println("fps (", fps, ") ups (", ups, "), ren ", avg_render)
+
+            fps_cnt = 0
+            ups_cnt = 0
+            second_cnt = 0
+            render_elapsed_cnt = 0
+        end
+
+        fps_cnt += 1
 
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         # Present
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-
-        second_cnt += elapsed_t
-
-        if second_cnt >= SECOND
-            # println("fps_cnt (", fps_cnt, ") ups_cnt (", ups_cnt, ")")
-
-            fps_cnt = 0
-            second_cnt = 0
-            ups_cnt = 0
-        end
-
-        fps_cnt += 1
+        post_visit(manager)
         
-        # sleep(0.1)
     end
 
     exit();
@@ -148,4 +173,27 @@ function exit()
     println("Game exited");
 end
 
+# Debugging
+orange = Orange()
+white = White()
+
+function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::World)
+    # set_draw_color(manager.context, orange)
+    # rect = SDL2.Rect(0, 0, 1, 1)
+    # rect.x = 100
+    # rect.y = 100
+    # rect.w = 400
+    # rect.h = 400
+    # draw_filled_rectangle(manager.context, rect)
+    # set_draw_color(manager.context, white)
+    # draw_outlined_rectangle(manager.context, rect)
+
+    set_draw_color(manager.context, orange)
+    text = @sprintf("fps(%2d), ups(%2d) rend(%2.4f)", fps, ups, avg_render)
+    x = 10
+    y = world.window_height - 24
+    draw_text(manager.context, x, y, text, 2, 2, false)
+
 end
+
+end # Module -----------------------------------------------------------
