@@ -16,7 +16,9 @@ using .Ranger.Engine:
     World
 
 using .Ranger.Rendering:
-    RenderContext
+    RenderContext,
+    White,
+    set_draw_color, draw_text
 
 mutable struct SplashScene <: AbstractScene
     base::NodeData
@@ -49,8 +51,12 @@ end
 # --------------------------------------------------------
 # Visits
 # --------------------------------------------------------
+white = White()
+
 function Ranger.Nodes.visit(node::SplashScene, context::RenderContext, interpolation::Float64)
     # println("SplashScene visit ", node);
+    set_draw_color(context, white)
+    draw_text(context, 10, 10, node.base.name, 3, 2, false)
 end
 
 # --------------------------------------------------------

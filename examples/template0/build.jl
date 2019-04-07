@@ -26,7 +26,7 @@ function build(world::World)
     println(game)
 
     splash = SplashScene(world, "SplashScene", game)
-    splash.transitioning.pause_for = 0.1 * 1000.0
+    splash.transitioning.pause_for = 5.1 * 1000.0
 
     println(splash)
     # println("splash scene has parent: ", RNodes.has_parent(splash))
