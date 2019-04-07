@@ -3,14 +3,14 @@ using SimpleDirectMediaLayer
 # --------------------------------------------------------------------
 # Events
 # --------------------------------------------------------------------
-to_hex(num) = "0x" * string(num, base=16)
+to_hex(num) = "0x" * string(num, base = 16)
 
 function extract_4byte_host(start_index, arr::Array{UInt8})
     # First combine into a single 32 bit value
     word = UInt32(arr[start_index]) << 24 |
-        UInt32(arr[start_index+1]) << 16 |
-        UInt32(arr[start_index+2]) << 8 |
-        arr[start_index+3]
+        UInt32(arr[start_index + 1]) << 16 |
+        UInt32(arr[start_index + 2]) << 8 |
+        arr[start_index + 3]
     # Convert to host endian
     # Note: SDL has a note about endian: https://wiki.libsdl.org/CategoryEndian
     ntoh(word)
@@ -19,7 +19,7 @@ end
 function extract_2byte_host(start_index, arr::Array{UInt8})
     # First combine into a single 16 bit value
     word = UInt16(arr[start_index]) << 8 |
-        arr[start_index+1]
+        arr[start_index + 1]
     ntoh(word)
 end
 
@@ -97,7 +97,7 @@ SDL_Event() = Array{UInt8}(zeros(56))
 event = SDL_Event()
 
 function poll_event!()
-    success = (SDL2.PollEvent(event) != 0)
+    success = (SDL2.PollEvent(event) ≠ 0)
     event, success
 end
 

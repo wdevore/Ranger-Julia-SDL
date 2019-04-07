@@ -10,7 +10,7 @@ mutable struct NodeStack
     function NodeStack()
         o = new()
 
-        o.nodes = AbstractNode[]
+        o.nodes = Array{AbstractNode,1}[]
         o.next_node = NodeNil()
         o.running_node = NodeNil()
 

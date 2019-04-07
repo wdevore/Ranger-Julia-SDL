@@ -51,12 +51,16 @@ function run(world::World)
     running = true
 
     ns_per_update = UInt64(round(UPDATE_PERIOD))
-    println("ns_per_update: ", ns_per_update, "ns")
+    # println("ns_per_update: ", ns_per_update, "ns")
 
     frame_dt = Float64(ns_per_update) / 1000000.0
-    println("frame_dt: ", frame_dt, "ms")
+    # println("frame_dt: ", frame_dt, "ms")
 
     lag = 0
+
+        # ***************************
+        # Debugging only
+        # ***************************
     fps_cnt = fps = 0
     ups_cnt = ups = 0
     previous_t = time_ns()
@@ -111,14 +115,15 @@ function run(world::World)
             end
         end
 
+        # sleep(0.01666)
 
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         # Render
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         pre_visit(manager)
 
-        # Capture time after pre_visit when vsync is enabled otherwise
-        # the time includes the vertical refresh which ~16.667ms
+        # Capture time AFTER pre_visit. If vsync is enabled
+        # then time includes the vertical refresh which ~16.667ms
         render_t = time_ns()
 
         interpolation = Float64(lag) / Float64(ns_per_update)
@@ -132,8 +137,10 @@ function run(world::World)
 
         second_cnt += elapsed_t
 
+        # ***************************
+        # Debugging only
+        # ***************************
         draw_stats(fps, ups, avg_render, world)
-        # sleep(1.0)
 
         render_elapsed_t =  time_ns() - render_t
         render_elapsed_cnt += render_elapsed_t
@@ -153,6 +160,7 @@ function run(world::World)
         end
 
         fps_cnt += 1
+        # ***************************
 
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         # Present
@@ -173,7 +181,9 @@ function exit()
     println("Game exited");
 end
 
-# Debugging
+# ***************************
+# Debugging only
+# ***************************
 orange = Orange()
 white = White()
 

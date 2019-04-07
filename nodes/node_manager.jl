@@ -1,7 +1,8 @@
 export
     NodeManager,
     pre_visit, post_visit, visit, update,
-    pop_node, push_node
+    pop_node, push_node,
+    register_target, unregister_target
 
 using ..Rendering:
     RenderContext,
@@ -30,15 +31,19 @@ mutable struct NodeManager
     # A stack of nodes
     stack::NodeStack
 
-    # timing_targets: RefCell<Vec<RNode>>,
+    timing_targets::Array{AbstractNode,1}
 
     function NodeManager(world::World)
         o = new()
         
         o.clear_background = true
+
         o.context = RenderContext(world)
         initialize(o.context, world)
+
         o.stack = NodeStack()
+
+        o.timing_targets = Array{AbstractNode,1}[]
 
         o
     end
@@ -90,7 +95,7 @@ end
 
 function set_next_node(man::NodeManager)
     if has_running_node(man.stack)
-        exit_node(man.stack.running_node)
+        exit_node(man.stack.running_node, man)
     end
 
     set_running_node(man.stack)
@@ -99,7 +104,7 @@ function set_next_node(man::NodeManager)
 
     println("Running node ", man.stack.running_node)
 
-    enter_node(man.stack.running_node);
+    enter_node(man.stack.running_node, man);
 end
 
 function pop_node(man::NodeManager)
@@ -116,4 +121,23 @@ end
 # Timing
 # --------------------------------------------------------------------------
 function update(man::NodeManager, dt::Float64)
+    # println("NodeManager::update")
+    for target in man.timing_targets
+        update(target, dt)
+    end
+end
+
+function register_target(man::NodeManager, target::AbstractNode)
+    println("Register ", target, " target")
+    push!(man.timing_targets, target);
+end
+
+function unregister_target(man::NodeManager, target::AbstractNode)
+    idx = findfirst(isequal(target), man.timing_targets)
+    if idx ≠ nothing
+        println("UnRegistering idx:(", idx, ") ", man.timing_targets[idx], " target");
+        node = deleteat!(man.timing_targets, idx)
+    else
+        println("Unable to UnRegister target: ", target);
+    end
 end

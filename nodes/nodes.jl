@@ -1,5 +1,5 @@
 # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-# Node API interface
+# Nodes API interface
 # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
 module Nodes
 
@@ -18,31 +18,51 @@ abstract type AbstractScene <: AbstractNode end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function enter_node(node::AbstractScene)
-    println("AbstractScene::enter nodes ", node);
-end
+function enter_node end
+function exit_node end
 
-function exit_node(node::AbstractScene)
-    println("AbstractScene::exit nodes ", node);
-end
 function transition end
 function get_replacement end
 function take_replacement end
+function visit end
 
+function has_parent end
+function is_nil end
+function has_replacement end
+function has_parent end
+
+function update end
+
+# ---------- INCLUDES --------------------------------------------------
+include("transition_properties.jl")
+include("timing_properties.jl")
+include("transform_properties.jl")
+
+include("node_data.jl")
+include("node_nil.jl")
+include("node_stack.jl")
+
+include("scenes/scenes.jl")
+include("scenes/scene_nil.jl")
+
+include("node_manager.jl")
+
+# -----------------------------------------------------------------------
+# Base defaults
+# -----------------------------------------------------------------------
 # -----------------------------------------------------------
 # Abstract Nodes
 # -----------------------------------------------------------
 function has_parent(node::AbstractNode)
-    !(node.parent === node)
+    !is_nil(node.parent)
 end
 
 using ..Rendering:
     RenderContext
 
 function visit(node::AbstractNode, context::RenderContext, interpolation::Float64)
-    println("AbstractNode::visit nodes ", node);
+    println("AbstractNode::visit ", node);
 end
-
 
 # -----------------------------------------------------------
 # Abstract Scenes
@@ -59,19 +79,25 @@ function has_parent(node::AbstractScene)
     !is_nil(node.base.parent)
 end
 
-# ---------- INCLUDES --------------------------------------------------
-include("transition_properties.jl")
-include("timing_properties.jl")
-include("transform_properties.jl")
+function enter_node(node::AbstractScene, man::NodeManager)
+    println("AbstractScene::enter ", node);
+end
 
-include("node.jl")
-include("node_nil.jl")
-include("node_stack.jl")
+function exit_node(node::AbstractScene, man::NodeManager)
+    println("AbstractScene::exit ", node);
+end
 
-include("scenes/scenes.jl")
-include("scenes/scene_nil.jl")
+# --------------------------------------------------------------------------
+# Timing
+# --------------------------------------------------------------------------
+function update(node::AbstractNode, dt::Float64)
+    println("AbstractNode::update : ", node)
+end
 
-include("node_manager.jl")
+import Base.show
 
+function Base.show(io::IO, node::AbstractNode)
+    print(io, "'", node.name, "' (", node.id, ")");
+end
 
 end # End Module --------------------------------------------------------

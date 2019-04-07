@@ -45,11 +45,11 @@ end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function Ranger.Nodes.enter_node(node::GameScene)
+function Ranger.Nodes.enter_node(node::GameScene, man::NodeManager)
     println("enter ", node);
 end
 
-function Ranger.Nodes.exit_node(node::GameScene)
+function Ranger.Nodes.exit_node(node::GameScene, man::NodeManager)
     println("exit ", node);
 end
 
