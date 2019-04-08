@@ -1,18 +1,23 @@
 using SimpleDirectMediaLayer
+const SDL2 = SimpleDirectMediaLayer
+
+export
+    get_key_code_sym, get_scancode,
+    get_modifier, get_event_type,
+    get_repeat
 
 # --------------------------------------------------------------------
-# Events
+# Event utilities
 # --------------------------------------------------------------------
-to_hex(num) = "0x" * string(num, base = 16)
-
+# returns a UInt32 in host-endian
 function extract_4byte_host(start_index, arr::Array{UInt8})
     # First combine into a single 32 bit value
     word = UInt32(arr[start_index]) << 24 |
         UInt32(arr[start_index + 1]) << 16 |
         UInt32(arr[start_index + 2]) << 8 |
         arr[start_index + 3]
-    # Convert to host endian
-    # Note: SDL has a note about endian: https://wiki.libsdl.org/CategoryEndian
+    # Convert to host-endian
+    # Note: SDL has a note about endianess: https://wiki.libsdl.org/CategoryEndian
     ntoh(word)
 end
 
@@ -23,10 +28,32 @@ function extract_2byte_host(start_index, arr::Array{UInt8})
     ntoh(word)
 end
 
-# Grabs the first 4 bytes and places them into a UInt32
+# Grabs the first 4 bytes and places them into a UInt32 in host-ordering
 function get_event_type(event::Array{UInt8})
-    extract_4byte_host(1, event)
+    extract_4byte_host(1, event) # return UInt32
 end
+
+function get_event_type(e::SDL2.Event)
+    e._Event[1] # UInt8
+end
+
+get_key_code_sym(event::Array{UInt8}) = extract_4byte_host(21, event)
+get_scancode(event::Array{UInt8}) = extract_4byte_host(17, event)
+get_modifier(event::Array{UInt8}) = extract_2byte_host(25, event)
+get_repeat(event::Array{UInt8}) = event[13]
+
+SDL_Event() = Array{UInt8}(zeros(56))
+event = SDL_Event()
+
+function poll_event!()
+    success = (SDL2.PollEvent(event) ≠ 0)
+    event, success
+end
+
+# --------------------------------------------------------------
+# Debugging printing and misc.
+# --------------------------------------------------------------
+to_hex(num) = "0x" * string(num, base = 16)
 
 function print_key_event_type(event::Array{UInt8})
     e32 = event[1]
@@ -54,11 +81,11 @@ function print_key_event_repeat(event::Array{UInt8})
 end
 
 function print_key_event_sym(event::Array{UInt8})
-    scancode = extract_4byte_host(17, event)
+    scancode = get_scancode(event)
     println("scancode: ($scancode) ", to_hex(scancode))
-    keycode = extract_4byte_host(21, event)
+    keycode = get_key_code_sym(event)
     println("keycode: ($keycode) ", to_hex(keycode))
-    mod = extract_2byte_host(25, event)
+    mod = get_modifier(event)
     println("mod: ($mod) ", to_hex(mod));
 end
 
@@ -79,27 +106,6 @@ function print_event(event::Array{UInt8})
     println("--------------------------------------------------------------")
 end
 
-function get_event_type(e::SDL2.Event)
-    e._Event[1]
-end
-
-get_key_code_sym(event) = extract_4byte_host(21, event) #bitcat(UInt32, event[24:-1:21])
-
-function handle_key_press(event)
-    # keySym = get_key_code_sym(event)
-
-    # if (keySym == SDL2.SDLK_ESCAPE)
-    #     println("!!!!!!!!!!! Escape")
-    # end
-end
-
-SDL_Event() = Array{UInt8}(zeros(56))
-event = SDL_Event()
-
-function poll_event!()
-    success = (SDL2.PollEvent(event) ≠ 0)
-    event, success
-end
 
 function handle_events!(event::Array{UInt8}, ev_type)
     if (ev_type == SDL2.KEYDOWN)# || ev_type == SDL2.KEYUP)

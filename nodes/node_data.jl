@@ -30,14 +30,14 @@ mutable struct NodeData
 
     function NodeData(id::UInt32, name::String, parent::AbstractNode)
         obj = NodeData(id, name)
-        # obj.transform = TransformProperties{Float64}()
 
         obj.parent = parent
+        
         obj
     end
 end
 
 function Base.show(io::IO, node::NodeData)
-    print(io, "'", node.name, "' (", node.id, ")");
+    print(io, "|'", node.name, "' (", node.id, ")|");
 end
 

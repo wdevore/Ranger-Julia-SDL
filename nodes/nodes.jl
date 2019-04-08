@@ -8,12 +8,10 @@ export
     enter_node
 
 export 
-    AbstractNode,
-    AbstractScene,
     visit, enter_node, exit_node
 
-abstract type AbstractNode end
-abstract type AbstractScene <: AbstractNode end
+using ..Ranger:
+    AbstractNode, AbstractScene, AbstractIOEvent
 
 # --------------------------------------------------------
 # Life cycle events
@@ -32,6 +30,10 @@ function has_replacement end
 function has_parent end
 
 function update end
+
+function get_children end
+
+function io_event end
 
 # ---------- INCLUDES --------------------------------------------------
 include("transition_properties.jl")
@@ -54,7 +56,7 @@ include("node_manager.jl")
 # Abstract Nodes
 # -----------------------------------------------------------
 function has_parent(node::AbstractNode)
-    !is_nil(node.parent)
+    !is_nil(node.base.parent)
 end
 
 using ..Rendering:
@@ -62,6 +64,14 @@ using ..Rendering:
 
 function visit(node::AbstractNode, context::RenderContext, interpolation::Float64)
     println("AbstractNode::visit ", node);
+end
+
+function get_children(node::AbstractNode)
+    nothing
+end
+
+function io_event(node::AbstractNode, event::AbstractIOEvent)
+    println("AbstractScene::io_event ", event)
 end
 
 # -----------------------------------------------------------
@@ -87,6 +97,10 @@ function exit_node(node::AbstractScene, man::NodeManager)
     println("AbstractScene::exit ", node);
 end
 
+function get_children(node::AbstractScene)
+    nothing
+end
+
 # --------------------------------------------------------------------------
 # Timing
 # --------------------------------------------------------------------------
@@ -97,7 +111,7 @@ end
 import Base.show
 
 function Base.show(io::IO, node::AbstractNode)
-    print(io, "'", node.name, "' (", node.id, ")");
+    print(io, "|'", node.base.name, "' (", node.base.id, ")|");
 end
 
 end # End Module --------------------------------------------------------

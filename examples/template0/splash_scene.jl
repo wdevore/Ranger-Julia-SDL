@@ -1,7 +1,5 @@
-export SplashScene
-
 using .Ranger.Nodes:
-    NodeData, NodeNil, AbstractNode, NodeManager,
+    NodeData, NodeNil, NodeManager,
     AbstractScene,
     TransitionProperties, update, ready,
     register_target, unregister_target

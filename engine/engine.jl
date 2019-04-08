@@ -10,18 +10,20 @@ export initialize, run
 using Printf
 
 using ..Nodes:
-    AbstractScene,
     NodeManager,
     pre_visit, post_visit, visit,
-    push_node, update
+    push_node, update, route_events
 
 using ..Ranger:
-    World
+    World, AbstractScene
 
 using ..Rendering:
     Orange, White,
     draw_text, set_draw_color,
     draw_filled_rectangle, draw_outlined_rectangle
+
+using ..Events:
+    KeyboardEvent
 
 manager = nothing
 
@@ -80,21 +82,29 @@ function run(world::World)
         # Process any events that have been queued.
         while haveEvents
             event, haveEvents = poll_event!()
-            ev_type = get_event_type(event)
-
-            if (ev_type == SDL2.KEYDOWN)
-                keySym = get_key_code_sym(event)
-
-                if (keySym == SDL2.SDLK_ESCAPE)
-                    running = false
-                    continue
-                end
-            end
             
-            # Route event to registered Nodes
-            # route_event(nodes)
+            if haveEvents
+                ev_type = get_event_type(event)
 
-            handle_events!(event, ev_type)
+                if (ev_type == SDL2.KEYDOWN)
+                    keySym = get_key_code_sym(event)
+    
+                    if (keySym == SDL2.SDLK_ESCAPE)
+                        running = false
+                        continue
+                    end
+                end
+                # print_event(event)
+
+                keyboard = KeyboardEvent()
+                keyboard.keycode = get_key_code_sym(event)
+                keyboard.scancode = get_scancode(event)
+                keyboard.modifier = get_modifier(event)
+                keyboard.repeat = get_repeat(event)
+
+                # Route event to registered Nodes
+                route_events(manager, keyboard)
+            end
         end        
 
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--

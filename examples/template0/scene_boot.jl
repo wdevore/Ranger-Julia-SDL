@@ -1,5 +1,3 @@
-export SceneBoot
-
 using .Ranger.Nodes:
     NodeData, NodeNil, AbstractNode,
     AbstractScene

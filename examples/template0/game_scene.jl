@@ -1,66 +1,67 @@
-export SplashScene
-
-using .Ranger.Nodes:
-    NodeData, SceneNil, AbstractNode, NodeManager,
-    AbstractScene
-
-using .Ranger.Nodes.Scenes:
-    NO_ACTION
-
-using .Ranger:
-    gen_id
-
-using .Ranger.Engine:
-    World
-
-using .Ranger.Rendering:
-    RenderContext,
-    White,
-    set_draw_color, draw_text
 
 mutable struct GameScene <: AbstractScene
     base::NodeData
 
     replacement::AbstractScene
 
-    # children::
+    # Collection of layers. The first is always a background layer
+    children::Array{AbstractNode,1}
 
     function GameScene(world::World, name::String)
         obj = new()
 
-        # We use "obj" to represent a lack of parent.
         obj.base = NodeData(gen_id(world), name, NodeNil())
-        # obj.transform = TransformProperties{Float64}()
         obj.replacement = SceneNil()
-
+        obj.children = Array{AbstractNode,1}[]
+        
         obj
     end
+end
+
+function build(scene::GameScene, world::World)
+    layer = GameLayer(world, "GameLayer", scene)
+    push!(scene.children, layer)
+    build(layer, world);
+end
+
+# --------------------------------------------------------
+# Timing
+# --------------------------------------------------------
+function Ranger.Nodes.update(scene::GameScene, dt::Float64)
+    # println("SplashScene::update : ", scene)
 end
 
 # --------------------------------------------------------
 # Visits
 # --------------------------------------------------------
-function Ranger.Nodes.visit(node::GameScene, context::RenderContext, interpolation::Float64)
+function Ranger.Nodes.visit(scene::GameScene, context::RenderContext, interpolation::Float64)
     # println("GameScene visit ", node);
     set_draw_color(context, white)
-    draw_text(context, 10, 10, node.base.name, 3, 2, false)
+    draw_text(context, 10, 10, scene.base.name, 3, 2, false)
 end
 
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function Ranger.Nodes.enter_node(node::GameScene, man::NodeManager)
-    println("enter ", node);
+function Ranger.Nodes.enter_node(scene::GameScene, man::NodeManager)
+    println("enter ", scene);
+    # Register node as a timing target in order to receive updates
+    # register_target(man, scene);
 end
 
-function Ranger.Nodes.exit_node(node::GameScene, man::NodeManager)
-    println("exit ", node);
+function Ranger.Nodes.exit_node(scene::GameScene, man::NodeManager)
+    println("exit ", scene);
+    # unregister_target(man, scene);
 end
 
-function Ranger.Nodes.transition(node::GameScene)
+function Ranger.Nodes.transition(scene::GameScene)
     NO_ACTION
 end
 
-function Ranger.Nodes.get_replacement(node::GameScene)
-    node.replacement
+function Ranger.Nodes.get_replacement(scene::GameScene)
+    scene.replacement
+end
+
+function Ranger.Nodes.get_children(node::GameScene)
+    node.children
 end

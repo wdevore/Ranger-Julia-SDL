@@ -9,7 +9,10 @@ export
 
 using ...Nodes:
     NodeData,
-    is_nil, AbstractScene
+    is_nil
+
+using ...Ranger:
+    AbstractScene
 
 import Base.show
 

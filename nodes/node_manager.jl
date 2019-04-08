@@ -2,7 +2,8 @@ export
     NodeManager,
     pre_visit, post_visit, visit, update,
     pop_node, push_node,
-    register_target, unregister_target
+    register_target, unregister_target,
+    register_event_target, unregister_event_target
 
 using ..Rendering:
     RenderContext,
@@ -10,15 +11,18 @@ using ..Rendering:
     initialize
 
 using ...Ranger:
-    World
+    World, AbstractNode
 
 using .Nodes:
     NodeStack,
     has_running_node, has_next_node, set_running_node,
     transition
 
-using .Scenes:AbstractScene,
+using .Scenes:
     REPLACE_TAKE, NO_ACTION
+
+using ..Events:
+    KeyboardEvent, MouseEvent
 
 import .Nodes:
     visit
@@ -32,6 +36,7 @@ mutable struct NodeManager
     stack::NodeStack
 
     timing_targets::Array{AbstractNode,1}
+    event_targets::Array{AbstractNode,1}
 
     function NodeManager(world::World)
         o = new()
@@ -44,6 +49,7 @@ mutable struct NodeManager
         o.stack = NodeStack()
 
         o.timing_targets = Array{AbstractNode,1}[]
+        o.event_targets = Array{AbstractNode,1}[]
 
         o
     end
@@ -95,7 +101,7 @@ end
 
 function set_next_node(man::NodeManager)
     if has_running_node(man.stack)
-        exit_node(man.stack.running_node, man)
+        exit_nodes(man.stack.running_node, man)
     end
 
     set_running_node(man.stack)
@@ -104,7 +110,29 @@ function set_next_node(man::NodeManager)
 
     println("Running node ", man.stack.running_node)
 
-    enter_node(man.stack.running_node, man);
+    enter_nodes(man.stack.running_node, man);
+end
+
+function enter_nodes(node::AbstractNode, man::NodeManager)
+    enter_node(node, man)
+
+    children = get_children(node)
+    if children ≠ nothing
+        for child in children
+            enter_nodes(child, man)
+        end
+    end
+end
+
+function exit_nodes(node::AbstractNode, man::NodeManager)
+    exit_node(node, man)
+
+    children = get_children(node)
+    if children ≠ nothing
+        for child in children
+            exit_nodes(child, man)
+        end
+    end
 end
 
 function pop_node(man::NodeManager)
@@ -138,6 +166,35 @@ function unregister_target(man::NodeManager, target::AbstractNode)
         println("UnRegistering idx:(", idx, ") ", man.timing_targets[idx], " target");
         node = deleteat!(man.timing_targets, idx)
     else
-        println("Unable to UnRegister target: ", target);
+        println("Unable to UnRegister ", target, " target");
     end
+end
+
+# --------------------------------------------------------------------------
+# IO events
+# --------------------------------------------------------------------------
+function register_event_target(man::NodeManager, target::AbstractNode)
+    println("Register ", target, " event target")
+    push!(man.event_targets, target);
+end
+
+function unregister_event_target(man::NodeManager, target::AbstractNode)
+    idx = findfirst(isequal(target), man.event_targets)
+    if idx ≠ nothing
+        println("UnRegistering idx:(", idx, ") ", man.event_targets[idx], " event target");
+        node = deleteat!(man.event_targets, idx)
+    else
+        println("Unable to UnRegister ", target, " event target");
+    end
+end
+
+function route_events(man::NodeManager, keyboard::KeyboardEvent)
+    # println(keyboard)
+    for target in man.event_targets
+        io_event(target, keyboard)
+    end
+end
+
+function route_events(man::NodeManager, mouse::MouseEvent)
+    println(mouse)
 end

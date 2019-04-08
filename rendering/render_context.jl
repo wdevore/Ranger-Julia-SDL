@@ -18,6 +18,11 @@ using .Rendering:
 using ..Math:
     AffineTransform, make_translate!, scale!, multiply!
 
+using ..Geometry:
+    Point
+
+@enum RenderStyle FILLED OUTLINE BOTH
+
 mutable struct RenderContext
     renderer::Ptr{Renderer}
 
@@ -154,7 +159,6 @@ end
 
 # ,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.
 # Draw functions render directly to the device.
-# The Render functions use the Draw functions.
 # ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.
 function set_draw_color(context::RenderContext, color::Palette) 
     context.draw_color = color
@@ -281,4 +285,14 @@ function draw_checkerboard(context::RenderContext)
         col = 0;
         row += size;
     end
+end
+
+# ,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.
+# Render functions render based on transformed vertices
+# The Render functions use the Draw functions.
+# ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.
+
+# Render an axis aligned rectangle. Rotating any of the vertices
+# will cause strange rendering behaviours
+function render_aa_rectangle(context::RenderContext, vertices::Array{Point{Float64}}, filled::RenderStyle)
 end
