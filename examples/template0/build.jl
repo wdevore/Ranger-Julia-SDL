@@ -17,7 +17,8 @@ using .Ranger.Nodes:
     has_parent, is_dirty, set_dirty!,
     TransformProperties,
     set_nonuniform_scale!, set_position!,
-    calc_transform!
+    calc_transform!,
+    print_tree
 
 using .Ranger.Nodes.Scenes:
     NO_ACTION
@@ -66,6 +67,8 @@ function build(world::World)
     # println(boot)
 
     REngine.push(boot)
+
+    print_tree(game)
 
     println("Built");
 end

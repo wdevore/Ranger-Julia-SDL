@@ -214,10 +214,44 @@ function update(node::AbstractNode, dt::Float64)
     println("AbstractNode::update : ", node)
 end
 
+
+# --------------------------------------------------------------------------
+# Misc debugging
+# --------------------------------------------------------------------------
 import Base.show
 
 function Base.show(io::IO, node::AbstractNode)
     print(io, "|'", node.base.name, "' (", node.base.id, ")|");
+end
+
+function print_tree(node::AbstractNode)
+    println("---------- Tree ---------------")
+    print_branch(UInt32(0), node)
+
+    children = get_children(node)
+    if children ≠ nothing
+        print_sub_tree(children, UInt32(1))
+    end
+    println("-------------------------------");
+end
+
+function print_sub_tree(children::Array{AbstractNode,1}, level::UInt32)
+    for child in children
+        sub_children = get_children(child)
+        if sub_children ≠ nothing
+            print_branch(level, child)
+            print_sub_tree(sub_children, level + 1)
+        else
+            print_branch(level, child)
+        end
+    end
+end
+
+function print_branch(level::UInt32, node::AbstractNode) 
+    for _ in 1:level 
+        print("  ")
+    end
+    println(node)
 end
 
 end # End Module --------------------------------------------------------
