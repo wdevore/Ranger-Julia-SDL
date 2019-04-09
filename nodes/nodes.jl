@@ -92,8 +92,8 @@ function visit(node::AbstractNode, context::RenderContext, interpolation::Float6
 
     if is_dirty(node)
         aft = calc_transform!(node.transform)
+        # println(node.base.name, " aft: ", aft)
     end
-
 
     apply!(context, aft)
 
@@ -119,6 +119,14 @@ end
 
 function draw(node::AbstractNode, context::RenderContext)
     # println("AbstractNode::draw ", node);
+end
+
+function enter_node(node::AbstractNode, man::NodeManager)
+    println("AbstractNode::enter ", node);
+end
+
+function exit_node(node::AbstractNode, man::NodeManager)
+    println("AbstractNode::exit ", node);
 end
 
 function get_children(node::AbstractNode)
@@ -175,40 +183,40 @@ end
 # -----------------------------------------------------------
 # Abstract Scenes
 # -----------------------------------------------------------
-    function is_nil(node::AbstractScene)
+function is_nil(node::AbstractScene)
     node.base.id == 0
 end
 
-    function has_replacement(node::AbstractScene)
+function has_replacement(node::AbstractScene)
     !is_nil(node.replacement)
 end
 
-    function has_parent(node::AbstractScene)
+function has_parent(node::AbstractScene)
     !is_nil(node.base.parent)
 end
 
-    function enter_node(node::AbstractScene, man::NodeManager)
+function enter_node(node::AbstractScene, man::NodeManager)
     println("AbstractScene::enter ", node);
 end
 
-    function exit_node(node::AbstractScene, man::NodeManager)
+function exit_node(node::AbstractScene, man::NodeManager)
     println("AbstractScene::exit ", node);
 end
 
-    function get_children(node::AbstractScene)
+function get_children(node::AbstractScene)
     nothing
 end
 
 # --------------------------------------------------------------------------
 # Timing
 # --------------------------------------------------------------------------
-    function update(node::AbstractNode, dt::Float64)
+function update(node::AbstractNode, dt::Float64)
     println("AbstractNode::update : ", node)
 end
 
-    import Base.show
+import Base.show
 
-    function Base.show(io::IO, node::AbstractNode)
+function Base.show(io::IO, node::AbstractNode)
     print(io, "|'", node.base.name, "' (", node.base.id, ")|");
 end
 

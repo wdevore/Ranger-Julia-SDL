@@ -1,4 +1,7 @@
 
+using .Ranger.Custom:
+    CrossNode
+
 mutable struct GameScene <: AbstractScene
     base::NodeData
     transform::TransformProperties{Float64}
@@ -24,6 +27,15 @@ function build(scene::GameScene, world::World)
     layer = GameLayer(world, "GameLayer", scene)
     push!(scene.children, layer)
     build(layer, world);
+
+    cross = CrossNode(gen_id(world), "CrossNode", scene)
+    push!(scene.children, cross)
+    
+    set_nonuniform_scale!(scene, world.view_width, world.view_height);
+    # Bake in the transform rather repeatedly perform in draw()
+    calc_transform!(scene.transform)
+    # This node is never dirtied
+    set_dirty!(scene, false);
 end
 
 # --------------------------------------------------------

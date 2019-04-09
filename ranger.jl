@@ -9,6 +9,8 @@ include("animation/animation.jl")
 include("rendering/rendering.jl")
 include("nodes/nodes.jl")
 
+include("nodes/custom/custom.jl")
+
 include("engine/engine.jl")
 
 end

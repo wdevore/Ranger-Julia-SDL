@@ -25,8 +25,6 @@ function build(layer::GameLayer, world::World)
     add_vertex!(layer.mesh, 0.5, 0.5)   # bottom-right
 
     build_it!(layer.mesh)
-
-    set_nonuniform_scale!(layer, world.view_width, world.view_height);
 end
 
 # --------------------------------------------------------
@@ -46,7 +44,6 @@ end
 function Ranger.Nodes.draw(layer::GameLayer, context::RenderContext)
     # Transform this node's vertices using the context
     if is_dirty(layer)
-        # println("GameLayer::draw DIRTY", layer);
         transform!(context, layer.mesh)
         set_dirty!(layer, false)
     end

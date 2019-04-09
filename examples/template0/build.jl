@@ -16,7 +16,8 @@ using .Ranger.Nodes:
     register_event_target, unregister_event_target,
     has_parent, is_dirty, set_dirty!,
     TransformProperties,
-    set_nonuniform_scale!, set_position!
+    set_nonuniform_scale!, set_position!,
+    calc_transform!
 
 using .Ranger.Nodes.Scenes:
     NO_ACTION
@@ -54,20 +55,17 @@ function build(world::World)
 
     game = GameScene(world, "GameScene")
     build(game, world)
-    println(game)
+    # println(game)
 
     splash = SplashScene(world, "SplashScene", game)
     splash.transitioning.pause_for = 0.1 * 1000.0
 
-    println(splash)
-    # println("splash scene has parent: ", RNodes.has_parent(splash))
+    # println(splash)
 
     boot = SceneBoot(world, "SceneBoot", splash)
-    println(boot)
-    # println("boot scene has parent: ", RNodes.has_parent(boot))
+    # println(boot)
 
     REngine.push(boot)
-    # println(RNodes.has_replacement(scene))
 
     println("Built");
 end
