@@ -46,7 +46,7 @@ copy(t::AffineTransform) = AffineTransform{Float64}(t.a, t.b, t.c, t.d, t.tx, t.
 
 # initializations
 function to_identity!(aft::AffineTransform)
-    aft.a = aft.d = 1.0
+    aft.a = aft.d = 1.0;
     aft.b = aft.c = aft.tx = aft.ty = 0.0;
 end
 
@@ -56,6 +56,11 @@ function transform!(aft::AffineTransform{T}, v::Point{T}) where {T <: AbstractFl
     y = (aft.b * v.x) + (aft.d * v.y) + aft.ty
     v.x = x
     v.y = y;
+end
+
+function transform!(aft::AffineTransform{T}, in::Point{T}, out::Point{T}) where {T <: AbstractFloat}
+    out.x = (aft.a * in.x) + (aft.c * in.y) + aft.tx
+    out.y = (aft.b * in.x) + (aft.d * in.y) + aft.ty;
 end
 
 function transform!(aft::AffineTransform{T}, vx::T, vy::T) where {T <: AbstractFloat}
@@ -71,6 +76,15 @@ function set!(aft::AffineTransform{T}, a::T, b::T, c::T, d::T, tx::T, ty::T) whe
     aft.d = d
     aft.tx = tx
     aft.ty = ty;
+end
+
+function set!(to::AffineTransform{T}, from::AffineTransform{T}) where {T <: AbstractFloat}
+    to.a = from.a
+    to.b = from.b
+    to.c = from.c
+    to.d = from.d
+    to.tx = from.tx
+    to.ty = from.ty;
 end
 
 function translate!(aft::AffineTransform{T}, tx::T, ty::T) where {T <: AbstractFloat}

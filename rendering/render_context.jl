@@ -6,7 +6,7 @@ using SimpleDirectMediaLayer:
 
 export 
     RenderContext,
-    save, restore, post, pre
+    save, restore, post, pre, apply!
 
 using ..Ranger:
     World
@@ -16,10 +16,13 @@ using .Rendering:
     DarkGray, Orange
 
 using ..Math:
-    AffineTransform, make_translate!, scale!, multiply!
+    AffineTransform, make_translate!, scale!, multiply!, set!
+
+import ..Math:
+    transform!
 
 using ..Geometry:
-    Point
+    Point, Mesh
 
 @enum RenderStyle FILLED OUTLINE BOTH
 
@@ -95,14 +98,15 @@ function set_view_space(context::RenderContext, world::World)
     scale!(center, width_ratio, height_ratio)
     context.view_space = center
 
-    apply(context, center);
+    apply!(context, center);
+    # println("View center: ", center)
 end
 
-function apply(context::RenderContext, aft::AffineTransform) 
+function apply!(context::RenderContext, aft::AffineTransform) 
     # Concat this transform onto the current transform but don't push it.
     # Use post multiply
     multiply!(aft, context.current, context.post)
-    context.current = context.post;
+    set!(context.current, context.post)
 end
 
 function pre(context::RenderContext)
@@ -121,7 +125,7 @@ function save(context::RenderContext)
 
     top.clear_color = context.clear_color
     top.draw_color = context.draw_color
-    top.current = context.current
+    set!(top.current, context.current)
 
     context.stack_top += 1;
 
@@ -147,7 +151,7 @@ function restore(context::RenderContext)
 
     context.clear_color = top.clear_color
     context.draw_color = top.draw_color
-    context.current = top.current
+    set!(context.current, top.current)
 
     c = context.clear_color
     SDL2.SetRenderDrawColor(context.renderer, c.r, c.g, c.b, c.a)
@@ -155,6 +159,18 @@ end
 
 function post(context::RenderContext)
     SDL2.RenderPresent(context.renderer);
+end
+
+function transform!(context::RenderContext, vertices::Array{Point{Float64},1}, bucket::Array{Point{Float64},1})
+    for (idx, vertex) in enumerate(vertices)
+        transform!(context.current, vertex, bucket[idx])
+    end
+end
+
+function transform!(context::RenderContext, mesh::Mesh)
+    for (idx, vertex) in enumerate(mesh.vertices)
+        transform!(context.current, vertex, mesh.bucket[idx])
+    end
 end
 
 # ,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.
@@ -294,5 +310,23 @@ end
 
 # Render an axis aligned rectangle. Rotating any of the vertices
 # will cause strange rendering behaviours
-function render_aa_rectangle(context::RenderContext, vertices::Array{Point{Float64}}, filled::RenderStyle)
+function render_aa_rectangle(context::RenderContext, mesh::Mesh, fillStyle::RenderStyle)
+    # upper-left
+    vertices = mesh.bucket
+    
+    minx = Int32(round(vertices[1].x))
+    miny = Int32(round(vertices[1].y))
+
+    # bottom-right
+    maxx = Int32(round(vertices[2].x))
+    maxy = Int32(round(vertices[2].y))
+
+    if fillStyle == FILLED
+        draw_filled_rectangle(context, minx, miny, maxx, maxy)
+    elseif fillStyle == OUTLINE
+        draw_outlined_rectangle(context, minx, miny, maxx, maxy)
+    else
+        draw_filled_rectangle(context, minx, miny, maxx, maxy)
+        draw_outlined_rectangle(context, minx, miny, maxx, maxy)
+    end
 end

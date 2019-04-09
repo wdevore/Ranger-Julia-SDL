@@ -1,6 +1,7 @@
 
 mutable struct GameScene <: AbstractScene
     base::NodeData
+    transform::TransformProperties{Float64}
 
     replacement::AbstractScene
 
@@ -12,8 +13,9 @@ mutable struct GameScene <: AbstractScene
 
         obj.base = NodeData(gen_id(world), name, NodeNil())
         obj.replacement = SceneNil()
+        obj.transform = TransformProperties{Float64}()
         obj.children = Array{AbstractNode,1}[]
-        
+
         obj
     end
 end
@@ -32,13 +34,17 @@ function Ranger.Nodes.update(scene::GameScene, dt::Float64)
 end
 
 # --------------------------------------------------------
-# Visits
+# Visits and rendering
 # --------------------------------------------------------
-function Ranger.Nodes.visit(scene::GameScene, context::RenderContext, interpolation::Float64)
-    # println("GameScene visit ", node);
-    set_draw_color(context, white)
-    draw_text(context, 10, 10, scene.base.name, 3, 2, false)
-end
+# function Ranger.Nodes.visit(scene::GameScene, context::RenderContext, interpolation::Float64)
+#     # println("GameScene visit ", node);
+# end
+
+# function Ranger.Nodes.draw(scene::GameScene, context::RenderContext)
+#     # println("GameScene::draw ", node);
+#     set_draw_color(context, white)
+#     draw_text(context, 10, 10, scene.base.name, 3, 2, false)
+# end
 
 # --------------------------------------------------------
 # Life cycle events

@@ -93,17 +93,17 @@ function run(world::World)
                         running = false
                         continue
                     end
+
+                    keyboard = KeyboardEvent()
+                    keyboard.keycode = get_key_code_sym(event)
+                    keyboard.scancode = get_scancode(event)
+                    keyboard.modifier = get_modifier(event)
+                    keyboard.repeat = get_repeat(event)
+    
+                    # Route event to registered Nodes
+                    route_events(manager, keyboard)
                 end
                 # print_event(event)
-
-                keyboard = KeyboardEvent()
-                keyboard.keycode = get_key_code_sym(event)
-                keyboard.scancode = get_scancode(event)
-                keyboard.modifier = get_modifier(event)
-                keyboard.repeat = get_repeat(event)
-
-                # Route event to registered Nodes
-                route_events(manager, keyboard)
             end
         end        
 

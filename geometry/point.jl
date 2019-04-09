@@ -1,7 +1,8 @@
 import Base.copy
 
-export Point
-export set!
+export
+    Point,
+    set!
 
 mutable struct Point{T <: AbstractFloat}
     x::T
@@ -19,8 +20,8 @@ end
 # copy specializations
 copy(p::Point) = Point{Float64}(p.x, p.y)
 
-# setters/getters
+# setters/getters set_point
 function set!(p::Point{T}, x::T, y::T) where {T <: AbstractFloat}
-  p.x = x
-  p.y = y;
+    p.x = x
+    p.y = y;
 end
