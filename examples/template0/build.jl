@@ -3,55 +3,43 @@
 # in splash and game scenes.
 # import .Ranger.Nodes:
 #     transition, get_replacement, visit
-using .Ranger.Engine:
-    World
-
-using .Ranger:
-    AbstractScene, AbstractNode
 
 using .Ranger.Nodes:
     NodeData, SceneNil, NodeNil, NodeManager,
     update,
     register_target, unregister_target,
     register_event_target, unregister_event_target,
-    has_parent, is_dirty, set_dirty!,
-    TransformProperties,
+    has_parent, is_dirty, set_dirty!, ready,
+    TransformProperties, TransitionProperties,
     set_nonuniform_scale!, set_position!,
     calc_transform!,
     print_tree
 
 using .Ranger.Nodes.Scenes:
-    NO_ACTION
+    NO_ACTION, REPLACE_TAKE
 
 using .Ranger:
     gen_id
 
-using .Ranger.Rendering:
-    RenderContext,
-    Orange, White, DarkGray,
-    set_draw_color, draw_text, render_aa_rectangle,
-    FILLED,
-    transform!
+using .Ranger.Rendering
+using .Ranger.Events
+using .Ranger.Geometry
 
-using .Ranger.Events:
-    KeyboardEvent
+module GameData
+    using ..Ranger.Rendering
+    orange = Rendering.Orange()
+    white = Rendering.White()
+    darkgray = Rendering.DarkGray()
+end
 
-using .Ranger.Geometry:
-    Point, Mesh,
-    add_vertex!, build_it!
+using .GameData
 
 include("scene_boot.jl")
 include("splash_scene.jl")
 include("game_layer.jl")
 include("game_scene.jl")
 
-const REngine = Ranger.Engine
-
-orange = Orange()
-white = White()
-darkgray = DarkGray()
-
-function build(world::World)
+function build(world::Ranger.World)
     println("Building: ", world.title)
 
     game = GameScene(world, "GameScene")
@@ -59,14 +47,15 @@ function build(world::World)
     # println(game)
 
     splash = SplashScene(world, "SplashScene", game)
-    splash.transitioning.pause_for = 0.1 * 1000.0
+    build(splash, world)
+    splash.transitioning.pause_for = 3.1 * 1000.0
 
     # println(splash)
 
     boot = SceneBoot(world, "SceneBoot", splash)
     # println(boot)
 
-    REngine.push(boot)
+    Ranger.Engine.push(boot)
 
     print_tree(game)
 

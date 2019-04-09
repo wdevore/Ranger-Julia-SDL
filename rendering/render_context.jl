@@ -8,21 +8,15 @@ export
     RenderContext,
     save, restore, post, pre, apply!
 
-using ..Ranger:
-    World
-
 using .Rendering:
     Palette, get_glyph, get_glyph_width,
     DarkGray, Orange
 
-using ..Math:
-    AffineTransform, make_translate!, scale!, multiply!, set!
+using ..Math
 
-import ..Math:
-    transform!
+import ..Math.transform!
 
-using ..Geometry:
-    Point, Mesh
+using ..Geometry
 
 @enum RenderStyle FILLED OUTLINE BOTH
 
@@ -41,14 +35,14 @@ mutable struct RenderContext
     height::Int32
 
     # The current transform based on top
-    current::AffineTransform
+    current::Math.AffineTransform
 
-    post::AffineTransform   # A preallocated cache
+    post::Math.AffineTransform   # A preallocated cache
     
     # view space to device-space projection
-    view_space::AffineTransform
+    view_space::Math.AffineTransform
 
-    function RenderContext(world::World)
+    function RenderContext(world::Ranger.World)
         o = new()
         o.renderer = world.renderer
         o.state = []
@@ -66,7 +60,7 @@ end
 
 # const SAMPLESIZE = 16
 
-function initialize(context::RenderContext, world::World)
+function initialize(context::RenderContext, world::Ranger.World)
     # SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLEBUFFERS, SAMPLESIZE)
     # SDL2.GL_SetAttribute(SDL2.GL_MULTISAMPLESAMPLES, SAMPLESIZE)
     # SDL2.SetHint(SDL2.HINT_RENDER_SCALE_QUALITY, "1")
@@ -82,9 +76,9 @@ function initialize(context::RenderContext, world::World)
     set_view_space(context, world)
 end
 
-function set_view_space(context::RenderContext, world::World)
+function set_view_space(context::RenderContext, world::Ranger.World)
     # Apply view-space matrix
-    center = AffineTransform{Float64}()
+    center = Math.AffineTransform{Float64}()
 
     # What separates world from view is the ratio between the device (aka window)
     # and an optional centering translation.
@@ -92,10 +86,10 @@ function set_view_space(context::RenderContext, world::World)
     height_ratio = Float64(context.height) / world.view_height
 
     if world.view_centered 
-        make_translate!(center, Float64(context.width) / 2.0, Float64(context.height) / 2.0)
+        Math.make_translate!(center, Float64(context.width) / 2.0, Float64(context.height) / 2.0)
     end
 
-    scale!(center, width_ratio, height_ratio)
+    Math.scale!(center, width_ratio, height_ratio)
     context.view_space = center
 
     apply!(context, center);
@@ -105,8 +99,8 @@ end
 function apply!(context::RenderContext, aft::AffineTransform) 
     # Concat this transform onto the current transform but don't push it.
     # Use post multiply
-    multiply!(aft, context.current, context.post)
-    set!(context.current, context.post)
+    Math.multiply!(aft, context.current, context.post)
+    Math.set!(context.current, context.post)
 end
 
 function pre(context::RenderContext)
@@ -125,7 +119,7 @@ function save(context::RenderContext)
 
     top.clear_color = context.clear_color
     top.draw_color = context.draw_color
-    set!(top.current, context.current)
+    Math.set!(top.current, context.current)
 
     context.stack_top += 1;
 
@@ -151,7 +145,7 @@ function restore(context::RenderContext)
 
     context.clear_color = top.clear_color
     context.draw_color = top.draw_color
-    set!(context.current, top.current)
+    Math.set!(context.current, top.current)
 
     c = context.clear_color
     SDL2.SetRenderDrawColor(context.renderer, c.r, c.g, c.b, c.a)
@@ -163,13 +157,15 @@ end
 
 function transform!(context::RenderContext, vertices::Array{Point{Float64},1}, bucket::Array{Point{Float64},1})
     for (idx, vertex) in enumerate(vertices)
-        transform!(context.current, vertex, bucket[idx])
+        Math.transform!(context.current, vertex, bucket[idx])
     end
 end
 
-function transform!(context::RenderContext, mesh::Mesh)
+function transform!(context::RenderContext, mesh::Geometry.Mesh)
     for (idx, vertex) in enumerate(mesh.vertices)
-        transform!(context.current, vertex, mesh.bucket[idx])
+        println(idx, ") A v: ", vertex, ", b: ", mesh.bucket[idx])
+        Math.transform!(context.current, vertex, mesh.bucket[idx])
+        println("B v: ", vertex, ", b: ", mesh.bucket[idx])
     end
 end
 
@@ -284,7 +280,6 @@ function draw_checkerboard(context::RenderContext)
     size = 200
     col = 0
     row = 0
-    rect = SDL2.Rect(0, 0, 1, 1)
 
     while row < context.height 
         while col < context.width 
@@ -294,12 +289,12 @@ function draw_checkerboard(context::RenderContext)
                 SDL2.SetRenderDrawColor(context.renderer, 80, 80, 80, 255)
             end
 
-            rect.x = col
-            rect.y = row
-            rect.w = col + size
-            rect.h = row + size
+            rect_draw.x = col
+            rect_draw.y = row
+            rect_draw.w = col + size
+            rect_draw.h = row + size
             
-            SDL2.RenderFillRect(context.renderer, pointer_from_objref(rect))
+            SDL2.RenderFillRect(context.renderer, pointer_from_objref(rect_draw))
 
             flip = !flip;
             col += size;
@@ -315,13 +310,58 @@ end
 # Render functions render based on transformed vertices
 # The Render functions use the Draw functions.
 # ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.
+function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh)
+    # render a grid of rectangles defined by min/max points
+    flip = false
+    vertices = mesh.bucket
+    build = true
+    v1 = Point{Float64}()
+    v2 = Point{Float64}()
+
+    for (idx, vertex) in enumerate(mesh.bucket)
+        if build
+            Geometry.set!(v1, vertex)
+            # println("v1: ",  v1)
+            build = false
+            continue
+        else
+            Geometry.set!(v2, vertex)
+            # println("v2: ", v2)
+            build = true
+        end
+
+        if flip 
+            SDL2.SetRenderDrawColor(context.renderer, 100, 50, 100, 255)
+        else 
+            SDL2.SetRenderDrawColor(context.renderer, 80, 50, 80, 255)
+        end
+        
+        # upper-left
+        minx = Int32(round(v1.x))
+        miny = Int32(round(v1.y))
+
+        # bottom-right
+        maxx = Int32(round(v2.x))
+        maxy = Int32(round(v2.y))
+        # println(minx, ", ", miny, ", ", maxx, ", ", maxy)
+
+        rect_draw.x = minx
+        rect_draw.y = miny
+        rect_draw.w = maxx + minx
+        rect_draw.h = maxy + miny
+        
+        SDL2.RenderFillRect(context.renderer, pointer_from_objref(rect_draw))
+
+        flip = !flip;
+    end
+end
 
 # Render an axis aligned rectangle. Rotating any of the vertices
 # will cause strange rendering behaviours
-function render_aa_rectangle(context::RenderContext, mesh::Mesh, fillStyle::RenderStyle)
-    # upper-left
+function render_aa_rectangle(context::RenderContext, mesh::Geometry.Mesh, fillStyle::RenderStyle)
     vertices = mesh.bucket
     
+    # upper-left
     minx = Int32(round(vertices[1].x))
     miny = Int32(round(vertices[1].y))
 

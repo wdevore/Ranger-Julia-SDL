@@ -1,16 +1,16 @@
 using .Nodes:
-    AbstractNode, NodeNil, is_nil
+    NodeNil, is_nil
 
 mutable struct NodeStack
-    nodes::Array{AbstractNode,1}
+    nodes::Array{Ranger.AbstractNode,1}
 
-    next_node::AbstractNode
-    running_node::AbstractNode
+    next_node::Ranger.AbstractNode
+    running_node::Ranger.AbstractNode
 
     function NodeStack()
         o = new()
 
-        o.nodes = Array{AbstractNode,1}[]
+        o.nodes = Array{Ranger.AbstractNode,1}[]
         o.next_node = NodeNil()
         o.running_node = NodeNil()
 
@@ -44,7 +44,7 @@ function set_running_node(stack::NodeStack)
     stack.running_node = stack.next_node;
 end
 
-function push(stack::NodeStack, node::AbstractNode)
+function push(stack::NodeStack, node::Ranger.AbstractNode)
     stack.next_node = node
 
     println("Pushing node: ", stack.next_node)
@@ -62,7 +62,7 @@ function pop(stack::NodeStack)
     end
 end
 
-function replace(stack::NodeStack, replacement::AbstractNode)
+function replace(stack::NodeStack, replacement::Ranger.AbstractNode)
     stack.next_node = replacement
 
     # Replacement is the act of popping and pushing. i.e. replacing

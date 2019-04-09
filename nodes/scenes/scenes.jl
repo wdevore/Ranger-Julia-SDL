@@ -7,16 +7,11 @@ export
 
 @enum SceneActions NO_ACTION REPLACE REPLACE_TAKE REPLACE_TAKE_UNREGISTER
 
-# using ...Nodes:
-#     NodeData,
-#     is_nil
-
-using ...Ranger:
-    AbstractScene
-
 import Base.show
 
-function Base.show(io::IO, node::AbstractScene)
+using ..Ranger
+
+function Base.show(io::IO, node::Ranger.AbstractScene)
     # repl = nothing
     # if  !is_nil(node.replacement)
     #     repl = node.replacement.base.name

@@ -1,6 +1,6 @@
 export SceneNil, is_nil
 
-struct SceneNil <: AbstractScene
+struct SceneNil <: Ranger.AbstractScene
     base::NodeData
 
     function SceneNil()
@@ -8,6 +8,6 @@ struct SceneNil <: AbstractScene
     end
 end
 
-function is_nil(node::AbstractScene)
+function is_nil(node::Ranger.AbstractScene)
     node.base.id == 0
 end

@@ -1,32 +1,14 @@
-using .Ranger.Nodes:
-    NodeData, NodeNil, NodeManager,
-    AbstractScene,
-    TransitionProperties, update, ready,
-    register_target, unregister_target
 
-using .Ranger.Nodes.Scenes:
-    REPLACE_TAKE, NO_ACTION
-    
-using .Ranger:
-    gen_id
-
-using .Ranger.Engine:
-    World
-
-using .Ranger.Rendering:
-    RenderContext,
-    White,
-    set_draw_color, draw_text
-
-mutable struct SplashScene <: AbstractScene
+mutable struct SplashScene <: Ranger.AbstractScene
     base::NodeData
+    transform::TransformProperties{Float64}
     transitioning::TransitionProperties
 
-    replacement::AbstractScene
+    replacement::Ranger.AbstractScene
 
-    # transform::TransformProperties
+    mesh::Geometry.Mesh
 
-    function SplashScene(world::World, name::String, replacement::AbstractScene)
+    function SplashScene(world::Ranger.World, name::String, replacement::Ranger.AbstractScene)
         obj = new()
 
         # We use "obj" to represent a lack of parent.
@@ -34,27 +16,45 @@ mutable struct SplashScene <: AbstractScene
         # obj.transform = TransformProperties{Float64}()
         obj.replacement = replacement   # default to self/obj = No replacement present
         obj.transitioning = TransitionProperties()
+        obj.transform = TransformProperties{Float64}()
+        obj.mesh = Geometry.Mesh()
+
         obj
     end
+end
+
+function build(node::SplashScene, world::Ranger.World)
+    Geometry.add_vertex!(node.mesh, -0.1, -0.1)  # top-left
+    Geometry.add_vertex!(node.mesh, 1.1, 1.1)   # bottom-right
+
+    Geometry.build_it!(node.mesh)
 end
 
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
 function Ranger.Nodes.update(node::SplashScene, dt::Float64)
-    # println("SplashScene::update : ", node)
     update(node.transitioning, dt);
 end
 
 # --------------------------------------------------------
 # Visits
 # --------------------------------------------------------
-white = White()
+function Ranger.Nodes.draw(node::SplashScene, context::Rendering.RenderContext)
+    if is_dirty(node)
+        # Transform this node's vertices using the context
+        Rendering.transform!(context, node.mesh)
+        println(context.current)
+        println(node.mesh.vertices)
+        println(node.mesh.bucket)
+        set_dirty!(node, false)
+    end
 
-function Ranger.Nodes.visit(node::SplashScene, context::RenderContext, interpolation::Float64)
-    # println("SplashScene visit ", node);
-    set_draw_color(context, white)
-    draw_text(context, 10, 10, node.base.name, 3, 2, false)
+    # Draw background
+    Rendering.render_checkerboard(context, node.mesh)
+
+    Rendering.set_draw_color(context, GameData.white)
+    Rendering.draw_text(context, 10, 10, node.base.name, 2, 2, false);
 end
 
 # --------------------------------------------------------
@@ -72,11 +72,11 @@ function Ranger.Nodes.exit_node(node::SplashScene, man::NodeManager)
 end
 
 function Ranger.Nodes.transition(node::SplashScene)
-    if ready(node.transitioning)
-        REPLACE_TAKE
-    else
-        NO_ACTION
-    end
+    # if ready(node.transitioning)
+    #     REPLACE_TAKE
+    # else
+    NO_ACTION
+    # end
 end
 
 function Ranger.Nodes.get_replacement(node::SplashScene)

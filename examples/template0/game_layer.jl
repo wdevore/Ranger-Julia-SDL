@@ -1,30 +1,30 @@
 
-mutable struct GameLayer <: AbstractNode
+mutable struct GameLayer <: Ranger.AbstractNode
     base::NodeData
     transform::TransformProperties{Float64}
 
     # Collection of nodes.
-    children::Array{AbstractNode,1}
+    children::Array{Ranger.AbstractNode,1}
 
-    mesh::Mesh
+    mesh::Geometry.Mesh
 
-    function GameLayer(world::World, name::String, parent::AbstractNode)
+    function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         obj = new()
 
         obj.base = NodeData(gen_id(world), name, parent)
-        obj.children = Array{AbstractNode,1}[]
+        obj.children = Array{Ranger.AbstractNode,1}[]
         obj.transform = TransformProperties{Float64}()
-        obj.mesh = Mesh()
+        obj.mesh = Geometry.Mesh()
 
         obj
     end
 end
 
-function build(layer::GameLayer, world::World)
-    add_vertex!(layer.mesh, -0.5, -0.5)  # top-left
-    add_vertex!(layer.mesh, 0.5, 0.5)   # bottom-right
+function build(layer::GameLayer, world::Ranger.World)
+    Geometry.add_vertex!(layer.mesh, -0.5, -0.5)  # top-left
+    Geometry.add_vertex!(layer.mesh, 0.5, 0.5)   # bottom-right
 
-    build_it!(layer.mesh)
+    Geometry.build_it!(layer.mesh)
 end
 
 # --------------------------------------------------------
@@ -41,18 +41,18 @@ end
 #     # println("GameLayer visit ", layer);
 # end
 
-function Ranger.Nodes.draw(layer::GameLayer, context::RenderContext)
+function Ranger.Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     # Transform this node's vertices using the context
     if is_dirty(layer)
-        transform!(context, layer.mesh)
+        Rendering.transform!(context, layer.mesh)
         set_dirty!(layer, false)
     end
 
-    set_draw_color(context, darkgray)
-    render_aa_rectangle(context, layer.mesh, FILLED)
+    Rendering.set_draw_color(context, darkgray)
+    Rendering.render_aa_rectangle(context, layer.mesh, Rendering.FILLED)
 
-    set_draw_color(context, white)
-    draw_text(context, 10, 10, layer.base.name, 2, 2, false)
+    Rendering.set_draw_color(context, white)
+    Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 end
 
 # --------------------------------------------------------
@@ -75,7 +75,7 @@ end
 # Events
 # --------------------------------------------------------
 # Here we elect to receive keyboard events.
-function Ranger.Nodes.io_event(node::GameLayer, event::KeyboardEvent)
+function Ranger.Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     println("io_event ", event)
     
     # set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)

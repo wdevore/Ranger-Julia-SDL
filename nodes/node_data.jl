@@ -9,7 +9,7 @@ mutable struct NodeData
     visible::Bool
     dirty::Bool
 
-    parent::AbstractNode
+    parent::Ranger.AbstractNode
 
     function NodeData()
         NodeData(UInt32(0), "_NoName_")
@@ -28,7 +28,7 @@ mutable struct NodeData
         obj
     end
 
-    function NodeData(id::UInt32, name::String, parent::AbstractNode)
+    function NodeData(id::UInt32, name::String, parent::Ranger.AbstractNode)
         obj = NodeData(id, name)
 
         obj.parent = parent

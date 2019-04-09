@@ -11,10 +11,8 @@ export
     visit, enter_node, exit_node,
     set_position!
 
-using ..Ranger:
-    AbstractNode, AbstractScene, AbstractIOEvent
-
 using ..Geometry
+using ..Ranger
 
 using ..Math:
     AffineTransform,
@@ -68,7 +66,7 @@ include("node_manager.jl")
 # -----------------------------------------------------------
 # Abstract Nodes
 # -----------------------------------------------------------
-function has_parent(node::AbstractNode)
+function has_parent(node::Ranger.AbstractNode)
     !is_nil(node.base.parent)
 end
 
@@ -76,7 +74,7 @@ using ..Rendering:
     RenderContext,
     apply!
 
-function visit(node::AbstractNode, context::RenderContext, interpolation::Float64)
+function visit(node::Ranger.AbstractNode, context::RenderContext, interpolation::Float64)
     # println("AbstractNode::visit ", node);
     if !is_visible(node)
         return;
@@ -113,44 +111,44 @@ function visit(node::AbstractNode, context::RenderContext, interpolation::Float6
     # println("End visit ----------------------------------------------")
 end
 
-function interpolate(node::AbstractNode, interpolation::Float64)
+function interpolate(node::Ranger.AbstractNode, interpolation::Float64)
     # println("AbstractNode::interpolate ", node);
 end
 
-function draw(node::AbstractNode, context::RenderContext)
+function draw(node::Ranger.AbstractNode, context::RenderContext)
     # println("AbstractNode::draw ", node);
 end
 
-function enter_node(node::AbstractNode, man::NodeManager)
+function enter_node(node::Ranger.AbstractNode, man::NodeManager)
     println("AbstractNode::enter ", node);
 end
 
-function exit_node(node::AbstractNode, man::NodeManager)
+function exit_node(node::Ranger.AbstractNode, man::NodeManager)
     println("AbstractNode::exit ", node);
 end
 
-function get_children(node::AbstractNode)
+function get_children(node::Ranger.AbstractNode)
     nothing
 end
 
-    function io_event(node::AbstractNode, event::AbstractIOEvent)
+    function io_event(node::Ranger.AbstractNode, event::Ranger.AbstractIOEvent)
     println("AbstractScene::io_event ", event)
 end
 
-function is_visible(node::AbstractNode)
+function is_visible(node::Ranger.AbstractNode)
     node.base.visible
 end
 
-function is_dirty(node::AbstractNode)
+function is_dirty(node::Ranger.AbstractNode)
     node.base.dirty
 end
 
 # ripple dirty flag
-function set_dirty!(node::AbstractNode, dirty::Bool)
+function set_dirty!(node::Ranger.AbstractNode, dirty::Bool)
     node.base.dirty = dirty
 end
 
-function ripple_dirty!(node::AbstractNode, dirty::Bool)
+function ripple_dirty!(node::Ranger.AbstractNode, dirty::Bool)
     children = get_children(node)
     if children ≠ nothing
         for child in children
@@ -160,22 +158,22 @@ function ripple_dirty!(node::AbstractNode, dirty::Bool)
     set_dirty!(node, dirty)
 end
 
-function set_position!(node::AbstractNode, x::T, y::T) where {T <: AbstractFloat}
+function set_position!(node::Ranger.AbstractNode, x::T, y::T) where {T <: AbstractFloat}
     Geometry.set!(node.transform.position, x, y)
     ripple_dirty!(node, true);
 end
 
-function set_rotation_in_degrees!(node::AbstractNode, rotation::T) where {T <: AbstractFloat}
+function set_rotation_in_degrees!(node::Ranger.AbstractNode, rotation::T) where {T <: AbstractFloat}
     node.transform.rotation = deg2rad(rotation);
     ripple_dirty!(node, true);
 end
 
-function set_scale!(node::AbstractNode, s::T) where {T <: AbstractFloat}
+function set_scale!(node::Ranger.AbstractNode, s::T) where {T <: AbstractFloat}
     Geometry.set!(node.transform.scale, s, s);
     ripple_dirty!(node, true);
 end
 
-function set_nonuniform_scale!(node::AbstractNode, sx::T, sy::T) where {T <: AbstractFloat}
+function set_nonuniform_scale!(node::Ranger.AbstractNode, sx::T, sy::T) where {T <: AbstractFloat}
     Geometry.set!(node.transform.scale, sx, sy)
     ripple_dirty!(node, true);
 end
@@ -183,34 +181,34 @@ end
 # -----------------------------------------------------------
 # Abstract Scenes
 # -----------------------------------------------------------
-function is_nil(node::AbstractScene)
+function is_nil(node::Ranger.AbstractScene)
     node.base.id == 0
 end
 
-function has_replacement(node::AbstractScene)
+function has_replacement(node::Ranger.AbstractScene)
     !is_nil(node.replacement)
 end
 
-function has_parent(node::AbstractScene)
+function has_parent(node::Ranger.AbstractScene)
     !is_nil(node.base.parent)
 end
 
-function enter_node(node::AbstractScene, man::NodeManager)
+function enter_node(node::Ranger.AbstractScene, man::NodeManager)
     println("AbstractScene::enter ", node);
 end
 
-function exit_node(node::AbstractScene, man::NodeManager)
+function exit_node(node::Ranger.AbstractScene, man::NodeManager)
     println("AbstractScene::exit ", node);
 end
 
-function get_children(node::AbstractScene)
+function get_children(node::Ranger.AbstractScene)
     nothing
 end
 
 # --------------------------------------------------------------------------
 # Timing
 # --------------------------------------------------------------------------
-function update(node::AbstractNode, dt::Float64)
+function update(node::Ranger.AbstractNode, dt::Float64)
     println("AbstractNode::update : ", node)
 end
 
@@ -220,11 +218,11 @@ end
 # --------------------------------------------------------------------------
 import Base.show
 
-function Base.show(io::IO, node::AbstractNode)
+function Base.show(io::IO, node::Ranger.AbstractNode)
     print(io, "|'", node.base.name, "' (", node.base.id, ")|");
 end
 
-function print_tree(node::AbstractNode)
+function print_tree(node::Ranger.AbstractNode)
     println("---------- Tree ---------------")
     print_branch(UInt32(0), node)
 
@@ -235,7 +233,7 @@ function print_tree(node::AbstractNode)
     println("-------------------------------");
 end
 
-function print_sub_tree(children::Array{AbstractNode,1}, level::UInt32)
+function print_sub_tree(children::Array{Ranger.AbstractNode,1}, level::UInt32)
     for child in children
         sub_children = get_children(child)
         if sub_children ≠ nothing
@@ -247,7 +245,7 @@ function print_sub_tree(children::Array{AbstractNode,1}, level::UInt32)
     end
 end
 
-function print_branch(level::UInt32, node::AbstractNode) 
+function print_branch(level::UInt32, node::Ranger.AbstractNode) 
     for _ in 1:level 
         print("  ")
     end

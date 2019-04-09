@@ -6,17 +6,14 @@
 
 include("../../ranger.jl")
 
-const REngine = Ranger.Engine
-const RBasicFont = Ranger.Rendering
-
 include("build.jl")
 
 println("Running Template 0")
 
 function go()
-    world = REngine.initialize("Template 0", build)
+    world = Ranger.Engine.initialize("Template 0", build)
 
-    REngine.run(world);
+    Ranger.Engine.run(world);
 end
 
 # using Debugger

@@ -25,3 +25,8 @@ function set!(p::Point{T}, x::T, y::T) where {T <: AbstractFloat}
     p.x = x
     p.y = y;
 end
+
+function set!(p::Point{T}, from::Point{T}) where {T <: AbstractFloat}
+    p.x = from.x
+    p.y = from.y;
+end

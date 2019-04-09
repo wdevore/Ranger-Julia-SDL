@@ -1,5 +1,7 @@
 module Rendering
 
+using ..Ranger
+
 include("colors.jl")
 include("state.jl")
 

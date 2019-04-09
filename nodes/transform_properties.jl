@@ -18,7 +18,7 @@ mutable struct TransformProperties{T <: AbstractFloat}
 end
 
 function set_position!(prop::TransformProperties{T}, x::T, y::T) where {T <: AbstractFloat}
-    Geometry.Point.set!(prop.position, x, y);
+    Geometry.set!(prop.position, x, y);
 end
 
 function rotation_in_degrees!(prop::TransformProperties{T}) where {T <: AbstractFloat}
@@ -36,11 +36,11 @@ function uniform_scale(prop::TransformProperties{T}) where {T <: AbstractFloat}
 end
 
 function set_scale!(prop::TransformProperties{T}, s::T) where {T <: AbstractFloat}
-    Geometry.Point.set!(prop.scale, s, s);
+    Geometry.set!(prop.scale, s, s);
 end
 
 function set_nonuniform_scale!(prop::TransformProperties{T}, sx::T, sy::T) where {T <: AbstractFloat}
-    Geometry.Point.set!(prop.scale, sx, sy);
+    Geometry.set!(prop.scale, sx, sy);
 end
 
 function calc_filtered_transform!(prop::TransformProperties{T},

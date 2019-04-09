@@ -1,22 +1,10 @@
-using .Ranger.Nodes:
-    NodeData, NodeNil, AbstractNode,
-    AbstractScene
 
-using .Ranger.Nodes.Scenes:
-    REPLACE_TAKE
-    
-using .Ranger:
-    gen_id
-
-using .Ranger.Engine:
-    World
-
-mutable struct SceneBoot <: AbstractScene
+mutable struct SceneBoot <: Ranger.AbstractScene
     base::NodeData
 
-    replacement::AbstractScene
+    replacement::Ranger.AbstractScene
 
-    function SceneBoot(world::World, name::String, replacement::AbstractScene)
+    function SceneBoot(world::Ranger.World, name::String, replacement::Ranger.AbstractScene)
         obj = new()
 
         obj.base = NodeData(gen_id(world), name, NodeNil())

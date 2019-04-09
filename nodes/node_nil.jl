@@ -1,6 +1,6 @@
 export NodeNil, is_nil
 
-struct NodeNil <: AbstractNode
+struct NodeNil <: Ranger.AbstractNode
     id::UInt32
     name::String
 
@@ -9,7 +9,7 @@ struct NodeNil <: AbstractNode
     end
 end
 
-function is_nil(node::AbstractNode)
+function is_nil(node::Ranger.AbstractNode)
     node.id == 0
 end
 
