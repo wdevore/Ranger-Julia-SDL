@@ -51,13 +51,7 @@ function Nodes.draw(node::CrossNode, context::RenderContext)
     v2 = node.mesh.bucket[2]
     v3 = node.mesh.bucket[3]
     v4 = node.mesh.bucket[4]
-    # println("############")
-    # println(v1)
-    # println(v2)
-    # println(v3)
-    # println(v4)
-    # println("@@@@@@@@@@@@@2")
-    draw_horz_line(context, Int32(round(v1.x)), Int32(round(v2.x)), Int32(round(v1.y)))
+    draw_horz_line(context, v1.x, v2.x, v1.y)
 
-    draw_vert_line(context, Int32(round(v3.x)), Int32(round(v3.y)), Int32(round(v4.y)));
+    draw_vert_line(context, v3.x, v3.y, v4.y);
 end

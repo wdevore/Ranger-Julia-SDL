@@ -220,8 +220,16 @@ function draw_horz_line(context::RenderContext, x1::Int32, x2::Int32, y::Int32)
     SDL2.RenderDrawLine(context.renderer, x1, y, x2, y);
 end
 
+function draw_horz_line(context::RenderContext, x1::AbstractFloat, x2::AbstractFloat, y::AbstractFloat)
+    SDL2.RenderDrawLine(context.renderer, Int32(round(x1)), Int32(round(y)), Int32(round(x2)), Int32(round(y)));
+end
+
 function draw_vert_line(context::RenderContext, x::Int32, y1::Int32, y2::Int32)
     SDL2.RenderDrawLine(context.renderer, x, y1, x, y2);
+end
+
+function draw_vert_line(context::RenderContext, x::AbstractFloat, y1::AbstractFloat, y2::AbstractFloat)
+    SDL2.RenderDrawLine(context.renderer, Int32(round(x)), Int32(round(y1)), Int32(round(x)), Int32(round(y2)));
 end
 
 const shifts = [0,1,2,3,4,5,6,7]
