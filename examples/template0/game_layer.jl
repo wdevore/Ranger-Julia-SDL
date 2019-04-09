@@ -21,10 +21,15 @@ mutable struct GameLayer <: Ranger.AbstractNode
 end
 
 function build(layer::GameLayer, world::Ranger.World)
-    Geometry.add_vertex!(layer.mesh, -0.5, -0.5)  # top-left
-    Geometry.add_vertex!(layer.mesh, 0.5, 0.5)   # bottom-right
+    top = -Float64(world.view_height) / 2.0
+    left = -Float64(world.view_width) / 2.0
+    Geometry.add_vertex!(layer.mesh, left, top)  # top-left
 
-    Geometry.build_it!(layer.mesh)
+    bottom = Float64(world.view_height) / 2.0
+    right = Float64(world.view_width) / 2.0
+    Geometry.add_vertex!(layer.mesh, right, bottom)   # bottom-right
+
+    Geometry.build!(layer.mesh)
 end
 
 # --------------------------------------------------------
@@ -48,10 +53,10 @@ function Ranger.Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
         set_dirty!(layer, false)
     end
 
-    Rendering.set_draw_color(context, darkgray)
+    Rendering.set_draw_color(context, GameData.darkgray)
     Rendering.render_aa_rectangle(context, layer.mesh, Rendering.FILLED)
 
-    Rendering.set_draw_color(context, white)
+    Rendering.set_draw_color(context, GameData.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 end
 
@@ -78,5 +83,5 @@ end
 function Ranger.Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     println("io_event ", event)
     
-    # set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
+    set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
 end

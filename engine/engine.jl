@@ -208,7 +208,7 @@ function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::Worl
     # set_draw_color(manager.context, white)
     # draw_outlined_rectangle(manager.context, rect)
 
-    set_draw_color(manager.context, orange)
+    set_draw_color(manager.context, white)
     text = @sprintf("fps(%2d), ups(%2d) rend(%2.4f)", fps, ups, avg_render)
     x = 10
     y = world.window_height - 24

@@ -13,7 +13,6 @@ mutable struct SplashScene <: Ranger.AbstractScene
 
         # We use "obj" to represent a lack of parent.
         obj.base = NodeData(gen_id(world), name, NodeNil())
-        # obj.transform = TransformProperties{Float64}()
         obj.replacement = replacement   # default to self/obj = No replacement present
         obj.transitioning = TransitionProperties()
         obj.transform = TransformProperties{Float64}()
@@ -24,10 +23,23 @@ mutable struct SplashScene <: Ranger.AbstractScene
 end
 
 function build(node::SplashScene, world::Ranger.World)
-    Geometry.add_vertex!(node.mesh, -0.1, -0.1)  # top-left
-    Geometry.add_vertex!(node.mesh, 1.1, 1.1)   # bottom-right
+    # The splash scene doesn't not have a transform (aka translate + scale)
+    # applied to it so we build the mesh using view-space coordinates
+    y = -Float64(world.view_height) / 2.0
+    w = 320
 
-    Geometry.build_it!(node.mesh)
+    # Construct a checker board grid of rectangles.
+    while y <= world.view_height
+        x = -Float64(world.view_width) / 2.0
+        while x <= world.view_width
+            Geometry.add_vertex!(node.mesh, x, y)  # top-left
+            Geometry.add_vertex!(node.mesh, x + w, y + w)   # bottom-right
+            x += w
+        end
+        y += w
+    end
+
+    Geometry.build!(node.mesh)
 end
 
 # --------------------------------------------------------
@@ -44,14 +56,11 @@ function Ranger.Nodes.draw(node::SplashScene, context::Rendering.RenderContext)
     if is_dirty(node)
         # Transform this node's vertices using the context
         Rendering.transform!(context, node.mesh)
-        println(context.current)
-        println(node.mesh.vertices)
-        println(node.mesh.bucket)
         set_dirty!(node, false)
     end
 
     # Draw background
-    Rendering.render_checkerboard(context, node.mesh)
+    Rendering.render_checkerboard(context, node.mesh, GameData.darkgray, GameData.lightgray)
 
     Rendering.set_draw_color(context, GameData.white)
     Rendering.draw_text(context, 10, 10, node.base.name, 2, 2, false);
@@ -72,11 +81,11 @@ function Ranger.Nodes.exit_node(node::SplashScene, man::NodeManager)
 end
 
 function Ranger.Nodes.transition(node::SplashScene)
-    # if ready(node.transitioning)
-    #     REPLACE_TAKE
-    # else
-    NO_ACTION
-    # end
+    if ready(node.transitioning)
+        REPLACE_TAKE
+    else
+        NO_ACTION
+    end
 end
 
 function Ranger.Nodes.get_replacement(node::SplashScene)

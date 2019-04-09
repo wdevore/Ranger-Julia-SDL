@@ -27,9 +27,11 @@ using .Ranger.Geometry
 
 module GameData
     using ..Ranger.Rendering
+
     orange = Rendering.Orange()
     white = Rendering.White()
     darkgray = Rendering.DarkGray()
+    lightgray = Rendering.LightGray()
 end
 
 using .GameData
@@ -48,7 +50,7 @@ function build(world::Ranger.World)
 
     splash = SplashScene(world, "SplashScene", game)
     build(splash, world)
-    splash.transitioning.pause_for = 3.1 * 1000.0
+    splash.transitioning.pause_for = 1.25 * 1000.0
 
     # println(splash)
 

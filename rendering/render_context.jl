@@ -47,8 +47,8 @@ mutable struct RenderContext
         o.renderer = world.renderer
         o.state = []
         o.stack_top = 1
-        o.clear_color = DarkGray()
-        o.draw_color = Orange()
+        o.clear_color = Orange()
+        o.draw_color = White()
         o.width = world.window_width
         o.height = world.window_height
         o.current = AffineTransform{Float64}()
@@ -104,13 +104,13 @@ function apply!(context::RenderContext, aft::AffineTransform)
 end
 
 function pre(context::RenderContext)
-    # c = context.clear_color
-    # SDL2.SetRenderDrawColor(context.renderer, c.r, c.g, c.b, c.a)
-    # SDL2.RenderClear(context.renderer);
+    c = context.clear_color
+    SDL2.SetRenderDrawColor(context.renderer, c.r, c.g, c.b, c.a)
+    SDL2.RenderClear(context.renderer);
 
     # Draw checkered board as an clear indicator for debugging
     # NOTE: disable this code for release builds
-    draw_checkerboard(context);
+    # draw_checkerboard(context);
 end
 
 # Push the current state onto the stack
@@ -163,9 +163,7 @@ end
 
 function transform!(context::RenderContext, mesh::Geometry.Mesh)
     for (idx, vertex) in enumerate(mesh.vertices)
-        println(idx, ") A v: ", vertex, ", b: ", mesh.bucket[idx])
         Math.transform!(context.current, vertex, mesh.bucket[idx])
-        println("B v: ", vertex, ", b: ", mesh.bucket[idx])
     end
 end
 
@@ -310,30 +308,30 @@ end
 # Render functions render based on transformed vertices
 # The Render functions use the Draw functions.
 # ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.
-function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh)
+function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh, oddColor::Palette, evenColor::Palette)
     # render a grid of rectangles defined by min/max points
     flip = false
     vertices = mesh.bucket
     build = true
     v1 = Point{Float64}()
     v2 = Point{Float64}()
-
+    
+    # TODO detect negative change in X so that the flip value
+    # alternates correctly for even grid sizes. To lazy to fix at the moment.
     for (idx, vertex) in enumerate(mesh.bucket)
         if build
             Geometry.set!(v1, vertex)
-            # println("v1: ",  v1)
             build = false
             continue
         else
             Geometry.set!(v2, vertex)
-            # println("v2: ", v2)
             build = true
         end
 
         if flip 
-            SDL2.SetRenderDrawColor(context.renderer, 100, 50, 100, 255)
+            SDL2.SetRenderDrawColor(context.renderer, oddColor.r, oddColor.g, oddColor.b, oddColor.a)
         else 
-            SDL2.SetRenderDrawColor(context.renderer, 80, 50, 80, 255)
+            SDL2.SetRenderDrawColor(context.renderer, evenColor.r, evenColor.g, evenColor.b, evenColor.a)
         end
         
         # upper-left
@@ -343,12 +341,11 @@ function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh)
         # bottom-right
         maxx = Int32(round(v2.x))
         maxy = Int32(round(v2.y))
-        # println(minx, ", ", miny, ", ", maxx, ", ", maxy)
 
         rect_draw.x = minx
         rect_draw.y = miny
-        rect_draw.w = maxx + minx
-        rect_draw.h = maxy + miny
+        rect_draw.w = maxx - minx
+        rect_draw.h = maxy - miny
         
         SDL2.RenderFillRect(context.renderer, pointer_from_objref(rect_draw))
 

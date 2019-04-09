@@ -30,11 +30,15 @@ function build(scene::GameScene, world::Ranger.World)
 
     cross = CrossNode(gen_id(world), "CrossNode", scene)
     push!(scene.children, cross)
-    
-    set_nonuniform_scale!(scene, world.view_width, world.view_height);
-    # Bake in the transform rather repeatedly perform in draw()
-    calc_transform!(scene.transform)
-    # This node is never dirtied
+
+    # Note: If you apply a scale that is the size of the view-space
+    # then the rest of your code will need to define all mesh data
+    # in unit-space.
+    # set_nonuniform_scale!(scene, world.view_width, world.view_height)
+    # # Bake in the transform rather repeatedly perform in draw()
+    # calc_transform!(scene.transform)
+
+    # # This node/scene is never dirtied at the scene level
     set_dirty!(scene, false);
 end
 
@@ -44,19 +48,6 @@ end
 function Ranger.Nodes.update(scene::GameScene, dt::Float64)
     # println("SplashScene::update : ", scene)
 end
-
-# --------------------------------------------------------
-# Visits and rendering
-# --------------------------------------------------------
-# function Ranger.Nodes.visit(scene::GameScene, context::Rendering.RenderContext, interpolation::Float64)
-#     # println("GameScene visit ", node);
-# end
-
-# function Ranger.Nodes.draw(scene::GameScene, context::Rendering.RenderContext)
-#     # println("GameScene::draw ", node);
-#     set_draw_color(context, white)
-#     draw_text(context, 10, 10, scene.base.name, 3, 2, false)
-# end
 
 # --------------------------------------------------------
 # Life cycle events
