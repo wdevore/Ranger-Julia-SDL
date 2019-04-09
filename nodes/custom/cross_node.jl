@@ -10,21 +10,21 @@ mutable struct CrossNode <: Ranger.AbstractNode
 
     color::Palette
 
-    function CrossNode(id::UInt32, name::String, parent::Ranger.AbstractNode)
+    function CrossNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = NodeData(id, name, parent)
+        o.base = NodeData(Ranger.gen_id(world), name, parent)
         o.transform = TransformProperties{Float64}()
         o.mesh = Geometry.Mesh()
         o.color = Rendering.White()
 
         # horizontal
-        Geometry.add_vertex!(o.mesh, -0.5, 0.0)  
-        Geometry.add_vertex!(o.mesh, 0.5, 0.0)   
+        Geometry.add_vertex!(o.mesh, -Float64(world.view_width) / 2.0, 0.0)  
+        Geometry.add_vertex!(o.mesh, Float64(world.view_width), 0.0)   
 
         # vertical
-        Geometry.add_vertex!(o.mesh, 0.0, -0.5)  
-        Geometry.add_vertex!(o.mesh, 0.0, 0.5)   
+        Geometry.add_vertex!(o.mesh, 0.0, -Float64(world.view_height))  
+        Geometry.add_vertex!(o.mesh, 0.0, Float64(world.view_height))   
         
         Geometry.build!(o.mesh)
 

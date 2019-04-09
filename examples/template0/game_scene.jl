@@ -28,7 +28,7 @@ function build(scene::GameScene, world::Ranger.World)
     push!(scene.children, layer)
     build(layer, world);
 
-    cross = CrossNode(gen_id(world), "CrossNode", scene)
+    cross = CrossNode(world, "CrossNode", scene)
     push!(scene.children, cross)
 
     # Note: If you apply a scale that is the size of the view-space
