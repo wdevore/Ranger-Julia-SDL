@@ -4,7 +4,7 @@ import ..Nodes.draw
 
 mutable struct CrossNode <: Ranger.AbstractNode
     base::Nodes.NodeData
-    transform::TransformProperties{Float64}
+    transform::Nodes.TransformProperties{Float64}
 
     mesh::Geometry.Mesh
 
@@ -13,8 +13,8 @@ mutable struct CrossNode <: Ranger.AbstractNode
     function CrossNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = NodeData(Ranger.gen_id(world), name, parent)
-        o.transform = TransformProperties{Float64}()
+        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.transform = Nodes.TransformProperties{Float64}()
         o.mesh = Geometry.Mesh()
         o.color = Rendering.White()
 

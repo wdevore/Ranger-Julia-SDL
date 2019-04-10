@@ -15,22 +15,18 @@ mutable struct OutlinedRectangle <: Ranger.AbstractNode
     function OutlinedRectangle(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = NodeData(Ranger.gen_id(world), name, parent)
-        o.transform = TransformProperties{Float64}()
+        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
 
-        # o.min = Geometry.Point{Float64}()
-        # o.max = Geometry.Point{Float64}()
-        # o.buc_min = Geometry.Point{Float64}()
-        # o.buc_max = Geometry.Point{Float64}()
         o.polygon = Geometry.Polygon{Float64}()
 
-        add_vertex!(o.polygon, 0.0, 0.0)
-        add_vertex!(o.polygon, 0.0, 0.0)
-        add_vertex!(o.polygon, 0.0, 0.0)
-        add_vertex!(o.polygon, 0.0, 0.0)
+        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
+        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
+        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
+        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
 
-        build!(o.polygon)
+        Geometry.build!(o.polygon)
 
         o
     end

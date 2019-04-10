@@ -8,7 +8,7 @@ using ..Rendering
 
 mutable struct VectorTextNode <: Ranger.AbstractNode
     base::Nodes.NodeData
-    transform::TransformProperties{Float64}
+    transform::Nodes.TransformProperties{Float64}
 
     color::Palette
 
@@ -18,8 +18,8 @@ mutable struct VectorTextNode <: Ranger.AbstractNode
     function VectorTextNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = NodeData(Ranger.gen_id(world), name, parent)
-        o.transform = TransformProperties{Float64}()
+        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
         o.mesh = Geometry.Mesh()
 
