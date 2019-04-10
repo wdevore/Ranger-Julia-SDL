@@ -1,7 +1,6 @@
 using Base: sin, cos
 
-using ..Geometry:
-    Point
+using ..Geometry
 
 export
   AffineTransform,
@@ -51,14 +50,14 @@ function to_identity!(aft::AffineTransform)
 end
 
 # transforms
-function transform!(aft::AffineTransform{T}, v::Point{T}) where {T <: AbstractFloat}
+function transform!(aft::AffineTransform{T}, v::Geometry.Point{T}) where {T <: AbstractFloat}
     x = (aft.a * v.x) + (aft.c * v.y) + aft.tx
     y = (aft.b * v.x) + (aft.d * v.y) + aft.ty
     v.x = x
     v.y = y;
 end
 
-function transform!(aft::AffineTransform{T}, in::Point{T}, out::Point{T}) where {T <: AbstractFloat}
+function transform!(aft::AffineTransform{T}, in::Geometry.Point{T}, out::Geometry.Point{T}) where {T <: AbstractFloat}
     out.x = (aft.a * in.x) + (aft.c * in.y) + aft.tx
     out.y = (aft.b * in.x) + (aft.d * in.y) + aft.ty;
 end
@@ -66,6 +65,12 @@ end
 function transform!(aft::AffineTransform{T}, vx::T, vy::T) where {T <: AbstractFloat}
     ((aft.a * vx) + (aft.c * vy) + aft.tx,
     (aft.b * vx) + (aft.d * vy) + aft.ty)
+end
+
+function transform!(aft::AffineTransform{T}, polygon::Geometry.Polygon{T}) where {T <: AbstractFloat}
+    for v in polygon.mesh.vertices
+        Geometry.set!(v, (aft.a * vx) + (aft.c * vy) + aft.tx, (aft.b * vx) + (aft.d * vy) + aft.ty)
+    end
 end
 
 # setters/getters

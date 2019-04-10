@@ -9,21 +9,10 @@ export initialize, run
 
 using Printf
 
-using ..Nodes:
-    NodeManager,
-    pre_visit, post_visit, visit,
-    push_node, update, route_events
-
-using ..Ranger:
-    World, AbstractScene
-
-using ..Rendering:
-    Orange, White,
-    draw_text, set_draw_color,
-    draw_filled_rectangle, draw_outlined_rectangle
-
-using ..Events:
-    KeyboardEvent
+using ..Nodes
+using ..Ranger
+using ..Rendering
+using ..Events
 
 manager = nothing
 
@@ -35,11 +24,11 @@ const UPDATES_PER_SECOND = 30
 const UPDATE_PERIOD = 1000000000.0 / Float64(UPDATES_PER_SECOND) 
 
 function initialize(title::String, build::Function)
-    world = World(title)
+    world = Ranger.World(title)
 
     SDL(world)
 
-    global manager = NodeManager(world)
+    global manager = Nodes.NodeManager(world)
 
     # Allow client to build game
     build(world)
@@ -47,7 +36,7 @@ function initialize(title::String, build::Function)
     world
 end
 
-function run(world::World)
+function run(world::Ranger.World)
     println("running...")
 
     running = true
@@ -70,6 +59,8 @@ function run(world::World)
     avg_render = 0.0
     render_elapsed_cnt = 0
 
+    keyboard = Events.KeyboardEvent()
+
     # Main game loop
     while running
         current_t = time_ns()
@@ -81,27 +72,26 @@ function run(world::World)
 
         # Process any events that have been queued.
         while haveEvents
-            event, haveEvents = poll_event!()
+            event, haveEvents = Events.poll_event!()
             
             if haveEvents
-                ev_type = get_event_type(event)
+                ev_type = Events.get_event_type(event)
 
                 if (ev_type == SDL2.KEYDOWN)
-                    keySym = get_key_code_sym(event)
+                    keySym = Events.get_key_code_sym(event)
     
                     if (keySym == SDL2.SDLK_ESCAPE)
                         running = false
                         continue
                     end
 
-                    keyboard = KeyboardEvent()
-                    keyboard.keycode = get_key_code_sym(event)
-                    keyboard.scancode = get_scancode(event)
-                    keyboard.modifier = get_modifier(event)
-                    keyboard.repeat = get_repeat(event)
+                    keyboard.keycode = keySym
+                    keyboard.scancode = Events.get_scancode(event)
+                    keyboard.modifier = Events.get_modifier(event)
+                    keyboard.repeat = Events.get_repeat(event)
     
                     # Route event to registered Nodes
-                    route_events(manager, keyboard)
+                    Nodes.route_events(manager, keyboard)
                 end
                 # print_event(event)
             end
@@ -117,7 +107,7 @@ function run(world::World)
         lagging = true
         while lagging
             if lag >= ns_per_update
-                update(manager, frame_dt)
+                Nodes.update(manager, frame_dt)
                 lag -= ns_per_update
                 ups_cnt += 1
             else 
@@ -130,7 +120,7 @@ function run(world::World)
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         # Render
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-        pre_visit(manager)
+        Nodes.pre_visit(manager)
 
         # Capture time AFTER pre_visit. If vsync is enabled
         # then time includes the vertical refresh which ~16.667ms
@@ -138,7 +128,7 @@ function run(world::World)
 
         interpolation = Float64(lag) / Float64(ns_per_update)
 
-        more_scenes = visit(manager, interpolation)
+        more_scenes = Nodes.visit(manager, interpolation)
 
         if !more_scenes
             running = false
@@ -175,15 +165,15 @@ function run(world::World)
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         # Present
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-        post_visit(manager)
+        Nodes.post_visit(manager)
         
     end
 
     exit();
 end
 
-function push(scene::AbstractScene)
-    push_node(manager, scene)
+function push(scene::Ranger.AbstractScene)
+    Nodes.push_node(manager, scene)
 end
 
 function exit()
@@ -194,10 +184,10 @@ end
 # ***************************
 # Debugging only
 # ***************************
-orange = Orange()
-white = White()
+orange = Rendering.Orange()
+white = Rendering.White()
 
-function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::World)
+function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::Ranger.World)
     # set_draw_color(manager.context, orange)
     # rect = SDL2.Rect(0, 0, 1, 1)
     # rect.x = 100
@@ -208,11 +198,11 @@ function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::Worl
     # set_draw_color(manager.context, white)
     # draw_outlined_rectangle(manager.context, rect)
 
-    set_draw_color(manager.context, white)
+    Rendering.set_draw_color(manager.context, white)
     text = @sprintf("fps(%2d), ups(%2d) rend(%2.4f)", fps, ups, avg_render)
     x = 10
     y = world.window_height - 24
-    draw_text(manager.context, x, y, text, 2, 2, false)
+    Rendering.draw_text(manager.context, x, y, text, 2, 2, false)
 
 end
 

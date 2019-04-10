@@ -2,8 +2,8 @@
 using .Ranger.Custom
 
 mutable struct GameScene <: Ranger.AbstractScene
-    base::NodeData
-    transform::TransformProperties{Float64}
+    base::Nodes.NodeData
+    transform::Nodes.TransformProperties{Float64}
 
     replacement::Ranger.AbstractScene
 
@@ -13,9 +13,9 @@ mutable struct GameScene <: Ranger.AbstractScene
     function GameScene(world::Ranger.World, name::String)
         obj = new()
 
-        obj.base = NodeData(gen_id(world), name, NodeNil())
-        obj.replacement = SceneNil()
-        obj.transform = TransformProperties{Float64}()
+        obj.base = Nodes.NodeData(gen_id(world), name, Nodes.NodeNil())
+        obj.replacement = Nodes.SceneNil()
+        obj.transform = Nodes.TransformProperties{Float64}()
         obj.children = Array{Ranger.AbstractNode,1}[]
 
         obj
@@ -31,8 +31,8 @@ function build(scene::GameScene, world::Ranger.World)
     push!(scene.children, cross)
 
     text = Custom.VectorTextNode(world, "VectorTextNode", scene)
-    set_scale!(text, 50.0)
-    set_rotation_in_degrees!(text, 45.0)
+    Nodes.set_scale!(text, 50.0)
+    Nodes.set_rotation_in_degrees!(text, 45.0)
     text.color = GameData.orange
     Custom.set_text!(text, GameData.vector_font, "RANGER IS A GO!")
     push!(scene.children, text)
@@ -45,7 +45,7 @@ function build(scene::GameScene, world::Ranger.World)
     # calc_transform!(scene.transform)
 
     # # This node/scene is never dirtied at the scene level
-    set_dirty!(scene, false);
+    Nodes.set_dirty!(scene, false);
 end
 
 # --------------------------------------------------------
@@ -70,13 +70,16 @@ function Ranger.Nodes.exit_node(scene::GameScene, man::NodeManager)
 end
 
 function Ranger.Nodes.transition(scene::GameScene)
-    NO_ACTION
+    Scenes.NO_ACTION
 end
 
 function Ranger.Nodes.get_replacement(scene::GameScene)
     scene.replacement
 end
 
+# --------------------------------------------------------
+# Grouping
+# --------------------------------------------------------
 function Ranger.Nodes.get_children(node::GameScene)
     node.children
 end

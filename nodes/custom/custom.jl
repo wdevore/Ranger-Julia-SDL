@@ -1,3 +1,5 @@
+export Custom
+
 module Custom
 
 using ..Nodes
@@ -8,6 +10,7 @@ using ..Math
 
 include("cross_node.jl")
 include("aa_rectangle.jl")
+include("outlined_rectangle.jl")
 include("vector_text_node.jl")
 
 end

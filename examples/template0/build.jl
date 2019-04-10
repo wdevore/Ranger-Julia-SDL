@@ -4,23 +4,11 @@
 # import .Ranger.Nodes:
 #     transition, get_replacement, visit
 
-using .Ranger.Nodes:
-    NodeData, SceneNil, NodeNil, NodeManager,
-    update,
-    register_target, unregister_target,
-    register_event_target, unregister_event_target,
-    has_parent, is_dirty, set_dirty!, ready,
-    TransformProperties, TransitionProperties,
-    set_nonuniform_scale!, set_position!, set_scale!, set_rotation_in_degrees!,
-    calc_transform!,
-    print_tree
+using .Ranger.Nodes
+using .Ranger.Nodes.Scenes
+using .Ranger.Nodes.Custom
 
-using .Ranger.Nodes.Scenes:
-    NO_ACTION, REPLACE_TAKE
-
-using .Ranger:
-    gen_id
-
+using .Ranger
 using .Ranger.Rendering
 using .Ranger.Events
 using .Ranger.Geometry
@@ -32,6 +20,8 @@ module GameData
     white = Rendering.White()
     darkgray = Rendering.DarkGray()
     lightgray = Rendering.LightGray()
+    red = Rendering.Red()
+    yellow = Rendering.Yellow()
 
     vector_font = Rendering.VectorFont()
     Rendering.build_font!(vector_font)
@@ -53,7 +43,7 @@ function build(world::Ranger.World)
 
     splash = SplashScene(world, "SplashScene", game)
     build(splash, world)
-    splash.transitioning.pause_for = 1.25 * 1000.0
+    splash.transitioning.pause_for = 0.25 * 1000.0
 
     # println(splash)
 
@@ -62,7 +52,7 @@ function build(world::Ranger.World)
 
     Ranger.Engine.push(boot)
 
-    print_tree(game)
+    Nodes.print_tree(game)
 
     println("Built");
 end

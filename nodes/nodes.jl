@@ -97,12 +97,14 @@ function visit(node::Ranger.AbstractNode, context::RenderContext, interpolation:
 
     children = get_children(node)
     if children ≠ nothing
+        # println("C drawing: ", node)
         draw(node, context)
 
         for child in children
             visit(child, context, interpolation)
         end
     else
+        # println("drawing: ", node)
         draw(node, context)
     end
 
@@ -209,7 +211,7 @@ end
 # Timing
 # --------------------------------------------------------------------------
 function update(node::Ranger.AbstractNode, dt::Float64)
-    println("AbstractNode::update : ", node)
+    # println("AbstractNode::update : ", node)
 end
 
 
@@ -238,7 +240,7 @@ function print_sub_tree(children::Array{Ranger.AbstractNode,1}, level::UInt32)
         sub_children = get_children(child)
         if sub_children ≠ nothing
             print_branch(level, child)
-            print_sub_tree(sub_children, level + 1)
+            print_sub_tree(sub_children, UInt32(level + 1))
         else
             print_branch(level, child)
         end

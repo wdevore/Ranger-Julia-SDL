@@ -8,7 +8,7 @@ mutable struct CrossNode <: Ranger.AbstractNode
 
     mesh::Geometry.Mesh
 
-    color::Palette
+    color::Rendering.Palette
 
     function CrossNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -33,9 +33,8 @@ mutable struct CrossNode <: Ranger.AbstractNode
 end
 
 function Nodes.draw(node::CrossNode, context::Rendering.RenderContext)
-    # Transform this node's vertices using the context
     if Nodes.is_dirty(node)
-        Math.transform!(context, node.mesh)
+        Rendering.transform!(context, node.mesh)
         Nodes.set_dirty!(node, false)
     end
 

@@ -1,43 +1,67 @@
 
 mutable struct GameLayer <: Ranger.AbstractNode
-    base::NodeData
-    transform::TransformProperties{Float64}
+    base::Nodes.NodeData
+    transform::Nodes.TransformProperties{Float64}
 
     # Collection of nodes.
     children::Array{Ranger.AbstractNode,1}
 
-    mesh::Geometry.Mesh
+    min::Geometry.Point{Float64}
+    max::Geometry.Point{Float64}
+    buc_min::Geometry.Point{Float64}
+    buc_max::Geometry.Point{Float64}
+
+    out_rect::Custom.OutlinedRectangle
+    angle::Float64
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
-        obj = new()
+        o = new()
 
-        obj.base = NodeData(gen_id(world), name, parent)
-        obj.children = Array{Ranger.AbstractNode,1}[]
-        obj.transform = TransformProperties{Float64}()
-        obj.mesh = Geometry.Mesh()
+        o.base = Nodes.NodeData(gen_id(world), name, parent)
+        o.children = Array{Ranger.AbstractNode,1}[]
+        o.transform = Nodes.TransformProperties{Float64}()
 
-        obj
+        o.min = Geometry.Point{Float64}()
+        o.max = Geometry.Point{Float64}()
+        o.buc_min = Geometry.Point{Float64}()
+        o.buc_max = Geometry.Point{Float64}()
+
+        o.angle = 0.0
+
+        o
     end
 end
 
 function build(layer::GameLayer, world::Ranger.World)
-    top = -Float64(world.view_height) / 2.0
-    left = -Float64(world.view_width) / 2.0
-    Geometry.add_vertex!(layer.mesh, left, top)  # top-left
+    hw = Float64(world.view_width) / 2.0
+    hh = Float64(world.view_height) / 2.0
 
-    bottom = Float64(world.view_height) / 2.0
-    right = Float64(world.view_width) / 2.0
-    Geometry.add_vertex!(layer.mesh, right, bottom)   # bottom-right
+    # top-left
+    Geometry.set!(layer.min, -hw, -hh)
 
-    Geometry.build!(layer.mesh)
+    # bottom-right
+    Geometry.set!(layer.max, hw, hh)
+
+    rect = Custom.AARectangle(world, "AARectangle", layer)
+    Custom.set_min!(rect, 200.0, 200.0)
+    Custom.set_max!(rect, 400.0, 400.0)
+    rect.color = GameData.yellow
+    push!(layer.children, rect);
+
+    layer.out_rect = Custom.OutlinedRectangle(world, "OutlinedRectangle", layer)
+    Custom.set!(layer.out_rect, -0.5, -0.5, 0.5, 0.5)
+    Nodes.set_scale!(layer.out_rect, 100.0)
+    Nodes.set_position!(layer.out_rect, -100.0, -100.0)
+    layer.out_rect.color = GameData.red
+    push!(layer.children, layer.out_rect);
 end
 
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
-function Ranger.Nodes.update(layer::GameLayer, dt::Float64)
-    # println("GameLayer::update : ", layer)
-end
+# function Ranger.Nodes.update(layer::GameLayer, dt::Float64)
+#     # println("GameLayer::update : ", layer)
+# end
 
 # --------------------------------------------------------
 # Visits
@@ -48,16 +72,18 @@ end
 
 function Ranger.Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     # Transform this node's vertices using the context
-    if is_dirty(layer)
-        Rendering.transform!(context, layer.mesh)
-        set_dirty!(layer, false)
+    if Nodes.is_dirty(layer)
+        Rendering.transform!(context, layer.min, layer.max, layer.buc_min, layer.buc_max)
+        # Rendering.transform!(context, layer.mesh)
+        Nodes.set_dirty!(layer, false)
     end
 
     Rendering.set_draw_color(context, GameData.darkgray)
-    Rendering.render_aa_rectangle(context, layer.mesh, Rendering.FILLED)
+    # Rendering.render_aa_rectangle(context, layer.mesh, Rendering.FILLED)
+    Rendering.render_aa_rectangle(context, layer.buc_min, layer.buc_max, Rendering.FILLED);
 
     Rendering.set_draw_color(context, GameData.white)
-    Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
+    Rendering.draw_text(context, 10, 10, layer.base.name, 5, 4, false)
 end
 
 # --------------------------------------------------------
@@ -66,14 +92,14 @@ end
 function Ranger.Nodes.enter_node(layer::GameLayer, man::NodeManager)
     println("enter ", layer);
     # Register node as a timing target in order to receive updates
-    register_target(man, layer)
-    register_event_target(man, layer);
+    Nodes.register_target(man, layer)
+    Nodes.register_event_target(man, layer);
 end
 
 function Ranger.Nodes.exit_node(layer::GameLayer, man::NodeManager)
     println("exit ", layer);
-    unregister_target(man, layer);
-    unregister_event_target(man, layer);
+    Nodes.unregister_target(man, layer);
+    Nodes.unregister_event_target(man, layer);
 end
 
 # --------------------------------------------------------
@@ -83,5 +109,14 @@ end
 function Ranger.Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     println("io_event ", event)
     
-    set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
+    node.angle += 1.0
+    Nodes.set_rotation_in_degrees!(node.out_rect, node.angle)
+    # Nodes.set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
+end
+
+# --------------------------------------------------------
+# Grouping
+# --------------------------------------------------------
+function Ranger.Nodes.get_children(node::GameLayer)
+    node.children
 end

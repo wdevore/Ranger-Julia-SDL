@@ -1,13 +1,13 @@
 
 mutable struct SceneBoot <: Ranger.AbstractScene
-    base::NodeData
+    base::Nodes.NodeData
 
     replacement::Ranger.AbstractScene
 
     function SceneBoot(world::Ranger.World, name::String, replacement::Ranger.AbstractScene)
         obj = new()
 
-        obj.base = NodeData(gen_id(world), name, NodeNil())
+        obj.base = Nodes.NodeData(gen_id(world), name, Nodes.NodeNil())
         obj.replacement = replacement
 
         obj
@@ -18,7 +18,7 @@ end
 # Transitioning
 # --------------------------------------------------------
 function Ranger.Nodes.transition(node::SceneBoot)
-    REPLACE_TAKE
+    Scenes.REPLACE_TAKE
 end
 
 function Ranger.Nodes.get_replacement(node::SceneBoot)

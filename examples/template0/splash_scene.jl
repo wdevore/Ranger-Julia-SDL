@@ -1,8 +1,8 @@
 
 mutable struct SplashScene <: Ranger.AbstractScene
-    base::NodeData
-    transform::TransformProperties{Float64}
-    transitioning::TransitionProperties
+    base::Nodes.NodeData
+    transform::Nodes.TransformProperties{Float64}
+    transitioning::Nodes.TransitionProperties
 
     replacement::Ranger.AbstractScene
 
@@ -12,10 +12,10 @@ mutable struct SplashScene <: Ranger.AbstractScene
         obj = new()
 
         # We use "obj" to represent a lack of parent.
-        obj.base = NodeData(gen_id(world), name, NodeNil())
+        obj.base = Nodes.NodeData(gen_id(world), name, Nodes.NodeNil())
         obj.replacement = replacement   # default to self/obj = No replacement present
-        obj.transitioning = TransitionProperties()
-        obj.transform = TransformProperties{Float64}()
+        obj.transitioning = Nodes.TransitionProperties()
+        obj.transform = Nodes.TransformProperties{Float64}()
         obj.mesh = Geometry.Mesh()
 
         obj
@@ -53,10 +53,10 @@ end
 # Visits
 # --------------------------------------------------------
 function Ranger.Nodes.draw(node::SplashScene, context::Rendering.RenderContext)
-    if is_dirty(node)
+    if Nodes.is_dirty(node)
         # Transform this node's vertices using the context
         Rendering.transform!(context, node.mesh)
-        set_dirty!(node, false)
+        Nodes.set_dirty!(node, false)
     end
 
     # Draw background
@@ -72,19 +72,19 @@ end
 function Ranger.Nodes.enter_node(node::SplashScene, man::NodeManager)
     println("enter ", node);
     # Register node as a timing target in order to receive updates
-    register_target(man, node);
+    Nodes.register_target(man, node);
 end
 
 function Ranger.Nodes.exit_node(node::SplashScene, man::NodeManager)
     println("exit ", node);
-    unregister_target(man, node);
+    Nodes.unregister_target(man, node);
 end
 
 function Ranger.Nodes.transition(node::SplashScene)
-    if ready(node.transitioning)
-        REPLACE_TAKE
+    if Nodes.ready(node.transitioning)
+        Scenes.REPLACE_TAKE
     else
-        NO_ACTION
+        Scenes.NO_ACTION
     end
 end
 

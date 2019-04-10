@@ -7,18 +7,16 @@ using SimpleDirectMediaLayer:
 export 
     RenderContext,
     save, restore, post, pre, apply!,
-    render_line, render_lines, render_aa_rectangle
+    render_line, render_lines, render_aa_rectangle, render_outlined_polygon
 
-using .Rendering:
-    Palette, get_glyph, get_glyph_width,
-    DarkGray, Orange
-
+using .Rendering
 using ..Math
 using ..Geometry
 
 import ..Math.transform!
 
 @enum RenderStyle FILLED OUTLINE BOTH
+@enum PolygonState OPEN CLOSED
 
 mutable struct RenderContext
     renderer::Ptr{Renderer}
@@ -42,8 +40,13 @@ mutable struct RenderContext
     # view space to device-space projection
     view_space::Math.AffineTransform
 
+    # Scratch working variables
+    v1::Geometry.Point{Float64}
+    v2::Geometry.Point{Float64}
+
     function RenderContext(world::Ranger.World)
         o = new()
+        
         o.renderer = world.renderer
         o.state = []
         o.stack_top = 1
@@ -51,9 +54,14 @@ mutable struct RenderContext
         o.draw_color = White()
         o.width = world.window_width
         o.height = world.window_height
+        
         o.current = AffineTransform{Float64}()
         o.post = AffineTransform{Float64}()
         o.view_space = AffineTransform{Float64}()
+
+        o.v1 = Geometry.Point{Float64}()
+        o.v2 = Geometry.Point{Float64}()
+
         o
     end
 end
@@ -155,7 +163,18 @@ function post(context::RenderContext)
     SDL2.RenderPresent(context.renderer);
 end
 
-function transform!(context::RenderContext, vertices::Array{Point{Float64},1}, bucket::Array{Point{Float64},1})
+# Transform a Point
+function transform!(context::RenderContext, p::Geometry.Point{Float64}, out::Geometry.Point{Float64})
+    Math.transform!(context.current, p, out)
+end
+
+# Transform a line or rectangle corners
+function transform!(context::RenderContext, p1::Geometry.Point{Float64}, p2::Geometry.Point{Float64}, out1::Geometry.Point{Float64}, out2::Geometry.Point{Float64})
+    Math.transform!(context.current, p1, out1)
+    Math.transform!(context.current, p2, out2)
+end
+
+function transform!(context::RenderContext, vertices::Array{Geometry.Point{Float64},1}, bucket::Array{Point{Float64},1})
     for (idx, vertex) in enumerate(vertices)
         Math.transform!(context.current, vertex, bucket[idx])
     end
@@ -164,6 +183,12 @@ end
 function transform!(context::RenderContext, mesh::Geometry.Mesh)
     for (idx, vertex) in enumerate(mesh.vertices)
         Math.transform!(context.current, vertex, mesh.bucket[idx])
+    end
+end
+
+function transform!(context::RenderContext, polygon::Math.Polygon)
+    for (idx, vertex) in enumerate(polygon.mesh.vertices)
+        Math.transform!(context.current, vertex, polygon.mesh.bucket[idx])
     end
 end
 
@@ -315,20 +340,19 @@ end
 
 function render_lines(context::RenderContext, mesh::Geometry.Mesh)
     first = true
-    v1 = Point{Float64}()
-    v2 = Point{Float64}()
         
     for v in mesh.bucket
         if first
-            v1 = v
+            context.v1 = v
             first = false
             continue
         else
-            v2 = v
+            context.v2 = v
             first = true
         end
 
-        draw_line(context, Int32(round(v1.x)), Int32(round(v1.y)), Int32(round(v2.x)), Int32(round(v2.y)));
+        draw_line(context, Int32(round(context.v1.x)), Int32(round(context.v1.y)),
+            Int32(round(context.v2.x)), Int32(round(context.v2.y)));
     end
 end
 
@@ -337,18 +361,16 @@ function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh, oddCol
     flip = false
     vertices = mesh.bucket
     build = true
-    v1 = Point{Float64}()
-    v2 = Point{Float64}()
         
     # TODO detect negative change in X so that the flip value
     # alternates correctly for even grid sizes. To lazy to fix at the moment.
     for (idx, vertex) in enumerate(mesh.bucket)
         if build
-            Geometry.set!(v1, vertex)
+            Geometry.set!(context.v1, vertex)
             build = false
             continue
         else
-            Geometry.set!(v2, vertex)
+            Geometry.set!(context.v2, vertex)
             build = true
         end
 
@@ -359,12 +381,12 @@ function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh, oddCol
         end
         
         # upper-left
-        minx = Int32(round(v1.x))
-        miny = Int32(round(v1.y))
+        minx = Int32(round(context.v1.x))
+        miny = Int32(round(context.v1.y))
 
         # bottom-right
-        maxx = Int32(round(v2.x))
-        maxy = Int32(round(v2.y))
+        maxx = Int32(round(context.v2.x))
+        maxy = Int32(round(context.v2.y))
 
         rect_draw.x = minx
         rect_draw.y = miny
@@ -379,16 +401,14 @@ end
 
 # Render an axis aligned rectangle. Rotating any of the vertices
 # will cause strange rendering behaviours
-function render_aa_rectangle(context::RenderContext, mesh::Geometry.Mesh, fillStyle::RenderStyle)
-    vertices = mesh.bucket
-    
+function render_aa_rectangle(context::RenderContext, min::Geometry.Point{Float64}, max::Geometry.Point{Float64}, fillStyle::RenderStyle)
     # upper-left
-    minx = Int32(round(vertices[1].x))
-    miny = Int32(round(vertices[1].y))
+    minx = Int32(round(min.x))
+    miny = Int32(round(min.y))
 
     # bottom-right
-    maxx = Int32(round(vertices[2].x))
-    maxy = Int32(round(vertices[2].y))
+    maxx = Int32(round(max.x))
+    maxy = Int32(round(max.y))
 
     if fillStyle == FILLED
         draw_filled_rectangle(context, minx, miny, maxx, maxy)
@@ -397,5 +417,24 @@ function render_aa_rectangle(context::RenderContext, mesh::Geometry.Mesh, fillSt
     else
         draw_filled_rectangle(context, minx, miny, maxx, maxy)
         draw_outlined_rectangle(context, minx, miny, maxx, maxy)
+    end
+end
+
+function render_outlined_polygon(context::RenderContext, polygon::Geometry.Polygon, state::PolygonState)
+    bucs = polygon.mesh.bucket
+    first = true
+
+    for idx in 1:(length(bucs)-1)
+        SDL2.RenderDrawLine(
+            context.renderer,
+            Int32(round(bucs[idx].x)), Int32(round(bucs[idx].y)),
+            Int32(round(bucs[idx+1].x)), Int32(round(bucs[idx+1].y)))
+    end
+
+    if state == CLOSED
+        SDL2.RenderDrawLine(
+            context.renderer,
+            Int32(round(bucs[length(bucs)].x)), Int32(round(bucs[length(bucs)].y)),
+            Int32(round(bucs[1].x)), Int32(round(bucs[1].y)))
     end
 end

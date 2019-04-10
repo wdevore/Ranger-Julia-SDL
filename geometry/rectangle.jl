@@ -1,8 +1,9 @@
 using Base: min, max
 
-export Rectangle
-export set!, intersect!, intersects
-export bounds!, contains_point
+export
+    Rectangle,
+    set!, intersect!, intersects,
+    bounds!, contains_point
 
 # A two-dimensional axis-aligned rectangle.
 #
@@ -20,9 +21,9 @@ export bounds!, contains_point
 #              Right(X)/Bottom(Y)
 #
 mutable struct Rectangle{T <: AbstractFloat}
-  # Top-left corner
+    # Top-left corner
     min::Point{T}
-  # Bottom-right corner
+    # Bottom-right corner
     max::Point{T}
   
     width::T
@@ -67,9 +68,9 @@ end
 
 function intersects(rectA::Rectangle{T}, rectB::Rectangle{T}) where {T <: AbstractFloat}
     rectA.min.x <= rectB.min.x + rectB.width &&
-  rectB.min.x <= rectA.min.x + rectA.width &&
-  rectA.max.y <= rectB.max.y + rectB.height &&
-  rectB.max.y <= rectA.max.y + rectA.height
+    rectB.min.x <= rectA.min.x + rectA.width &&
+    rectA.max.y <= rectB.max.y + rectB.height &&
+    rectB.max.y <= rectA.max.y + rectA.height
 end
 
 # Returns a new rectangle which completely contains `rectA` and `rectB`.

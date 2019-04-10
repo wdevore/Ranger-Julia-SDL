@@ -49,7 +49,7 @@ end
 function Nodes.draw(node::VectorTextNode, context::Rendering.RenderContext)
     # Transform this node's vertices using the context
     if Nodes.is_dirty(node)
-        Math.transform!(context, node.mesh)
+        Rendering.transform!(context, node.mesh)
         Nodes.set_dirty!(node, false)
     end
 
