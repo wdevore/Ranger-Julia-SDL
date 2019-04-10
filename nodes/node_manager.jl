@@ -85,10 +85,14 @@ function visit(man::NodeManager, interpolation::Float64)
     if action == REPLACE_TAKE
         repl = get_replacement(man.stack.running_node)
         replace(man.stack, repl)
-    else
-        # Visit the running node
-        visit(man.stack.running_node, man.context, interpolation)
+
+        if has_next_node(man.stack)
+            set_next_node(man)
+        end
     end
+
+    # Visit the running node
+    visit(man.stack.running_node, man.context, interpolation)
 
     restore(man.context)
 
