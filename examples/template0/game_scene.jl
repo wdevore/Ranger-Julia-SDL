@@ -1,6 +1,5 @@
 
-using .Ranger.Custom:
-    CrossNode
+using .Ranger.Custom
 
 mutable struct GameScene <: Ranger.AbstractScene
     base::NodeData
@@ -28,8 +27,15 @@ function build(scene::GameScene, world::Ranger.World)
     push!(scene.children, layer)
     build(layer, world);
 
-    cross = CrossNode(world, "CrossNode", scene)
+    cross = Custom.CrossNode(world, "CrossNode", scene)
     push!(scene.children, cross)
+
+    text = Custom.VectorTextNode(world, "VectorTextNode", scene)
+    set_scale!(text, 50.0)
+    set_rotation_in_degrees!(text, 45.0)
+    text.color = GameData.orange
+    Custom.set_text!(text, GameData.vector_font, "RANGER IS A GO!")
+    push!(scene.children, text)
 
     # Note: If you apply a scale that is the size of the view-space
     # then the rest of your code will need to define all mesh data

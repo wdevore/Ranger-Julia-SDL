@@ -11,7 +11,7 @@ using .Ranger.Nodes:
     register_event_target, unregister_event_target,
     has_parent, is_dirty, set_dirty!, ready,
     TransformProperties, TransitionProperties,
-    set_nonuniform_scale!, set_position!,
+    set_nonuniform_scale!, set_position!, set_scale!, set_rotation_in_degrees!,
     calc_transform!,
     print_tree
 
@@ -32,6 +32,9 @@ module GameData
     white = Rendering.White()
     darkgray = Rendering.DarkGray()
     lightgray = Rendering.LightGray()
+
+    vector_font = Rendering.VectorFont()
+    Rendering.build_font!(vector_font)
 end
 
 using .GameData

@@ -6,17 +6,17 @@ using SimpleDirectMediaLayer:
 
 export 
     RenderContext,
-    save, restore, post, pre, apply!
+    save, restore, post, pre, apply!,
+    render_line, render_lines, render_aa_rectangle
 
 using .Rendering:
     Palette, get_glyph, get_glyph_width,
     DarkGray, Orange
 
 using ..Math
+using ..Geometry
 
 import ..Math.transform!
-
-using ..Geometry
 
 @enum RenderStyle FILLED OUTLINE BOTH
 
@@ -279,9 +279,9 @@ function draw_checkerboard(context::RenderContext)
     col = 0
     row = 0
 
-    while row < context.height 
-        while col < context.width 
-            if flip 
+    while row < context.height
+        while col < context.width
+            if flip
                 SDL2.SetRenderDrawColor(context.renderer, 100, 100, 100, 255)
             else 
                 SDL2.SetRenderDrawColor(context.renderer, 80, 80, 80, 255)
@@ -308,6 +308,30 @@ end
 # Render functions render based on transformed vertices
 # The Render functions use the Draw functions.
 # ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.
+function render_line(context::RenderContext, x1::Float64, y1::Float64, x2::Float64, y2::Float64)
+    draw_line(context, Int32(round(x1)), Int32(round(y1)), Int32(round(x2)), Int32(round(y2)));
+end
+
+
+function render_lines(context::RenderContext, mesh::Geometry.Mesh)
+    first = true
+    v1 = Point{Float64}()
+    v2 = Point{Float64}()
+        
+    for v in mesh.bucket
+        if first
+            v1 = v
+            first = false
+            continue
+        else
+            v2 = v
+            first = true
+        end
+
+        draw_line(context, Int32(round(v1.x)), Int32(round(v1.y)), Int32(round(v2.x)), Int32(round(v2.y)));
+    end
+end
+
 function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh, oddColor::Palette, evenColor::Palette)
     # render a grid of rectangles defined by min/max points
     flip = false
@@ -315,7 +339,7 @@ function render_checkerboard(context::RenderContext, mesh::Geometry.Mesh, oddCol
     build = true
     v1 = Point{Float64}()
     v2 = Point{Float64}()
-    
+        
     # TODO detect negative change in X so that the flip value
     # alternates correctly for even grid sizes. To lazy to fix at the moment.
     for (idx, vertex) in enumerate(mesh.bucket)

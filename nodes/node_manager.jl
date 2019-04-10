@@ -86,6 +86,7 @@ function visit(man::NodeManager, interpolation::Float64)
         repl = get_replacement(man.stack.running_node)
         replace(man.stack, repl)
 
+        # Immediately switch to the new runner
         if has_next_node(man.stack)
             set_next_node(man)
         end
