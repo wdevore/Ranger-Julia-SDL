@@ -1,3 +1,5 @@
+export Geometry
+
 module Geometry
 
 include("point.jl")

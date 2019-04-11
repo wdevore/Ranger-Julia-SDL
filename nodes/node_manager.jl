@@ -5,27 +5,13 @@ export
     register_target, unregister_target,
     register_event_target, unregister_event_target
 
-using ..Rendering:
-    RenderContext,
-    save, restore, pre, post,
-    initialize
+using ..Rendering
+using ...Ranger
+using .Nodes
+using .Scenes
+using ..Events
 
-using ...Ranger:
-    World, AbstractNode
-
-using .Nodes:
-    NodeStack,
-    has_running_node, has_next_node, set_running_node,
-    transition
-
-using .Scenes:
-    REPLACE_TAKE, NO_ACTION
-
-using ..Events:
-    KeyboardEvent, MouseEvent
-
-import .Nodes:
-    visit
+import .Nodes.visit
 
 mutable struct NodeManager
     clear_background::Bool
@@ -35,21 +21,21 @@ mutable struct NodeManager
     # A stack of nodes
     stack::NodeStack
 
-    timing_targets::Array{AbstractNode,1}
-    event_targets::Array{AbstractNode,1}
+    timing_targets::Array{Ranger.AbstractNode,1}
+    event_targets::Array{Ranger.AbstractNode,1}
 
-    function NodeManager(world::World)
+    function NodeManager(world::Ranger.World)
         o = new()
         
         o.clear_background = true
 
-        o.context = RenderContext(world)
-        initialize(o.context, world)
+        o.context = Rendering.RenderContext(world)
+        Rendering.initialize(o.context, world)
 
-        o.stack = NodeStack()
+        o.stack = Nodes.NodeStack()
 
-        o.timing_targets = Array{AbstractNode,1}[]
-        o.event_targets = Array{AbstractNode,1}[]
+        o.timing_targets = Array{Ranger.AbstractNode,1}[]
+        o.event_targets = Array{Ranger.AbstractNode,1}[]
 
         o
     end
@@ -61,65 +47,65 @@ function pre_visit(man::NodeManager)
     if man.clear_background
         # If vsync is enabled then this takes nearly 1/fps milliseconds.
         # For example, 60fps -> 1/60 = ~16.666ms
-        pre(man.context)
+        Rendering.pre(man.context)
     end
 end
 
 function visit(man::NodeManager, interpolation::Float64)
-    if is_empty(man.stack)
+    if Nodes.is_empty(man.stack)
         println("NodeManager: no more nodes to visit.")
         return false
     end
 
-    if has_next_node(man.stack)
-        set_next_node(man)
+    if Nodes.has_next_node(man.stack)
+        Nodes.set_next_node(man)
     end
 
     # This will save view-space matrix
-    save(man.context)
+    Rendering.save(man.context)
 
     # If mouse coords changed then update view coords.
     # self.global_data.update_view_coords(&mut self.context);
-    action = transition(man.stack.running_node)
+    action = Nodes.transition(man.stack.running_node)
 
-    if action == REPLACE_TAKE
-        repl = get_replacement(man.stack.running_node)
-        replace(man.stack, repl)
+    if action == Scenes.REPLACE_TAKE
+        repl = Nodes.get_replacement(man.stack.running_node)
+        Nodes.replace(man.stack, repl)
 
         # Immediately switch to the new runner
-        if has_next_node(man.stack)
-            set_next_node(man)
+        if Nodes.has_next_node(man.stack)
+            Nodes.set_next_node(man)
         end
     end
 
     # Visit the running node
-    visit(man.stack.running_node, man.context, interpolation)
+    Nodes.visit(man.stack.running_node, man.context, interpolation)
 
-    restore(man.context)
+    Rendering.restore(man.context)
 
     true # continue to draw.
 end
 
 function post_visit(man::NodeManager)
-    post(man.context);
+    Rendering.post(man.context);
 end
 
 function set_next_node(man::NodeManager)
-    if has_running_node(man.stack)
+    if Nodes.has_running_node(man.stack)
         exit_nodes(man.stack.running_node, man)
     end
 
-    set_running_node(man.stack)
+    Nodes.set_running_node(man.stack)
 
-    set_next_node_nil(man.stack)
+    Nodes.set_next_node_nil(man.stack)
 
     println("Running node ", man.stack.running_node)
 
     enter_nodes(man.stack.running_node, man);
 end
 
-function enter_nodes(node::AbstractNode, man::NodeManager)
-    enter_node(node, man)
+function enter_nodes(node::Ranger.AbstractNode, man::NodeManager)
+    Nodes.enter_node(node, man)
 
     children = get_children(node)
     if children ≠ nothing
@@ -129,7 +115,7 @@ function enter_nodes(node::AbstractNode, man::NodeManager)
     end
 end
 
-function exit_nodes(node::AbstractNode, man::NodeManager)
+function exit_nodes(node::Ranger.AbstractNode, man::NodeManager)
     exit_node(node, man)
 
     children = get_children(node)
@@ -141,13 +127,13 @@ function exit_nodes(node::AbstractNode, man::NodeManager)
 end
 
 function pop_node(man::NodeManager)
-    pop(man.stack);
+    Nodes.pop(man.stack);
 end
 
-function push_node(man::NodeManager, node::AbstractNode)
+function push_node(man::NodeManager, node::Ranger.AbstractNode)
     man.stack.next_node = node
     println("Pushing : ", node)
-    push(man.stack, node);
+    Nodes.push(man.stack, node);
 end
 
 # --------------------------------------------------------------------------
@@ -156,16 +142,16 @@ end
 function update(man::NodeManager, dt::Float64)
     # println("NodeManager::update")
     for target in man.timing_targets
-        update(target, dt)
+        Nodes.update(target, dt)
     end
 end
 
-function register_target(man::NodeManager, target::AbstractNode)
+function register_target(man::NodeManager, target::Ranger.AbstractNode)
     println("Register ", target, " target")
     push!(man.timing_targets, target);
 end
 
-function unregister_target(man::NodeManager, target::AbstractNode)
+function unregister_target(man::NodeManager, target::Ranger.AbstractNode)
     idx = findfirst(isequal(target), man.timing_targets)
     if idx ≠ nothing
         println("UnRegistering idx:(", idx, ") ", man.timing_targets[idx], " target");
@@ -178,12 +164,12 @@ end
 # --------------------------------------------------------------------------
 # IO events
 # --------------------------------------------------------------------------
-function register_event_target(man::NodeManager, target::AbstractNode)
+function register_event_target(man::NodeManager, target::Ranger.AbstractNode)
     println("Register ", target, " event target")
     push!(man.event_targets, target);
 end
 
-function unregister_event_target(man::NodeManager, target::AbstractNode)
+function unregister_event_target(man::NodeManager, target::Ranger.AbstractNode)
     idx = findfirst(isequal(target), man.event_targets)
     if idx ≠ nothing
         println("UnRegistering idx:(", idx, ") ", man.event_targets[idx], " event target");
@@ -193,13 +179,13 @@ function unregister_event_target(man::NodeManager, target::AbstractNode)
     end
 end
 
-function route_events(man::NodeManager, keyboard::KeyboardEvent)
+function route_events(man::NodeManager, keyboard::Events.KeyboardEvent)
     # println(keyboard)
     for target in man.event_targets
-        io_event(target, keyboard)
+        Nodes.io_event(target, keyboard)
     end
 end
 
-function route_events(man::NodeManager, mouse::MouseEvent)
+function route_events(man::NodeManager, mouse::Events.MouseEvent)
     println(mouse)
 end

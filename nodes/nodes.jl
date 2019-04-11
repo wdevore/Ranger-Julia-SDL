@@ -1,11 +1,9 @@
+export Nodes
+
 # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
 # Nodes API interface
 # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
 module Nodes
-
-export
-    Nodes,
-    enter_node
 
 export 
     visit, enter_node, exit_node,
@@ -13,10 +11,6 @@ export
 
 using ..Geometry
 using ..Ranger
-
-using ..Math:
-    AffineTransform,
-    to_identity!, make_translate!, rotate!, scale!, invert!, copy
 
 using Base.Math:
     deg2rad, rad2deg

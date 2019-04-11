@@ -1,3 +1,5 @@
+export Rendering
+
 module Rendering
 
 using ..Ranger

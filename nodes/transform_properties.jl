@@ -1,19 +1,21 @@
 export TransformProperties
 
+using ..Math
+
 mutable struct TransformProperties{T <: AbstractFloat}
     position::Point{T}
     rotation::T       # radians
     scale::Point{T}
 
-    aft::AffineTransform{T}
-    inverse::AffineTransform{T}
+    aft::Math.AffineTransform{T}
+    inverse::Math.AffineTransform{T}
 
     function TransformProperties{T}() where {T <: AbstractFloat}
         new(Point{T}(),
             0.0,
             Point{T}(1.0, 1.0),
-            AffineTransform{T}(),
-            AffineTransform{T}())
+            Math.AffineTransform{T}(),
+            Math.AffineTransform{T}())
     end
 end
 
@@ -45,7 +47,7 @@ end
 
 function calc_filtered_transform!(prop::TransformProperties{T},
     exclude_translation::Bool, exclude_rotation::Bool, exclude_scale::Bool,
-    aft::AffineTransform{T},
+    aft::Math.AffineTransform{T},
 ) where {T <: AbstractFloat}
     to_identity!(aft)
 

@@ -422,7 +422,6 @@ end
 
 function render_outlined_polygon(context::RenderContext, polygon::Geometry.Polygon, state::PolygonState)
     bucs = polygon.mesh.bucket
-    first = true
 
     for idx in 1:(length(bucs)-1)
         SDL2.RenderDrawLine(

@@ -54,14 +54,26 @@ function build(layer::GameLayer, world::Ranger.World)
     Nodes.set_position!(layer.out_rect, -100.0, -100.0)
     layer.out_rect.color = GameData.red
     push!(layer.children, layer.out_rect);
+
+    tri = Custom.OutlinedTriangle(world, "OutlinedTriangle", layer)
+    Custom.set!(tri,
+        Geometry.Point{Float64}(-0.5, 0.5),
+        Geometry.Point{Float64}(0.5, 0.5),
+        Geometry.Point{Float64}(0.0, -0.5))
+    Nodes.set_scale!(tri, 50.0)
+    Nodes.set_position!(tri, 100.0, -100.0)
+    tri.color = GameData.yellow
+    push!(layer.children, tri);
 end
 
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
-# function Ranger.Nodes.update(layer::GameLayer, dt::Float64)
-#     # println("GameLayer::update : ", layer)
-# end
+function Ranger.Nodes.update(layer::GameLayer, dt::Float64)
+    # println("GameLayer::update : ", layer)
+    layer.angle += 1.0
+    Nodes.set_rotation_in_degrees!(layer.out_rect, layer.angle)
+end
 
 # --------------------------------------------------------
 # Visits
@@ -109,8 +121,8 @@ end
 function Ranger.Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     println("io_event ", event)
     
-    node.angle += 1.0
-    Nodes.set_rotation_in_degrees!(node.out_rect, node.angle)
+    # node.angle += 1.0
+    # Nodes.set_rotation_in_degrees!(node.out_rect, node.angle)
     # Nodes.set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
 end
 
