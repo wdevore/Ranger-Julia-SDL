@@ -45,7 +45,7 @@ function run(world::Ranger.World)
     # println("ns_per_update: ", ns_per_update, "ns")
 
     frame_dt = Float64(ns_per_update) / 1000000.0
-    println("frame_dt: ", frame_dt, "ms")
+    println("Frame period: ", frame_dt, "ms")
 
     lag = 0
 
@@ -60,6 +60,7 @@ function run(world::Ranger.World)
     render_elapsed_cnt = 0
 
     keyboard = Events.KeyboardEvent()
+    mouse = Events.MouseEvent()
 
     # Main game loop
     while running
@@ -85,15 +86,16 @@ function run(world::Ranger.World)
                         continue
                     end
 
-                    keyboard.keycode = keySym
-                    keyboard.scancode = Events.get_scancode(event)
-                    keyboard.modifier = Events.get_modifier(event)
-                    keyboard.repeat = Events.get_repeat(event)
+                    Events.set!(keyboard, event)
     
                     # Route event to registered Nodes
                     Nodes.route_events(manager, keyboard)
+                elseif ev_type == SDL2.MOUSEMOTION
+                    # Events.print_mouse_event(event)
+                    Events.set!(mouse, event)
+
+                    Nodes.route_events(manager, mouse)
                 end
-                # print_event(event)
             end
         end        
 

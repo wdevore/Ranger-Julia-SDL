@@ -8,7 +8,7 @@ const SDL2 = SimpleDirectMediaLayer
 export
     KeyboardEvent, MouseEvent,
     get_key_code_sym, get_scancode, get_modifier, get_repeat,
-    poll_event!, get_event_type
+    poll_event!, get_event_type, set!
 
 using ..Ranger
 
@@ -95,7 +95,7 @@ function print_key_event_sym(event::Array{UInt8})
     println("mod: ($mod) ", to_hex(mod));
 end
 
-function print_event(event::Array{UInt8})
+function print_keyboard_event(event::Array{UInt8})
     println("*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--")
     println("event: ", event[1:31])
     println("f-type:     ", event[1:4])   # Ex: SDL2.KEYDOWN
@@ -112,6 +112,40 @@ function print_event(event::Array{UInt8})
     println("--------------------------------------------------------------")
 end
 
+function print_mouse_event(event::Array{UInt8})
+    # mutable struct MouseMotionEvent <: AbstractEvent
+    #     _type::Uint32        1:4
+    #     timestamp::Uint32    5:8
+    #     windowID::Uint32     9:12
+    #     which::Uint32        13:16 
+    #     state::Uint32
+    #     x::Sint32
+    #     y::Sint32
+    #     xrel::Sint32
+    #     yrel::Sint32
+    # end
+    println("*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--")
+    println("event: ", event[1:36])
+
+    type = extract_4byte_host(1, event)
+    which = extract_4byte_host(13, event)
+    state = extract_4byte_host(17, event)
+    x = extract_4byte_host(21, event)
+    y = extract_4byte_host(25, event)
+    xrel = extract_4byte_host(29, event)
+    yrel = extract_4byte_host(33, event)
+
+    println("m-type:     ", event[1:4], " <= ", type)   # Ex: SDL2.MOUSEMOTION
+    println("m-which:    ", event[13:16], " <= ", which)
+    println("m-state:    ", event[17:20], " <= ", state)
+    println("m-x:        ", event[21:24], " <= ", signed(x))
+    println("m-y:        ", event[25:28], " <= ", signed(y))
+    println("m-xrel:     ", event[29:32], " <= ", signed(xrel))
+    println("m-yrel:     ", event[33:36], " <= ", signed(yrel))
+
+    println("--------------------------------------------------------------")
+end
+
 mutable struct KeyboardEvent <: Ranger.AbstractIOEvent
     keycode::UInt32
     scancode::UInt32
@@ -123,6 +157,33 @@ mutable struct KeyboardEvent <: Ranger.AbstractIOEvent
     end
 end
 
-struct MouseEvent <: Ranger.AbstractIOEvent end
+function set!(keyboard::KeyboardEvent, event::Array{UInt8,1})
+    keyboard.keycode = get_key_code_sym(event)
+    keyboard.scancode = get_scancode(event)
+    keyboard.modifier = get_modifier(event)
+    keyboard.repeat = get_repeat(event)
+end
+
+mutable struct MouseEvent <: Ranger.AbstractIOEvent
+    which::UInt32
+    state::UInt32
+    x::Int32
+    y::Int32
+    xrel::Int32
+    yrel::Int32
+
+    function MouseEvent()
+        new(0, 0, 0, 0, 0, 0)
+    end
+end
+
+function set!(mouse::MouseEvent, event::Array{UInt8,1})
+    mouse.which = extract_4byte_host(13, event)
+    mouse.state = extract_4byte_host(17, event)
+    mouse.x = signed(extract_4byte_host(21, event))
+    mouse.y = signed(extract_4byte_host(25, event))
+    mouse.xrel = signed(extract_4byte_host(29, event))
+    mouse.yrel = signed(extract_4byte_host(33, event))
+end
 
 end

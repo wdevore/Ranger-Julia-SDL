@@ -8,6 +8,9 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
 
+    # Collection of nodes.
+    children::Array{Ranger.AbstractNode,1}
+
     color::Rendering.Palette
 
     polygon::Geometry.Polygon
@@ -19,6 +22,7 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
 
         o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
         o.transform = Nodes.TransformProperties{Float64}()
+        o.children = Array{Ranger.AbstractNode,1}[]
         o.color = Rendering.White()
         o.polygon = Geometry.Polygon{Float64}()
         o.angular_motion = Animation.AngularMotion{Float64}()
@@ -85,3 +89,9 @@ function set!(node::OrbitSystemNode, minx::Float64, miny::Float64, maxx::Float64
     Nodes.set_dirty!(node, true)
 end
 
+# --------------------------------------------------------
+# Grouping
+# --------------------------------------------------------
+function Nodes.get_children(node::OrbitSystemNode)
+    node.children
+end

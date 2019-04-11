@@ -187,5 +187,7 @@ function route_events(man::NodeManager, keyboard::Events.KeyboardEvent)
 end
 
 function route_events(man::NodeManager, mouse::Events.MouseEvent)
-    println(mouse)
+    for target in man.event_targets
+        Nodes.io_event(target, mouse)
+    end
 end
