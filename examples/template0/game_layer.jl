@@ -12,7 +12,6 @@ mutable struct GameLayer <: Ranger.AbstractNode
     buc_max::Geometry.Point{Float64}
 
     orbit_system::OrbitSystemNode
-    angle::Float64
     solid_yellow_rect::Custom.AARectangle
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
@@ -26,8 +25,6 @@ mutable struct GameLayer <: Ranger.AbstractNode
         o.max = Geometry.Point{Float64}()
         o.buc_min = Geometry.Point{Float64}()
         o.buc_max = Geometry.Point{Float64}()
-
-        o.angle = 0.0
 
         o
     end
@@ -43,14 +40,8 @@ function build(layer::GameLayer, world::Ranger.World)
     # bottom-right
     Geometry.set!(layer.max, hw, hh)
 
-    solid_yellow_rect = Custom.AARectangle(world, "YellowAARectangle", layer)
-    layer.solid_yellow_rect = solid_yellow_rect
-    Custom.set_min!(solid_yellow_rect, 200.0, 200.0)
-    Custom.set_max!(solid_yellow_rect, 400.0, 400.0)
-    solid_yellow_rect.color = RangerGame.yellow
-    push!(layer.children, solid_yellow_rect);
-    
     layer.orbit_system = OrbitSystemNode(world, "OrbitSystemNode", layer)
+    build(layer.orbit_system, world)
     set!(layer.orbit_system, -0.5, -0.5, 0.5, 0.5)
     Nodes.set_scale!(layer.orbit_system, 100.0)
     Nodes.set_position!(layer.orbit_system, -100.0, -100.0)
@@ -66,6 +57,13 @@ function build(layer::GameLayer, world::Ranger.World)
     Nodes.set_position!(tri, 100.0, -100.0)
     tri.color = RangerGame.yellow
     push!(layer.children, tri);
+
+    solid_yellow_rect = Custom.AARectangle(world, "YellowAARectangle", layer)
+    layer.solid_yellow_rect = solid_yellow_rect
+    Custom.set_min!(solid_yellow_rect, 200.0, 200.0)
+    Custom.set_max!(solid_yellow_rect, 400.0, 400.0)
+    solid_yellow_rect.color = RangerGame.yellow
+    push!(layer.children, solid_yellow_rect);
 end
 
 # --------------------------------------------------------
@@ -73,8 +71,6 @@ end
 # --------------------------------------------------------
 function Nodes.update(layer::GameLayer, dt::Float64)
     # println("GameLayer::update : ", layer)
-    layer.angle += 1.0
-    Nodes.set_rotation_in_degrees!(layer.orbit_system, layer.angle)
 end
 
 # --------------------------------------------------------
@@ -125,8 +121,6 @@ function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     
     rect = node.solid_yellow_rect
     Nodes.set_position!(rect, rect.transform.position.x + 1.0, rect.transform.position.y)
-    # node.angle += 1.0
-    # Nodes.set_rotation_in_degrees!(node.out_rect, node.angle)
     # Nodes.set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
 end
 

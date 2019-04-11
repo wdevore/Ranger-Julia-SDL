@@ -12,7 +12,7 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
 
     polygon::Geometry.Polygon
 
-    angle::Float64
+    angular_motion::Animation.AngularMotion{Float64}
 
     function OrbitSystemNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -20,18 +20,22 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
         o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
         o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
-
         o.polygon = Geometry.Polygon{Float64}()
-
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-
-        Geometry.build!(o.polygon)
+        o.angular_motion = Animation.AngularMotion{Float64}()
 
         o
     end
+end
+
+function build(node::OrbitSystemNode, world::Ranger.World)
+    Geometry.add_vertex!(node.polygon, 0.0, 0.0)
+    Geometry.add_vertex!(node.polygon, 0.0, 0.0)
+    Geometry.add_vertex!(node.polygon, 0.0, 0.0)
+    Geometry.add_vertex!(node.polygon, 0.0, 0.0)
+
+    Geometry.build!(node.polygon)
+
+    node.angular_motion.step_value = 45.0    # ~degrees/second
 end
 
 # --------------------------------------------------------
@@ -39,8 +43,12 @@ end
 # --------------------------------------------------------
 function Nodes.update(node::OrbitSystemNode, dt::Float64)
     # println("OrbitSystemNode::update : ", layer)
-    node.angle += 1.0
-    Nodes.set_rotation_in_degrees!(node, node.angle)
+    Animation.update!(node.angular_motion, dt);
+end
+
+function Nodes.interpolate(node::OrbitSystemNode, interpolation::Float64)
+    value = Animation.interpolate!(node.angular_motion, interpolation)
+    Nodes.set_rotation_in_degrees!(node, value)
 end
 
 # --------------------------------------------------------

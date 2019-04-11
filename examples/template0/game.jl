@@ -14,7 +14,8 @@ using ..Ranger.Geometry
 using ..Ranger.Nodes
 using ..Ranger.Nodes.Scenes
 using ..Ranger.Nodes.Custom
-    
+using ..Ranger.Animation
+
 orange = Rendering.Orange()
 white = Rendering.White()
 darkgray = Rendering.DarkGray()
@@ -31,23 +32,19 @@ include("splash_scene.jl")
 include("game_layer.jl")
 include("game_scene.jl")
 
-export build, go
+export go
 
 function build(world::Ranger.World)
     println("Building: ", world.title)
     
     game = GameScene(world, "GameScene")
     build(game, world)
-        # println(game)
     
     splash = SplashScene(world, "SplashScene", game)
     build(splash, world)
     splash.transitioning.pause_for = 0.25 * 1000.0
     
-        # println(splash)
-    
     boot = SceneBoot(world, "SceneBoot", splash)
-        # println(boot)
     
     Ranger.Engine.push(boot)
     

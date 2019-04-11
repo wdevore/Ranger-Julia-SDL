@@ -45,7 +45,7 @@ function run(world::Ranger.World)
     # println("ns_per_update: ", ns_per_update, "ns")
 
     frame_dt = Float64(ns_per_update) / 1000000.0
-    # println("frame_dt: ", frame_dt, "ms")
+    println("frame_dt: ", frame_dt, "ms")
 
     lag = 0
 

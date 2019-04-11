@@ -6,7 +6,7 @@
 
 include("../../ranger.jl")
 
-include("build.jl")
+include("game.jl")
 
 using .RangerGame
 

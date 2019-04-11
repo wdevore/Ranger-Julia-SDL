@@ -46,9 +46,9 @@ function set_nonuniform_scale!(prop::TransformProperties{T}, sx::T, sy::T) where
 end
 
 function calc_filtered_transform!(prop::TransformProperties{T},
-    exclude_translation::Bool, exclude_rotation::Bool, exclude_scale::Bool,
-    aft::Math.AffineTransform{T},
-) where {T <: AbstractFloat}
+        exclude_translation::Bool, exclude_rotation::Bool, exclude_scale::Bool,
+        aft::Math.AffineTransform{T},
+    ) where {T <: AbstractFloat}
     to_identity!(aft)
 
     if !exclude_translation 
@@ -65,8 +65,6 @@ function calc_filtered_transform!(prop::TransformProperties{T},
 
     nothing
 end
-
-using ..Math
 
 function calc_transform!(prop::TransformProperties{T}) where {T <: AbstractFloat}
 

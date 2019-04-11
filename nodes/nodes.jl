@@ -108,6 +108,9 @@ function draw(node::Ranger.AbstractNode, context::RenderContext)
     # println("AbstractNode::draw ", node);
 end
 
+function interpolate(node::Ranger.AbstractNode, interpolation::Float64)
+end
+
 function enter_node(node::Ranger.AbstractNode, man::NodeManager)
     # println("AbstractNode::enter ", node);
 end
@@ -144,6 +147,7 @@ function ripple_dirty!(node::Ranger.AbstractNode, dirty::Bool)
             ripple_dirty!(child, dirty)
         end
     end
+
     set_dirty!(node, dirty)
 end
 
@@ -154,6 +158,7 @@ end
 
 function set_rotation_in_degrees!(node::Ranger.AbstractNode, rotation::T) where {T <: AbstractFloat}
     node.transform.rotation = deg2rad(rotation);
+
     ripple_dirty!(node, true);
 end
 
