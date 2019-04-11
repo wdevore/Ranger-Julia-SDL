@@ -8,13 +8,9 @@ include("../../ranger.jl")
 
 include("build.jl")
 
+using .RangerGame
+
 println("Running Template 0")
 
-function go()
-    world = Ranger.Engine.initialize("Template 0", build)
-
-    Ranger.Engine.run(world);
-end
-
 # using Debugger
-go()
+RangerGame.go()

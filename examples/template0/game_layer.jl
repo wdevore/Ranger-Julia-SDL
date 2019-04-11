@@ -11,7 +11,7 @@ mutable struct GameLayer <: Ranger.AbstractNode
     buc_min::Geometry.Point{Float64}
     buc_max::Geometry.Point{Float64}
 
-    out_rect::Custom.OutlinedRectangle
+    orbit_system::OrbitSystemNode
     angle::Float64
     solid_yellow_rect::Custom.AARectangle
 
@@ -47,15 +47,15 @@ function build(layer::GameLayer, world::Ranger.World)
     layer.solid_yellow_rect = solid_yellow_rect
     Custom.set_min!(solid_yellow_rect, 200.0, 200.0)
     Custom.set_max!(solid_yellow_rect, 400.0, 400.0)
-    solid_yellow_rect.color = GameData.yellow
+    solid_yellow_rect.color = RangerGame.yellow
     push!(layer.children, solid_yellow_rect);
     
-    layer.out_rect = Custom.OutlinedRectangle(world, "RedRectangle", layer)
-    Custom.set!(layer.out_rect, -0.5, -0.5, 0.5, 0.5)
-    Nodes.set_scale!(layer.out_rect, 100.0)
-    Nodes.set_position!(layer.out_rect, -100.0, -100.0)
-    layer.out_rect.color = GameData.red
-    push!(layer.children, layer.out_rect);
+    layer.orbit_system = OrbitSystemNode(world, "OrbitSystemNode", layer)
+    set!(layer.orbit_system, -0.5, -0.5, 0.5, 0.5)
+    Nodes.set_scale!(layer.orbit_system, 100.0)
+    Nodes.set_position!(layer.orbit_system, -100.0, -100.0)
+    layer.orbit_system.color = RangerGame.red
+    push!(layer.children, layer.orbit_system);
 
     tri = Custom.OutlinedTriangle(world, "YellowTriangle", layer)
     Custom.set!(tri,
@@ -64,7 +64,7 @@ function build(layer::GameLayer, world::Ranger.World)
         Geometry.Point{Float64}(0.0, -0.5))
     Nodes.set_scale!(tri, 50.0)
     Nodes.set_position!(tri, 100.0, -100.0)
-    tri.color = GameData.yellow
+    tri.color = RangerGame.yellow
     push!(layer.children, tri);
 end
 
@@ -74,7 +74,7 @@ end
 function Nodes.update(layer::GameLayer, dt::Float64)
     # println("GameLayer::update : ", layer)
     layer.angle += 1.0
-    Nodes.set_rotation_in_degrees!(layer.out_rect, layer.angle)
+    Nodes.set_rotation_in_degrees!(layer.orbit_system, layer.angle)
 end
 
 # --------------------------------------------------------
@@ -92,25 +92,25 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
         Nodes.set_dirty!(layer, false)
     end
 
-    Rendering.set_draw_color(context, GameData.darkgray)
+    Rendering.set_draw_color(context, RangerGame.darkgray)
     # Rendering.render_aa_rectangle(context, layer.mesh, Rendering.FILLED)
     Rendering.render_aa_rectangle(context, layer.buc_min, layer.buc_max, Rendering.FILLED);
 
-    Rendering.set_draw_color(context, GameData.white)
+    Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 5, 4, false)
 end
 
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function Nodes.enter_node(layer::GameLayer, man::NodeManager)
+function Nodes.enter_node(layer::GameLayer, man::Nodes.NodeManager)
     println("enter ", layer);
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, layer)
     Nodes.register_event_target(man, layer);
 end
 
-function Nodes.exit_node(layer::GameLayer, man::NodeManager)
+function Nodes.exit_node(layer::GameLayer, man::Nodes.NodeManager)
     println("exit ", layer);
     Nodes.unregister_target(man, layer);
     Nodes.unregister_event_target(man, layer);

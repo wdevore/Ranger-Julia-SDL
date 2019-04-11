@@ -33,8 +33,8 @@ function build(scene::GameScene, world::Ranger.World)
     text = Custom.VectorTextNode(world, "VectorTextNode", scene)
     Nodes.set_scale!(text, 25.0)
     # Nodes.set_rotation_in_degrees!(text, 45.0)
-    text.color = GameData.orange
-    Custom.set_text!(text, GameData.vector_font, "RANGER IS A GO!")
+    text.color = RangerGame.orange
+    Custom.set_text!(text, RangerGame.vector_font, "RANGER IS A GO!")
     push!(scene.children, text)
 
     # Note: If you apply a scale that is the size of the view-space

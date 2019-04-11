@@ -60,22 +60,22 @@ function Nodes.draw(node::SplashScene, context::Rendering.RenderContext)
     end
 
     # Draw background
-    Rendering.render_checkerboard(context, node.mesh, GameData.darkgray, GameData.lightgray)
+    Rendering.render_checkerboard(context, node.mesh, RangerGame.darkgray, RangerGame.lightgray)
 
-    Rendering.set_draw_color(context, GameData.white)
+    Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, node.base.name, 2, 2, false);
 end
 
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function Nodes.enter_node(node::SplashScene, man::NodeManager)
+function Nodes.enter_node(node::SplashScene, man::Nodes.NodeManager)
     println("enter ", node);
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, node);
 end
 
-function Nodes.exit_node(node::SplashScene, man::NodeManager)
+function Nodes.exit_node(node::SplashScene, man::Nodes.NodeManager)
     println("exit ", node);
     Nodes.unregister_target(man, node);
 end

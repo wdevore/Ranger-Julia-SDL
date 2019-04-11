@@ -25,7 +25,7 @@ end
 
 # Filters are special in that they overload the visit() method
 # Because this is a translate filter we "filter out" everything
-# but translation.
+# but translation component from the immediate parent.
 function Nodes.visit(node::TranslateFilter, context::Rendering.RenderContext, interpolation::Float64)
     if !Nodes.is_visible(node)
         return;
