@@ -31,7 +31,7 @@ function build(scene::GameScene, world::Ranger.World)
     push!(scene.children, cross)
 
     text = Custom.VectorTextNode(world, "VectorTextNode", scene)
-    Nodes.set_scale!(text, 50.0)
+    Nodes.set_scale!(text, 25.0)
     # Nodes.set_rotation_in_degrees!(text, 45.0)
     text.color = GameData.orange
     Custom.set_text!(text, GameData.vector_font, "RANGER IS A GO!")
@@ -48,38 +48,17 @@ function build(scene::GameScene, world::Ranger.World)
     Nodes.set_dirty!(scene, false);
 end
 
-# --------------------------------------------------------
-# Timing
-# --------------------------------------------------------
-function Ranger.Nodes.update(scene::GameScene, dt::Float64)
-    # println("SplashScene::update : ", scene)
-end
-
-# --------------------------------------------------------
-# Life cycle events
-# --------------------------------------------------------
-function Ranger.Nodes.enter_node(scene::GameScene, man::NodeManager)
-    println("enter ", scene);
-    # Register node as a timing target in order to receive updates
-    # register_target(man, scene);
-end
-
-function Ranger.Nodes.exit_node(scene::GameScene, man::NodeManager)
-    println("exit ", scene);
-    # unregister_target(man, scene);
-end
-
-function Ranger.Nodes.transition(scene::GameScene)
+function Nodes.transition(scene::GameScene)
     Scenes.NO_ACTION
 end
 
-function Ranger.Nodes.get_replacement(scene::GameScene)
+function Nodes.get_replacement(scene::GameScene)
     scene.replacement
 end
 
 # --------------------------------------------------------
 # Grouping
 # --------------------------------------------------------
-function Ranger.Nodes.get_children(node::GameScene)
+function Nodes.get_children(node::GameScene)
     node.children
 end

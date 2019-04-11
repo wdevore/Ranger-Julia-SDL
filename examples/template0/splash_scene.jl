@@ -45,14 +45,14 @@ end
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
-function Ranger.Nodes.update(node::SplashScene, dt::Float64)
+function Nodes.update(node::SplashScene, dt::Float64)
     update(node.transitioning, dt);
 end
 
 # --------------------------------------------------------
 # Visits
 # --------------------------------------------------------
-function Ranger.Nodes.draw(node::SplashScene, context::Rendering.RenderContext)
+function Nodes.draw(node::SplashScene, context::Rendering.RenderContext)
     if Nodes.is_dirty(node)
         # Transform this node's vertices using the context
         Rendering.transform!(context, node.mesh)
@@ -69,18 +69,18 @@ end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function Ranger.Nodes.enter_node(node::SplashScene, man::NodeManager)
+function Nodes.enter_node(node::SplashScene, man::NodeManager)
     println("enter ", node);
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, node);
 end
 
-function Ranger.Nodes.exit_node(node::SplashScene, man::NodeManager)
+function Nodes.exit_node(node::SplashScene, man::NodeManager)
     println("exit ", node);
     Nodes.unregister_target(man, node);
 end
 
-function Ranger.Nodes.transition(node::SplashScene)
+function Nodes.transition(node::SplashScene)
     if Nodes.ready(node.transitioning)
         Scenes.REPLACE_TAKE
     else
@@ -88,6 +88,6 @@ function Ranger.Nodes.transition(node::SplashScene)
     end
 end
 
-function Ranger.Nodes.get_replacement(node::SplashScene)
+function Nodes.get_replacement(node::SplashScene)
     node.replacement
 end

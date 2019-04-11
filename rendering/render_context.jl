@@ -6,7 +6,7 @@ using SimpleDirectMediaLayer:
 
 export 
     RenderContext,
-    save, restore, post, pre, apply!,
+    save!, restore!, post, pre, apply!,
     render_line, render_lines, render_aa_rectangle, render_outlined_polygon
 
 using .Rendering
@@ -122,7 +122,7 @@ function pre(context::RenderContext)
 end
 
 # Push the current state onto the stack
-function save(context::RenderContext)
+function save!(context::RenderContext)
     top = context.state[context.stack_top]
 
     top.clear_color = context.clear_color
@@ -146,7 +146,7 @@ function save(context::RenderContext)
 end
 
 # Pop the current state
-function restore(context::RenderContext)
+function restore!(context::RenderContext)
     context.stack_top -= 1
 
     top = context.state[context.stack_top]
@@ -423,16 +423,14 @@ end
 function render_outlined_polygon(context::RenderContext, polygon::Geometry.Polygon, state::PolygonState)
     bucs = polygon.mesh.bucket
 
-    for idx in 1:(length(bucs)-1)
-        SDL2.RenderDrawLine(
-            context.renderer,
+    for idx in 1:(length(bucs) - 1)
+        SDL2.RenderDrawLine(context.renderer,
             Int32(round(bucs[idx].x)), Int32(round(bucs[idx].y)),
-            Int32(round(bucs[idx+1].x)), Int32(round(bucs[idx+1].y)))
+            Int32(round(bucs[idx + 1].x)), Int32(round(bucs[idx + 1].y)))
     end
 
     if state == CLOSED
-        SDL2.RenderDrawLine(
-            context.renderer,
+        SDL2.RenderDrawLine(context.renderer,
             Int32(round(bucs[length(bucs)].x)), Int32(round(bucs[length(bucs)].y)),
             Int32(round(bucs[1].x)), Int32(round(bucs[1].y)))
     end

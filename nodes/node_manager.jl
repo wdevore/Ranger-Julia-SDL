@@ -62,7 +62,7 @@ function visit(man::NodeManager, interpolation::Float64)
     end
 
     # This will save view-space matrix
-    Rendering.save(man.context)
+    Rendering.save!(man.context)
 
     # If mouse coords changed then update view coords.
     # self.global_data.update_view_coords(&mut self.context);
@@ -81,7 +81,7 @@ function visit(man::NodeManager, interpolation::Float64)
     # Visit the running node
     Nodes.visit(man.stack.running_node, man.context, interpolation)
 
-    Rendering.restore(man.context)
+    Rendering.restore!(man.context)
 
     true # continue to draw.
 end

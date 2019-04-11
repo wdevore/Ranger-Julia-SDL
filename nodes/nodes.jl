@@ -54,9 +54,6 @@ include("scenes/scene_nil.jl")
 
 include("node_manager.jl")
 
-# -----------------------------------------------------------------------
-# Base defaults
-# -----------------------------------------------------------------------
 # -----------------------------------------------------------
 # Abstract Nodes
 # -----------------------------------------------------------
@@ -64,17 +61,15 @@ function has_parent(node::Ranger.AbstractNode)
     !is_nil(node.base.parent)
 end
 
-using ..Rendering:
-    RenderContext,
-    apply!
+using ..Rendering
 
-function visit(node::Ranger.AbstractNode, context::RenderContext, interpolation::Float64)
+function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, interpolation::Float64)
     # println("AbstractNode::visit ", node);
     if !is_visible(node)
         return;
     end
 
-    save(context)
+    Rendering.save!(context)
 
     # Because position and angles are dependent
     # on lerping we perform interpolation first.
@@ -87,22 +82,20 @@ function visit(node::Ranger.AbstractNode, context::RenderContext, interpolation:
         # println(node.base.name, " aft: ", aft)
     end
 
-    apply!(context, aft)
+    Rendering.apply!(context, aft)
 
     children = get_children(node)
     if children ≠ nothing
-        # println("C drawing: ", node)
         draw(node, context)
 
         for child in children
             visit(child, context, interpolation)
         end
     else
-        # println("drawing: ", node)
         draw(node, context)
     end
 
-    restore(context)
+    Rendering.restore!(context)
 
     # println("End visit ----------------------------------------------")
 end
@@ -116,18 +109,18 @@ function draw(node::Ranger.AbstractNode, context::RenderContext)
 end
 
 function enter_node(node::Ranger.AbstractNode, man::NodeManager)
-    println("AbstractNode::enter ", node);
+    # println("AbstractNode::enter ", node);
 end
 
 function exit_node(node::Ranger.AbstractNode, man::NodeManager)
-    println("AbstractNode::exit ", node);
+    # println("AbstractNode::exit ", node);
 end
 
 function get_children(node::Ranger.AbstractNode)
     nothing
 end
 
-    function io_event(node::Ranger.AbstractNode, event::Ranger.AbstractIOEvent)
+function io_event(node::Ranger.AbstractNode, event::Ranger.AbstractIOEvent)
     println("AbstractScene::io_event ", event)
 end
 

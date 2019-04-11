@@ -17,10 +17,10 @@ end
 # --------------------------------------------------------
 # Transitioning
 # --------------------------------------------------------
-function Ranger.Nodes.transition(node::SceneBoot)
+function Nodes.transition(node::SceneBoot)
     Scenes.REPLACE_TAKE
 end
 
-function Ranger.Nodes.get_replacement(node::SceneBoot)
+function Nodes.get_replacement(node::SceneBoot)
     node.replacement
 end

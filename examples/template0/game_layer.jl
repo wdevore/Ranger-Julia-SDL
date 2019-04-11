@@ -13,6 +13,7 @@ mutable struct GameLayer <: Ranger.AbstractNode
 
     out_rect::Custom.OutlinedRectangle
     angle::Float64
+    solid_yellow_rect::Custom.AARectangle
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -42,20 +43,21 @@ function build(layer::GameLayer, world::Ranger.World)
     # bottom-right
     Geometry.set!(layer.max, hw, hh)
 
-    rect = Custom.AARectangle(world, "AARectangle", layer)
-    Custom.set_min!(rect, 200.0, 200.0)
-    Custom.set_max!(rect, 400.0, 400.0)
-    rect.color = GameData.yellow
-    push!(layer.children, rect);
-
-    layer.out_rect = Custom.OutlinedRectangle(world, "OutlinedRectangle", layer)
+    solid_yellow_rect = Custom.AARectangle(world, "YellowAARectangle", layer)
+    layer.solid_yellow_rect = solid_yellow_rect
+    Custom.set_min!(solid_yellow_rect, 200.0, 200.0)
+    Custom.set_max!(solid_yellow_rect, 400.0, 400.0)
+    solid_yellow_rect.color = GameData.yellow
+    push!(layer.children, solid_yellow_rect);
+    
+    layer.out_rect = Custom.OutlinedRectangle(world, "RedRectangle", layer)
     Custom.set!(layer.out_rect, -0.5, -0.5, 0.5, 0.5)
     Nodes.set_scale!(layer.out_rect, 100.0)
     Nodes.set_position!(layer.out_rect, -100.0, -100.0)
     layer.out_rect.color = GameData.red
     push!(layer.children, layer.out_rect);
 
-    tri = Custom.OutlinedTriangle(world, "OutlinedTriangle", layer)
+    tri = Custom.OutlinedTriangle(world, "YellowTriangle", layer)
     Custom.set!(tri,
         Geometry.Point{Float64}(-0.5, 0.5),
         Geometry.Point{Float64}(0.5, 0.5),
@@ -69,7 +71,7 @@ end
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
-function Ranger.Nodes.update(layer::GameLayer, dt::Float64)
+function Nodes.update(layer::GameLayer, dt::Float64)
     # println("GameLayer::update : ", layer)
     layer.angle += 1.0
     Nodes.set_rotation_in_degrees!(layer.out_rect, layer.angle)
@@ -82,7 +84,7 @@ end
 #     # println("GameLayer visit ", layer);
 # end
 
-function Ranger.Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
+function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     # Transform this node's vertices using the context
     if Nodes.is_dirty(layer)
         Rendering.transform!(context, layer.min, layer.max, layer.buc_min, layer.buc_max)
@@ -101,14 +103,14 @@ end
 # --------------------------------------------------------
 # Life cycle events
 # --------------------------------------------------------
-function Ranger.Nodes.enter_node(layer::GameLayer, man::NodeManager)
+function Nodes.enter_node(layer::GameLayer, man::NodeManager)
     println("enter ", layer);
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, layer)
     Nodes.register_event_target(man, layer);
 end
 
-function Ranger.Nodes.exit_node(layer::GameLayer, man::NodeManager)
+function Nodes.exit_node(layer::GameLayer, man::NodeManager)
     println("exit ", layer);
     Nodes.unregister_target(man, layer);
     Nodes.unregister_event_target(man, layer);
@@ -118,9 +120,11 @@ end
 # Events
 # --------------------------------------------------------
 # Here we elect to receive keyboard events.
-function Ranger.Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
-    println("io_event ", event)
+function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
+    # println("io_event ", event, ", node: ", node)
     
+    rect = node.solid_yellow_rect
+    Nodes.set_position!(rect, rect.transform.position.x + 1.0, rect.transform.position.y)
     # node.angle += 1.0
     # Nodes.set_rotation_in_degrees!(node.out_rect, node.angle)
     # Nodes.set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
@@ -129,6 +133,6 @@ end
 # --------------------------------------------------------
 # Grouping
 # --------------------------------------------------------
-function Ranger.Nodes.get_children(node::GameLayer)
+function Nodes.get_children(node::GameLayer)
     node.children
 end
