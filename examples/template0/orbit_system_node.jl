@@ -49,20 +49,14 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     # amgle is measured in angular-velocity or "degrees/second"
     node.angular_motion.angle = -45.0    # degrees/second
 
-    # orbit_filter uses the default behaviour of the transform filter.
-    orbit_filter = Filters.TransformFilter(world, "OrbitTransformFilter", node)
-    push!(node.children, orbit_filter);
-
     # The anchor will rotate and we want that rotation to propagate to the
-    # children. We set this arrangement by creating a filter as a child
-    # of the anchor.
+    # children.
     # Another way to say this is:
     # The anchor has a position, rotation and scale. We want to "filter-out" the
     # from any children as the children will determine their own scale.
-    node.anchor = Custom.AnchorNode(world, "AnchorNode", orbit_filter)
+    node.anchor = Custom.AnchorNode(world, "AnchorNode", node)
     Nodes.set_scale!(node.anchor, 20.0)
     node.anchor.color = RangerGame.lightblue
-    push!(orbit_filter.children, node.anchor);
     node.anchor_motion.angle = 45.0
 
     # The child filter of the anchor node above.

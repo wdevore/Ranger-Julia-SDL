@@ -2,6 +2,9 @@ export AnchorNode
 
 import ..Nodes.draw
 
+# This is an opionated node. It will automatically inject a filter node
+# between the given parent and this anchor node.
+
 mutable struct AnchorNode <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
@@ -16,7 +19,15 @@ mutable struct AnchorNode <: Ranger.AbstractNode
     function AnchorNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        # Automatically insert a filter between the parent and this anchor node.
+        # filter uses the default behaviour of the transform filter.
+        filter = Filters.TransformFilter(world, "TransformFilter", parent)
+        # Add the filter as a child of parent.
+        push!(parent.children, filter)
+        # Now make the anchor a child of the filter.
+        push!(filter.children, o)
+
+        o.base = Nodes.NodeData(Ranger.gen_id(world), name, filter)
         o.transform = Nodes.TransformProperties{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
         o.mesh = Geometry.Mesh()

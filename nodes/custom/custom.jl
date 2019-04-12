@@ -7,6 +7,7 @@ using ..Ranger
 using ..Geometry
 using ..Rendering
 using ..Math
+using ..Nodes.Filters
 
 include("cross_node.jl")
 include("aa_rectangle.jl")

@@ -91,7 +91,6 @@ function run(world::Ranger.World)
                     # Route event to registered Nodes
                     Nodes.route_events(manager, keyboard)
                 elseif ev_type == SDL2.MOUSEMOTION
-                    # Events.print_mouse_event(event)
                     Events.set!(mouse, event)
 
                     Nodes.route_events(manager, mouse)
@@ -123,6 +122,7 @@ function run(world::Ranger.World)
         # Render
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         Nodes.pre_visit(manager)
+        # **** Any rendering must occur AFTER this point ****
 
         # Capture time AFTER pre_visit. If vsync is enabled
         # then time includes the vertical refresh which ~16.667ms
@@ -142,6 +142,7 @@ function run(world::Ranger.World)
         # ***************************
         # Debugging only
         # ***************************
+        draw_space_coords(mouse.x, mouse.y, world)
         draw_stats(fps, ups, avg_render, world)
 
         render_elapsed_t =  time_ns() - render_t
@@ -188,22 +189,21 @@ end
 # ***************************
 orange = Rendering.Orange()
 white = Rendering.White()
+green = Rendering.Lime()
 
 function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::Ranger.World)
-    # set_draw_color(manager.context, orange)
-    # rect = SDL2.Rect(0, 0, 1, 1)
-    # rect.x = 100
-    # rect.y = 100
-    # rect.w = 400
-    # rect.h = 400
-    # draw_filled_rectangle(manager.context, rect)
-    # set_draw_color(manager.context, white)
-    # draw_outlined_rectangle(manager.context, rect)
-
     Rendering.set_draw_color(manager.context, white)
-    text = @sprintf("fps(%2d), ups(%2d) rend(%2.4f)", fps, ups, avg_render)
+    text = @sprintf("(%2d)(%2d)(%2.4f)", fps, ups, avg_render)
     x = 10
     y = world.window_height - 24
+    Rendering.draw_text(manager.context, x, y, text, 2, 2, false)
+end
+
+function draw_space_coords(mx::Int32, my::Int32, world::Ranger.World)
+    Rendering.set_draw_color(manager.context, green)
+    text = @sprintf("M: %2d, %2d", mx, my)
+    x = 10
+    y = 30
     Rendering.draw_text(manager.context, x, y, text, 2, 2, false)
 
 end

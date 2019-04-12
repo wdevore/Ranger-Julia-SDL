@@ -83,7 +83,7 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     Rendering.render_aa_rectangle(context, layer.buc_min, layer.buc_max, Rendering.FILLED);
 
     Rendering.set_draw_color(context, RangerGame.white)
-    Rendering.draw_text(context, 10, 10, layer.base.name, 5, 4, false)
+    Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 end
 
 # --------------------------------------------------------
