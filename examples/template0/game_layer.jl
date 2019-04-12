@@ -48,16 +48,6 @@ function build(layer::GameLayer, world::Ranger.World)
     layer.orbit_system.color = RangerGame.red
     push!(layer.children, layer.orbit_system);
 
-    tri = Custom.OutlinedTriangle(world, "YellowTriangle", layer)
-    Custom.set!(tri,
-        Geometry.Point{Float64}(-0.5, 0.5),
-        Geometry.Point{Float64}(0.5, 0.5),
-        Geometry.Point{Float64}(0.0, -0.5))
-    Nodes.set_scale!(tri, 50.0)
-    Nodes.set_position!(tri, 100.0, -100.0)
-    tri.color = RangerGame.yellow
-    push!(layer.children, tri);
-
     solid_yellow_rect = Custom.AARectangle(world, "YellowAARectangle", layer)
     layer.solid_yellow_rect = solid_yellow_rect
     Custom.set_min!(solid_yellow_rect, 200.0, 200.0)

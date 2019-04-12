@@ -40,7 +40,21 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     Geometry.build!(node.polygon)
 
     # amgle is measured in angular-velocity or "degrees/second"
-    node.angular_motion.angle = 45.0    # degrees/second
+    node.angular_motion.angle = -45.0    # degrees/second
+
+    tri = Custom.OutlinedTriangle(world, "YellowTriangle", node)
+    Custom.set!(tri,
+        Geometry.Point{Float64}(-0.5, 0.5),
+        Geometry.Point{Float64}(0.5, 0.5),
+        Geometry.Point{Float64}(0.0, -0.5))
+    # Nodes.set_scale!(tri, 50.0)
+    # Nodes.set_position!(tri, 100.0, -100.0)
+    Nodes.set_scale!(tri, 1.0)
+    Nodes.set_position!(tri, 3.0, 0.0)
+    tri.color = RangerGame.yellow
+    push!(node.children, tri);
+
+
 end
 
 # --------------------------------------------------------

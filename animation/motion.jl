@@ -37,14 +37,14 @@ function interpolate!(angMo::AngularMotion{T}, t::T) where {T <: AbstractFloat}
             if angle >= 360.0
                 # Wrap range back around
                 angMo.from = 0.0
-                angMo.to = 360.0 - angle
+                angMo.to = 361.0 - angle
                 # Calc new angle from the adjusted range
                 angle = lerp(angMo.from, angMo.to, t)
             end
         else
             if angle <= 0.0
-                angMo.from = 359.0
-                angMo.to = 359.0 - angle
+                angMo.from = 360.0
+                angMo.to = 358.0 - angle
                 angle = lerp(angMo.from, angMo.to, t)
             end
         end
