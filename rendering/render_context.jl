@@ -39,6 +39,7 @@ mutable struct RenderContext
     
     # view space to device-space projection
     view_space::Math.AffineTransform
+    inv_view_space::Math.AffineTransform
 
     # Scratch working variables
     v1::Geometry.Point{Float64}
@@ -58,6 +59,7 @@ mutable struct RenderContext
         o.current = AffineTransform{Float64}()
         o.post = AffineTransform{Float64}()
         o.view_space = AffineTransform{Float64}()
+        o.inv_view_space = AffineTransform{Float64}()
 
         o.v1 = Geometry.Point{Float64}()
         o.v2 = Geometry.Point{Float64}()
@@ -99,6 +101,8 @@ function set_view_space(context::RenderContext, world::Ranger.World)
 
     Math.scale!(center, width_ratio, height_ratio)
     context.view_space = center
+
+    Math.invert!(context.view_space, context.inv_view_space)
 
     apply!(context, center);
     # println("View center: ", center)

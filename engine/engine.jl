@@ -13,6 +13,7 @@ using ..Nodes
 using ..Ranger
 using ..Rendering
 using ..Events
+using ..Geometry
 
 manager = nothing
 
@@ -190,6 +191,7 @@ end
 orange = Rendering.Orange()
 white = Rendering.White()
 green = Rendering.Lime()
+view_point = Geometry.Point{Float64}()
 
 function draw_stats(fps::Integer, ups::Integer, avg_render::Float64, world::Ranger.World)
     Rendering.set_draw_color(manager.context, white)
@@ -206,6 +208,10 @@ function draw_space_coords(mx::Int32, my::Int32, world::Ranger.World)
     y = 30
     Rendering.draw_text(manager.context, x, y, text, 2, 2, false)
 
+    Nodes.map_device_to_view(manager.context, mx, my, view_point)
+    text = @sprintf("V: %2d, %2d", view_point.x, view_point.y)
+    y += 20
+    Rendering.draw_text(manager.context, x, y, text, 2, 2, false)
 end
 
 end # Module -----------------------------------------------------------

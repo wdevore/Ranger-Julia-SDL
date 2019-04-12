@@ -62,6 +62,11 @@ function transform!(aft::AffineTransform{T}, in::Geometry.Point{T}, out::Geometr
     out.y = (aft.b * in.x) + (aft.d * in.y) + aft.ty;
 end
 
+function transform!(aft::AffineTransform{T}, x::T, y::T, out::Geometry.Point{T}) where {T <: AbstractFloat}
+    out.x = (aft.a * x) + (aft.c * y) + aft.tx
+    out.y = (aft.b * x) + (aft.d * y) + aft.ty;
+end
+
 function transform!(aft::AffineTransform{T}, vx::T, vy::T) where {T <: AbstractFloat}
     ((aft.a * vx) + (aft.c * vy) + aft.tx,
     (aft.b * vx) + (aft.d * vy) + aft.ty)
@@ -204,6 +209,16 @@ function invert!(aft::AffineTransform{T}) where {T <: AbstractFloat}
     aft.d = determinant * a
     aft.tx = determinant * (c * ty - d * tx)
     aft.ty = determinant * (b * tx - a * ty);
+end
+
+function invert!(aft::AffineTransform{T}, out::AffineTransform{T}) where {T <: AbstractFloat}
+    determinant = 1.0 / (aft.a * aft.d - aft.b * aft.c)
+    out.a = determinant * aft.d
+    out.b = -determinant * aft.b
+    out.c = -determinant * aft.c
+    out.d = determinant * aft.a
+    out.tx = determinant * (aft.c * aft.ty - aft.d * aft.tx)
+    out.ty = determinant * (aft.b * aft.tx - aft.a * aft.ty);
 end
 
 # Converts either from or to pre or post multiplication.

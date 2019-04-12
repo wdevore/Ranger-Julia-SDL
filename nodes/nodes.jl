@@ -56,6 +56,8 @@ include("node_manager.jl")
 
 include("filters/filters.jl")
 
+include("space_mappings.jl")
+
 # -----------------------------------------------------------
 # Abstract Nodes
 # -----------------------------------------------------------

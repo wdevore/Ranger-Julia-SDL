@@ -78,8 +78,7 @@ function calc_transform!(prop::TransformProperties{T}) where {T <: AbstractFloat
         scale!(prop.aft, prop.scale.x, prop.scale.y)
     end
 
-    Math.set!(prop.inverse, prop.aft)
-    invert!(prop.inverse)
+    Math.invert!(prop.aft, prop.inverse)
 
     prop.aft
 end
