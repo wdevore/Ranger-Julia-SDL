@@ -124,7 +124,7 @@ function get_children(node::Ranger.AbstractNode)
 end
 
 function io_event(node::Ranger.AbstractNode, event::Ranger.AbstractIOEvent)
-    println("AbstractScene::io_event ", event)
+    # println("AbstractScene::io_event ", event)
 end
 
 function is_visible(node::Ranger.AbstractNode)

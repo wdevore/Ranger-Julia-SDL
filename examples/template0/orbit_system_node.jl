@@ -39,7 +39,8 @@ function build(node::OrbitSystemNode, world::Ranger.World)
 
     Geometry.build!(node.polygon)
 
-    node.angular_motion.step_value = 45.0    # ~degrees/second
+    # amgle is measured in angular-velocity or "degrees/second"
+    node.angular_motion.angle = 45.0    # degrees/second
 end
 
 # --------------------------------------------------------

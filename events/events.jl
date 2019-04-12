@@ -165,6 +165,7 @@ function set!(keyboard::KeyboardEvent, event::Array{UInt8,1})
 end
 
 mutable struct MouseEvent <: Ranger.AbstractIOEvent
+    type::UInt32
     which::UInt32
     state::UInt32
     x::Int32
@@ -178,6 +179,7 @@ mutable struct MouseEvent <: Ranger.AbstractIOEvent
 end
 
 function set!(mouse::MouseEvent, event::Array{UInt8,1})
+    mouse.type = extract_4byte_host(1, event)
     mouse.which = extract_4byte_host(13, event)
     mouse.state = extract_4byte_host(17, event)
     mouse.x = signed(extract_4byte_host(21, event))
