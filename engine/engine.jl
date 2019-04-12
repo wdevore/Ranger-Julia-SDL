@@ -50,15 +50,17 @@ function run(world::Ranger.World)
 
     lag = 0
 
-        # ***************************
-        # Debugging only
-        # ***************************
+    # ***************************
+    # Debugging only
+    # ***************************
     fps_cnt = fps = 0
     ups_cnt = ups = 0
     previous_t = time_ns()
     second_cnt = 0
     avg_render = 0.0
     render_elapsed_cnt = 0
+    display_coords = true
+    display_on = true
 
     keyboard = Events.KeyboardEvent()
     mouse = Events.MouseEvent()
@@ -88,7 +90,16 @@ function run(world::Ranger.World)
                     end
 
                     Events.set!(keyboard, event)
+                    # Events.print_keyboard_event(event)
     
+                    if keyboard.keycode == SDL2.SDLK_m
+                        display_coords = !display_coords
+                    end
+
+                    if keyboard.keycode == SDL2.SDLK_n
+                        display_on = !display_on
+                    end
+
                     # Route event to registered Nodes
                     Nodes.route_events(manager, keyboard)
                 elseif ev_type == SDL2.MOUSEMOTION
@@ -143,8 +154,12 @@ function run(world::Ranger.World)
         # ***************************
         # Debugging only
         # ***************************
-        draw_space_coords(mouse.x, mouse.y, world)
-        draw_stats(fps, ups, avg_render, world)
+        if display_on
+            if display_coords
+                draw_space_coords(mouse.x, mouse.y, world)
+            end
+            draw_stats(fps, ups, avg_render, world)
+        end
 
         render_elapsed_t =  time_ns() - render_t
         render_elapsed_cnt += render_elapsed_t

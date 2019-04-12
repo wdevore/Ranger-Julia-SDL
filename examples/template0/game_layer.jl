@@ -109,8 +109,8 @@ end
 function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     # println("io_event ", event, ", node: ", node)
     
-    tnode = node.orbit_system
-    Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
+    # tnode = node.orbit_system
+    # Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
 end
 
 # --------------------------------------------------------
