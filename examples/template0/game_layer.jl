@@ -109,9 +109,8 @@ end
 function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     # println("io_event ", event, ", node: ", node)
     
-    rect = node.solid_yellow_rect
-    Nodes.set_position!(rect, rect.transform.position.x + 1.0, rect.transform.position.y)
-    # Nodes.set_position!(node, node.transform.position.x + 10.0, node.transform.position.y)
+    tnode = node.orbit_system
+    Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
 end
 
 # --------------------------------------------------------

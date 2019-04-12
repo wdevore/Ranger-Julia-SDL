@@ -21,11 +21,13 @@ mutable struct OutlinedTriangle <: Ranger.AbstractNode
 
         o.polygon = Geometry.Polygon{Float64}()
 
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
+        Geometry.add_vertex!(o.polygon, -0.5, 0.5)
+        Geometry.add_vertex!(o.polygon, 0.5, 0.5)
+        Geometry.add_vertex!(o.polygon, 0.0, -0.5)
 
         Geometry.build!(o.polygon)
+
+        Nodes.set_dirty!(o, true)
 
         o
     end

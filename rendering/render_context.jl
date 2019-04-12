@@ -205,8 +205,8 @@ function draw_point(context::RenderContext, x::Int32, y::Int32)
     SDL2.RenderDrawPoint(context.renderer, x, y);
 end
 
-function draw_line(context::RenderContext, x1::Int32, y1::Int32, x2::Int32, y2::Int32)
-    SDL2.RenderDrawLine(context.renderer, x1, y1, x2, y2);
+function draw_line(context::RenderContext, x1::Float64, y1::Float64, x2::Float64, y2::Float64)
+    SDL2.RenderDrawLine(context.renderer, Int32(round(x1)), Int32(round(y1)), Int32(round(x2)), Int32(round(y2)));
 end
 
 function draw_outlined_rectangle(context::RenderContext, rect::SDL2.Rect)
@@ -351,8 +351,9 @@ function render_lines(context::RenderContext, mesh::Geometry.Mesh)
             first = true
         end
 
-        draw_line(context, Int32(round(context.v1.x)), Int32(round(context.v1.y)),
-            Int32(round(context.v2.x)), Int32(round(context.v2.y)));
+        draw_line(context, 
+            context.v1.x, context.v1.y,
+            context.v2.x, context.v2.y);
     end
 end
 

@@ -16,6 +16,11 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
     polygon::Geometry.Polygon
 
     angular_motion::Animation.AngularMotion{Float64}
+    anchor_motion::Animation.AngularMotion{Float64}
+    tri_motion::Animation.AngularMotion{Float64}
+
+    anchor::Custom.AnchorNode
+    triangle::Custom.OutlinedTriangle
 
     function OrbitSystemNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -26,6 +31,8 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
         o.color = Rendering.White()
         o.polygon = Geometry.Polygon{Float64}()
         o.angular_motion = Animation.AngularMotion{Float64}()
+        o.anchor_motion = Animation.AngularMotion{Float64}()
+        o.tri_motion = Animation.AngularMotion{Float64}()
 
         o
     end
@@ -42,22 +49,35 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     # amgle is measured in angular-velocity or "degrees/second"
     node.angular_motion.angle = -45.0    # degrees/second
 
-    filter = Filters.TransformFilter(world, "TransformFilter", node)
-    # We want the rotation from the parent, hence, we DON'T exclude it.
-    filter.exclude_rotation = false
-    push!(node.children, filter);
+    # orbit_filter uses the default behaviour of the transform filter.
+    orbit_filter = Filters.TransformFilter(world, "OrbitTransformFilter", node)
+    push!(node.children, orbit_filter);
 
-    tri = Custom.OutlinedTriangle(world, "YellowTriangle", filter)
-    Custom.set!(tri,
-        Geometry.Point{Float64}(-0.5, 0.5),
-        Geometry.Point{Float64}(0.5, 0.5),
-        Geometry.Point{Float64}(0.0, -0.5))
-    Nodes.set_scale!(tri, 50.0)
-    Nodes.set_position!(tri, 200.0, 0.0)
-    tri.color = RangerGame.yellow
-    push!(filter.children, tri);
+    # The anchor will rotate and we want that rotation to propagate to the
+    # children. We set this arrangement by creating a filter as a child
+    # of the anchor.
+    # Another way to say this is:
+    # The anchor has a position, rotation and scale. We want to "filter-out" the
+    # from any children as the children will determine their own scale.
+    node.anchor = Custom.AnchorNode(world, "AnchorNode", orbit_filter)
+    Nodes.set_scale!(node.anchor, 20.0)
+    node.anchor.color = RangerGame.lightblue
+    push!(orbit_filter.children, node.anchor);
+    node.anchor_motion.angle = 45.0
 
+    # The child filter of the anchor node above.
+    anchor_filter = Filters.TransformFilter(world, "AnchorTransformFilter", node.anchor)
+    # Change the default rotation flag from "true" to "false".
+    anchor_filter.exclude_rotation = false
+    push!(node.anchor.children, anchor_filter);
 
+    # Now we add children of the filter.
+    node.triangle = Custom.OutlinedTriangle(world, "YellowTriangle", anchor_filter)
+    Nodes.set_scale!(node.triangle, 50.0)
+    Nodes.set_position!(node.triangle, 200.0, 0.0)
+    node.triangle.color = RangerGame.yellow
+    push!(anchor_filter.children, node.triangle);
+    node.tri_motion.angle = -90.0    # degrees/second
 end
 
 # --------------------------------------------------------
@@ -66,11 +86,19 @@ end
 function Nodes.update(node::OrbitSystemNode, dt::Float64)
     # println("OrbitSystemNode::update : ", layer)
     Animation.update!(node.angular_motion, dt);
+    Animation.update!(node.anchor_motion, dt);
+    Animation.update!(node.tri_motion, dt);
 end
 
 function Nodes.interpolate(node::OrbitSystemNode, interpolation::Float64)
     value = Animation.interpolate!(node.angular_motion, interpolation)
     Nodes.set_rotation_in_degrees!(node, value)
+
+    value = Animation.interpolate!(node.anchor_motion, interpolation)
+    Nodes.set_rotation_in_degrees!(node.anchor, value)
+
+    value = Animation.interpolate!(node.tri_motion, interpolation)
+    Nodes.set_rotation_in_degrees!(node.triangle, value)
 end
 
 # --------------------------------------------------------

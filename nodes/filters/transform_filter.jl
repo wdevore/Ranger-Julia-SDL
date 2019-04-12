@@ -1,6 +1,9 @@
 export 
     TransformFilter
 
+# By default the TransformFilter will exclude or "block" rotations and scales from
+# propagating to the children, but allow translations.
+# 
 mutable struct TransformFilter <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
@@ -32,8 +35,6 @@ mutable struct TransformFilter <: Ranger.AbstractNode
 end
 
 # Filters are special in that they overload the visit() method
-# Because this is a translate filter we "filter out" everything
-# but translation component from the immediate parent.
 function Nodes.visit(node::TransformFilter, context::Rendering.RenderContext, interpolation::Float64)
     if !Nodes.is_visible(node)
         return;

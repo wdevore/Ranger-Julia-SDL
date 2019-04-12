@@ -28,6 +28,8 @@ function build(scene::GameScene, world::Ranger.World)
     build(layer, world);
 
     cross = Custom.CrossNode(world, "CrossNode", scene)
+    Nodes.set_nonuniform_scale!(cross.transform, Float64(world.view_width), Float64(world.view_height))
+    cross.color = Rendering.LightGray()
     push!(scene.children, cross)
 
     text = Custom.VectorTextNode(world, "VectorTextNode", scene)

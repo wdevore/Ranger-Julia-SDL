@@ -115,3 +115,10 @@ function LightPurple()
     Palette(0xaaaaffFF)
 end
 
+# ----------------------------------------------------
+# Pantones
+# https://www.pantone.com/color-finder#/pick?pantoneBook=pantoneSolidCoatedV3M2
+# ----------------------------------------------------
+function LightNavyBlue()
+    Palette(0x85B3D1FF)
+end

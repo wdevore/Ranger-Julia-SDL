@@ -19,12 +19,12 @@ mutable struct CrossNode <: Ranger.AbstractNode
         o.color = Rendering.White()
 
         # horizontal
-        Geometry.add_vertex!(o.mesh, -Float64(world.view_width) / 2.0, 0.0)  
-        Geometry.add_vertex!(o.mesh, Float64(world.view_width), 0.0)   
+        Geometry.add_vertex!(o.mesh, -0.5, 0.0)
+        Geometry.add_vertex!(o.mesh, 0.5, 0.0)
 
         # vertical
-        Geometry.add_vertex!(o.mesh, 0.0, -Float64(world.view_height))  
-        Geometry.add_vertex!(o.mesh, 0.0, Float64(world.view_height))   
+        Geometry.add_vertex!(o.mesh, 0.0, -0.5)
+        Geometry.add_vertex!(o.mesh, 0.0, 0.5)
         
         Geometry.build!(o.mesh)
 

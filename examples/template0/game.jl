@@ -23,6 +23,8 @@ darkgray = Rendering.DarkGray()
 lightgray = Rendering.LightGray()
 red = Rendering.Red()
 yellow = Rendering.Yellow()
+blue = Rendering.Blue()
+lightblue = Rendering.LightNavyBlue()
 
 vector_font = Rendering.VectorFont()
 Rendering.build_font!(vector_font)
