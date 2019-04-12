@@ -42,17 +42,20 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     # amgle is measured in angular-velocity or "degrees/second"
     node.angular_motion.angle = -45.0    # degrees/second
 
-    tri = Custom.OutlinedTriangle(world, "YellowTriangle", node)
+    filter = Filters.TransformFilter(world, "TransformFilter", node)
+    # We want the rotation from the parent, hence, we DON'T exclude it.
+    filter.exclude_rotation = false
+    push!(node.children, filter);
+
+    tri = Custom.OutlinedTriangle(world, "YellowTriangle", filter)
     Custom.set!(tri,
         Geometry.Point{Float64}(-0.5, 0.5),
         Geometry.Point{Float64}(0.5, 0.5),
         Geometry.Point{Float64}(0.0, -0.5))
-    # Nodes.set_scale!(tri, 50.0)
-    # Nodes.set_position!(tri, 100.0, -100.0)
-    Nodes.set_scale!(tri, 1.0)
-    Nodes.set_position!(tri, 3.0, 0.0)
+    Nodes.set_scale!(tri, 50.0)
+    Nodes.set_position!(tri, 200.0, 0.0)
     tri.color = RangerGame.yellow
-    push!(node.children, tri);
+    push!(filter.children, tri);
 
 
 end

@@ -13,6 +13,5 @@ include("aa_rectangle.jl")
 include("outlined_rectangle.jl")
 include("vector_text_node.jl")
 include("outlined_triangle.jl")
-include("translate_filter.jl")
 
 end

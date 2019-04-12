@@ -1,7 +1,7 @@
 export 
-    TranslateFilter
+    TransformFilter
 
-mutable struct TranslateFilter <: Ranger.AbstractNode
+mutable struct TransformFilter <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
 
@@ -9,15 +9,23 @@ mutable struct TranslateFilter <: Ranger.AbstractNode
     children::Array{Ranger.AbstractNode,1}
 
     # This node's parent translation component
-    translate_component::Math.AffineTransform{Float64}
+    components::Math.AffineTransform{Float64}
 
-    function TranslateFilter(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
+    # What to exclude from the immediate parent
+    exclude_translation::Bool
+    exclude_rotation::Bool
+    exclude_scale::Bool
+
+    function TransformFilter(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
         o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
         o.transform = Nodes.TransformProperties{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
-        o.translate = Math.AffineTransform{Float64}()
+        o.components = Math.AffineTransform{Float64}()
+        o.exclude_translation = false
+        o.exclude_rotation = true
+        o.exclude_scale = true
 
         o
     end
@@ -26,7 +34,7 @@ end
 # Filters are special in that they overload the visit() method
 # Because this is a translate filter we "filter out" everything
 # but translation component from the immediate parent.
-function Nodes.visit(node::TranslateFilter, context::Rendering.RenderContext, interpolation::Float64)
+function Nodes.visit(node::TransformFilter, context::Rendering.RenderContext, interpolation::Float64)
     if !Nodes.is_visible(node)
         return;
     end
@@ -47,16 +55,18 @@ function Nodes.visit(node::TranslateFilter, context::Rendering.RenderContext, in
 
                 # Re-introduce only the parent's translation component by
                 # excluding the other components
-                Nodes.calc_filtered_transform!(parent.transform, false, true, true, node.translate_component)
+                Nodes.calc_filtered_transform!(parent.transform, 
+                    node.exclude_translation, node.exclude_rotation, node.exclude_scale,
+                    node.components)
 
-                Rendering.apply!(context, node.translate_component)
+                Rendering.apply!(context, node.components)
             else
-                println("TranslateFilter::visit: ", node, " has NO parent")
+                println("TransformFilter::visit: ", node, " has NO parent")
                 return;
             end
             
             # Now visit the child with the modified context
-            visit(child, context, interpolation)
+            Nodes.visit(child, context, interpolation)
 
             Rendering.restore!(context)
         end
@@ -68,6 +78,6 @@ end
 # --------------------------------------------------------
 # Grouping
 # --------------------------------------------------------
-function Nodes.get_children(node::TranslateFilter)
+function Nodes.get_children(node::TransformFilter)
     node.children
 end

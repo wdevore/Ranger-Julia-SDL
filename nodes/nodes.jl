@@ -54,9 +54,15 @@ include("scenes/scene_nil.jl")
 
 include("node_manager.jl")
 
+include("filters/filters.jl")
+
 # -----------------------------------------------------------
 # Abstract Nodes
 # -----------------------------------------------------------
+function is_nil(node::Ranger.AbstractNode)
+    node.base.id == 0
+end
+
 function has_parent(node::Ranger.AbstractNode)
     !is_nil(node.base.parent)
 end

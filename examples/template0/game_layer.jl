@@ -44,7 +44,7 @@ function build(layer::GameLayer, world::Ranger.World)
     build(layer.orbit_system, world)
     set!(layer.orbit_system, -0.5, -0.5, 0.5, 0.5)
     Nodes.set_scale!(layer.orbit_system, 100.0)
-    Nodes.set_position!(layer.orbit_system, -100.0, -100.0)
+    Nodes.set_position!(layer.orbit_system, 100.0, -100.0)
     layer.orbit_system.color = RangerGame.red
     push!(layer.children, layer.orbit_system);
 

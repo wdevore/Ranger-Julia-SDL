@@ -15,6 +15,7 @@ using ..Ranger.Nodes
 using ..Ranger.Nodes.Scenes
 using ..Ranger.Nodes.Custom
 using ..Ranger.Animation
+using ..Ranger.Nodes.Filters
 
 orange = Rendering.Orange()
 white = Rendering.White()
