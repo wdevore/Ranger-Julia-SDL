@@ -25,6 +25,7 @@ red = Rendering.Red()
 yellow = Rendering.Yellow()
 blue = Rendering.Blue()
 lightblue = Rendering.LightNavyBlue()
+lime = Rendering.Lime()
 
 vector_font = Rendering.VectorFont()
 Rendering.build_font!(vector_font)

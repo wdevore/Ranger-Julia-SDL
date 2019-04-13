@@ -1,3 +1,4 @@
+using Printf
 
 mutable struct GameLayer <: Ranger.AbstractNode
     base::Nodes.NodeData
@@ -14,6 +15,9 @@ mutable struct GameLayer <: Ranger.AbstractNode
     orbit_system::OrbitSystemNode
     solid_yellow_rect::Custom.AARectangle
 
+    device_point::Geometry.Point{Float64}
+    local_point::Geometry.Point{Float64}
+
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
@@ -25,6 +29,9 @@ mutable struct GameLayer <: Ranger.AbstractNode
         o.max = Geometry.Point{Float64}()
         o.buc_min = Geometry.Point{Float64}()
         o.buc_max = Geometry.Point{Float64}()
+
+        o.device_point = Geometry.Point{Float64}()
+        o.local_point = Geometry.Point{Float64}()
 
         o
     end
@@ -48,12 +55,16 @@ function build(layer::GameLayer, world::Ranger.World)
     layer.orbit_system.color = RangerGame.red
     push!(layer.children, layer.orbit_system);
 
-    solid_yellow_rect = Custom.AARectangle(world, "YellowAARectangle", layer)
-    layer.solid_yellow_rect = solid_yellow_rect
-    Custom.set_min!(solid_yellow_rect, 200.0, 200.0)
-    Custom.set_max!(solid_yellow_rect, 400.0, 400.0)
-    solid_yellow_rect.color = RangerGame.yellow
-    push!(layer.children, solid_yellow_rect);
+    rect = Custom.AARectangle(world, "YellowAARectangle", layer)
+    layer.solid_yellow_rect = rect
+    Custom.set_min!(rect, -0.5, -0.5) # centered
+    Custom.set_max!(rect, 0.5, 0.5)
+    # Custom.set_min!(rect, 0.0, 0.0) # top-left
+    # Custom.set_max!(rect, 1.0, 1.0)
+    Nodes.set_scale!(rect, 200.0)
+    Nodes.set_position!(rect, -300.0, 300.0)
+    rect.color = RangerGame.yellow
+    push!(layer.children, rect);
 end
 
 # --------------------------------------------------------
@@ -84,6 +95,13 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
 
     Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
+
+    Nodes.map_device_to_node!(context, Int32(layer.device_point.x), Int32(layer.device_point.y),
+        layer.solid_yellow_rect, layer.local_point)
+
+    Rendering.set_draw_color(context, RangerGame.lime)
+    text = @sprintf("L: %2.4f, %2.4f", layer.local_point.x, layer.local_point.y)
+    Rendering.draw_text(context, 10, 70, text, 2, 2, false)
 end
 
 # --------------------------------------------------------
@@ -109,6 +127,13 @@ end
 function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
     # println("io_event ", event, ", node: ", node)
     
+    # tnode = node.orbit_system
+    # Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
+end
+
+function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
+    # println("io_event ", event, ", node: ", node)
+    Geometry.set!(node.device_point, Float64(event.x), Float64(event.y))
     # tnode = node.orbit_system
     # Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
 end

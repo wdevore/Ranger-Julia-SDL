@@ -61,6 +61,7 @@ function run(world::Ranger.World)
     render_elapsed_cnt = 0
     display_coords = true
     display_on = true
+    step_enabled = false
 
     keyboard = Events.KeyboardEvent()
     mouse = Events.MouseEvent()
@@ -115,19 +116,21 @@ function run(world::Ranger.World)
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
         elapsed_t = current_t - previous_t
         previous_t = current_t
-        lag += elapsed_t
 
-        lagging = true
-        while lagging
-            if lag >= ns_per_update
-                Nodes.update(manager, frame_dt)
-                lag -= ns_per_update
-                ups_cnt += 1
-            else 
-                lagging = false
+        if !step_enabled
+            lag += elapsed_t
+            lagging = true
+            while lagging
+                if lag >= ns_per_update
+                    Nodes.update(manager, frame_dt)
+                    lag -= ns_per_update
+                    ups_cnt += 1
+                else 
+                    lagging = false
+                end
             end
         end
-
+        
         # sleep(0.01666)
 
         # ~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--

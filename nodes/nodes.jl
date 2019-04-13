@@ -11,6 +11,7 @@ export
 
 using ..Geometry
 using ..Ranger
+using ..Math
 
 using Base.Math:
     deg2rad, rad2deg

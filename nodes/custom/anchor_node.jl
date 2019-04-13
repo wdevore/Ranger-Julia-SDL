@@ -21,7 +21,7 @@ mutable struct AnchorNode <: Ranger.AbstractNode
 
         # Automatically insert a filter between the parent and this anchor node.
         # filter uses the default behaviour of the transform filter.
-        filter = Filters.TransformFilter(world, "TransformFilter", parent)
+        filter = Filters.TransformFilter(world, "AnchorTransformFilter", parent)
         # Add the filter as a child of parent.
         push!(parent.children, filter)
         # Now make the anchor a child of the filter.

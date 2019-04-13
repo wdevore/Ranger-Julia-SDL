@@ -1,4 +1,5 @@
-export TransformProperties
+export
+    TransformProperties, calc_transform!
 
 using ..Math
 
