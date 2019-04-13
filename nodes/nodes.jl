@@ -128,10 +128,6 @@ function exit_node(node::Ranger.AbstractNode, man::NodeManager)
     # println("AbstractNode::exit ", node);
 end
 
-function get_children(node::Ranger.AbstractNode)
-    nothing
-end
-
 function io_event(node::Ranger.AbstractNode, event::Ranger.AbstractIOEvent)
     # println("AbstractScene::io_event ", event)
 end
@@ -204,8 +200,22 @@ function exit_node(node::Ranger.AbstractScene, man::NodeManager)
     println("AbstractScene::exit ", node);
 end
 
+# --------------------------------------------------------
+# Grouping
+# --------------------------------------------------------
 function get_children(node::Ranger.AbstractScene)
     nothing
+end
+
+function get_children(node::Ranger.AbstractNode)
+    nothing
+end
+
+# --------------------------------------------------------
+# Polygons
+# --------------------------------------------------------
+function get_bucket(node::Ranger.AbstractNode)
+    node.polygon.mesh.bucket # return AbstractArray{Geometry.Point{T}}
 end
 
 # --------------------------------------------------------------------------

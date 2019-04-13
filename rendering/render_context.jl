@@ -341,7 +341,6 @@ function render_line(context::RenderContext, x1::Float64, y1::Float64, x2::Float
     draw_line(context, Int32(round(x1)), Int32(round(y1)), Int32(round(x2)), Int32(round(y2)));
 end
 
-
 function render_lines(context::RenderContext, mesh::Geometry.Mesh)
     first = true
         
@@ -423,6 +422,18 @@ function render_aa_rectangle(context::RenderContext, min::Geometry.Point{Float64
         draw_filled_rectangle(context, minx, miny, maxx, maxy)
         draw_outlined_rectangle(context, minx, miny, maxx, maxy)
     end
+end
+
+function render_aabb_rectangle(context::RenderContext, aabb::Geometry.AABB)
+    # upper-left
+    minx = Int32(round(aabb.min.x))
+    miny = Int32(round(aabb.min.y))
+
+    # bottom-right
+    maxx = Int32(round(aabb.max.x))
+    maxy = Int32(round(aabb.max.y))
+
+    draw_outlined_rectangle(context, minx, miny, maxx, maxy)
 end
 
 function render_outlined_polygon(context::RenderContext, polygon::Geometry.Polygon, state::PolygonState)

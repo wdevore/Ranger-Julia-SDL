@@ -13,10 +13,12 @@ mutable struct GameLayer <: Ranger.AbstractNode
     buc_max::Geometry.Point{Float64}
 
     orbit_system::OrbitSystemNode
-    solid_yellow_rect::Custom.AARectangle
+    yellow_rect::Custom.OutlinedRectangle
 
     device_point::Geometry.Point{Float64}
     local_point::Geometry.Point{Float64}
+    aabb::Geometry.AABB{Float64}
+    inside_rect::Bool
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -32,6 +34,8 @@ mutable struct GameLayer <: Ranger.AbstractNode
 
         o.device_point = Geometry.Point{Float64}()
         o.local_point = Geometry.Point{Float64}()
+        o.aabb = Geometry.AABB{Float64}()
+        o.inside_rect = false
 
         o
     end
@@ -55,14 +59,12 @@ function build(layer::GameLayer, world::Ranger.World)
     layer.orbit_system.color = RangerGame.red
     push!(layer.children, layer.orbit_system);
 
-    rect = Custom.AARectangle(world, "YellowAARectangle", layer)
-    layer.solid_yellow_rect = rect
-    Custom.set_min!(rect, -0.5, -0.5) # centered
-    Custom.set_max!(rect, 0.5, 0.5)
-    # Custom.set_min!(rect, 0.0, 0.0) # top-left
-    # Custom.set_max!(rect, 1.0, 1.0)
+    rect = Custom.OutlinedRectangle(world, "YellowOutlinedRectangle", layer)
+    layer.yellow_rect = rect
+    Custom.set!(rect, -0.5, -0.5, 0.5, 0.5) # centered
     Nodes.set_scale!(rect, 200.0)
     Nodes.set_position!(rect, -300.0, 300.0)
+    Nodes.set_rotation_in_degrees!(rect, 30.0)
     rect.color = RangerGame.yellow
     push!(layer.children, rect);
 end
@@ -72,6 +74,8 @@ end
 # --------------------------------------------------------
 function Nodes.update(layer::GameLayer, dt::Float64)
     # println("GameLayer::update : ", layer)
+    inside = Geometry.is_point_inside(layer.yellow_rect.polygon, layer.local_point)
+    layer.inside_rect = inside
 end
 
 # --------------------------------------------------------
@@ -82,26 +86,36 @@ end
 # end
 
 function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
-    # Transform this node's vertices using the context
     if Nodes.is_dirty(layer)
         Rendering.transform!(context, layer.min, layer.max, layer.buc_min, layer.buc_max)
-        # Rendering.transform!(context, layer.mesh)
         Nodes.set_dirty!(layer, false)
     end
 
+    # Render background (i.e. a solid gray color)
     Rendering.set_draw_color(context, RangerGame.darkgray)
-    # Rendering.render_aa_rectangle(context, layer.mesh, Rendering.FILLED)
-    Rendering.render_aa_rectangle(context, layer.buc_min, layer.buc_max, Rendering.FILLED);
+    Rendering.render_aa_rectangle(context, layer.buc_min, layer.buc_max, Rendering.FILLED)
 
+    # Draw debug layer name
     Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 
+    # Map device/mouse coords to local-space of node.
     Nodes.map_device_to_node!(context, Int32(layer.device_point.x), Int32(layer.device_point.y),
-        layer.solid_yellow_rect, layer.local_point)
+        layer.yellow_rect, layer.local_point)
 
+    # Draw debug local-space coords
     Rendering.set_draw_color(context, RangerGame.lime)
     text = @sprintf("L: %2.4f, %2.4f", layer.local_point.x, layer.local_point.y)
     Rendering.draw_text(context, 10, 70, text, 2, 2, false)
+
+    # Draw AABB box around yellow triangle
+    if layer.inside_rect
+        Rendering.set_draw_color(context, RangerGame.lime)
+    else
+        Rendering.set_draw_color(context, RangerGame.red)
+    end
+    Geometry.expand!(layer.aabb, Nodes.get_bucket(layer.yellow_rect))
+    Rendering.render_aabb_rectangle(context, layer.aabb)
 end
 
 # --------------------------------------------------------
