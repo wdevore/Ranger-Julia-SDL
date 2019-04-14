@@ -24,12 +24,12 @@ mutable struct NodeManager
     timing_targets::Array{Ranger.AbstractNode,1}
     event_targets::Array{Ranger.AbstractNode,1}
 
-    function NodeManager(world::Ranger.World, raster_font::Rendering.RasterFont)
+    function NodeManager(world::Ranger.World, raster_font::Rendering.RasterFont, vector_font::Rendering.VectorFont)
         o = new()
         
         o.clear_background = true
 
-        o.context = Rendering.RenderContext(world, raster_font)
+        o.context = Rendering.RenderContext(world, raster_font, vector_font)
         Rendering.initialize(o.context, world)
 
         o.stack = Nodes.NodeStack()

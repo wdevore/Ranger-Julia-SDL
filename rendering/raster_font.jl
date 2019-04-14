@@ -52,8 +52,7 @@ function load_font!(font::RasterFont, file::String)
         println("******************************************************")
         return false
     end
-    
-    # println(font.dict)
+
     true
 end
 

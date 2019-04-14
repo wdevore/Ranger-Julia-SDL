@@ -28,8 +28,8 @@ lightblue = Rendering.LightNavyBlue()
 lime = Rendering.Lime()
 olive = Rendering.Olive()
 
-vector_font = Rendering.VectorFont()
-Rendering.build_font!(vector_font)
+# vector_font = Rendering.VectorFont()
+# Rendering.load_font!(vector_font)
 
 include("orbit_system_node.jl")
 include("scene_boot.jl")

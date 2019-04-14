@@ -37,11 +37,19 @@ function initialize(title::String, build::Function)
         return nothing
     end
 
+    vector_font = Rendering.VectorFont()
+    loaded = Rendering.load_font!(vector_font, ranger_path * "assets/vector_font.data")
+
+    if !loaded
+        println("Engine failed to initialize")
+        return nothing
+    end
+
     world = Ranger.World(title)
 
     SDL(world)
 
-    global manager = Nodes.NodeManager(world, raster_font)
+    global manager = Nodes.NodeManager(world, raster_font, vector_font)
 
     # Allow client to build game
     build(world)

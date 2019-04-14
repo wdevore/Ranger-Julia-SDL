@@ -22,6 +22,7 @@ mutable struct RenderContext
     renderer::Ptr{Renderer}
 
     raster_font::RasterFont
+    vector_font::VectorFont
 
     # State management
     state::Array{State}
@@ -47,11 +48,12 @@ mutable struct RenderContext
     v1::Geometry.Point{Float64}
     v2::Geometry.Point{Float64}
 
-    function RenderContext(world::Ranger.World, raster_font::RasterFont)
+    function RenderContext(world::Ranger.World, raster_font::RasterFont, vector_font::Rendering.VectorFont)
         o = new()
         
         o.renderer = world.renderer
         o.raster_font = raster_font
+        o.vector_font = vector_font
         o.state = []
         o.stack_top = 1
         o.clear_color = Orange()
