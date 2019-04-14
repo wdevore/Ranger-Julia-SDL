@@ -25,11 +25,23 @@ const UPDATES_PER_SECOND = 30
 const UPDATE_PERIOD = 1000000000.0 / Float64(UPDATES_PER_SECOND) 
 
 function initialize(title::String, build::Function)
+    println("Initializing Ranger engine...")
+    ranger_path = joinpath(@__DIR__, "../")
+    println("Ranger path: ", ranger_path)
+
+    raster_font = Rendering.RasterFont()
+    loaded = Rendering.load_font!(raster_font, ranger_path * "assets/raster_font.data")
+
+    if !loaded
+        println("Engine failed to initialize")
+        return nothing
+    end
+
     world = Ranger.World(title)
 
     SDL(world)
 
-    global manager = Nodes.NodeManager(world)
+    global manager = Nodes.NodeManager(world, raster_font)
 
     # Allow client to build game
     build(world)

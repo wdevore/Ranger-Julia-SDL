@@ -21,6 +21,8 @@ import ..Math.transform!
 mutable struct RenderContext
     renderer::Ptr{Renderer}
 
+    raster_font::RasterFont
+
     # State management
     state::Array{State}
     stack_top::Integer
@@ -45,10 +47,11 @@ mutable struct RenderContext
     v1::Geometry.Point{Float64}
     v2::Geometry.Point{Float64}
 
-    function RenderContext(world::Ranger.World)
+    function RenderContext(world::Ranger.World, raster_font::RasterFont)
         o = new()
         
         o.renderer = world.renderer
+        o.raster_font = raster_font
         o.state = []
         o.stack_top = 1
         o.clear_color = Orange()
@@ -273,7 +276,7 @@ function draw_text(context::RenderContext, x::Integer, y::Integer, text::String,
         end
 
         gy = Int32(y) # move y back to the "top" for each char
-        glyph = get_glyph(char)
+        glyph = get_glyph(context.raster_font, char)
         for g in glyph
             gx = cx # set to current column
             for shift in shifts # scan each pixel in the glyph

@@ -49,13 +49,12 @@ function Nodes.visit(node::TransformFilter, context::Rendering.RenderContext, in
 
             if Nodes.has_parent(node)
                 parent = node.base.parent
-                inverse = parent.transform.inverse
 
                 # This removes the immediate parent's transform effects
-                Rendering.apply!(context, inverse)
+                Rendering.apply!(context, parent.transform.inverse)
 
-                # Re-introduce only the parent's translation component by
-                # excluding the other components
+                # Re-introduce only the parent's components as defined by
+                # exclusion flags.
                 Nodes.calc_filtered_transform!(parent.transform, 
                     node.exclude_translation, node.exclude_rotation, node.exclude_scale,
                     node.components)

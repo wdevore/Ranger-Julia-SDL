@@ -68,7 +68,6 @@ function calc_filtered_transform!(prop::TransformProperties{T},
 end
 
 function calc_transform!(prop::TransformProperties{T}) where {T <: AbstractFloat}
-
     make_translate!(prop.aft, prop.position.x, prop.position.y)
 
     if prop.rotation ≠ 0.0

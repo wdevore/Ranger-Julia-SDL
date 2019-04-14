@@ -44,8 +44,8 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
         parentT = Nodes.calc_transform!(p.transform)
         # println("parentT: ", parentT)
 
-        # Because we are iterating upwards we need to pre-multiply each
-        # child. Ex: [child] x [parent]
+        # Because we are iterating upwards we need to pre-multiply each child.
+        # Ex: [child] x [parent]
         # ----------------------------------------------------------
         #           [comp] x [parentT]
         #               |

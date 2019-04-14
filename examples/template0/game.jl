@@ -61,7 +61,9 @@ end
 function go()
     world = Ranger.Engine.initialize("Template 0", build)
 
-    Ranger.Engine.run(world);
+    if world ≠ nothing
+        Ranger.Engine.run(world);
+    end
 end
 
 end # Module ----------------------------------------------------------
