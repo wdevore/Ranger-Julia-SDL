@@ -54,9 +54,10 @@ function build(layer::GameLayer, world::Ranger.World)
     layer.orbit_system = OrbitSystemNode(world, "OrbitSystemNode", layer)
     build(layer.orbit_system, world)
     set!(layer.orbit_system, -0.5, -0.5, 0.5, 0.5)
+    Nodes.set_rotation_in_degrees!(layer.orbit_system, 30.0)
     Nodes.set_scale!(layer.orbit_system, 100.0)
     Nodes.set_position!(layer.orbit_system, 100.0, -100.0)
-    layer.orbit_system.color = RangerGame.red
+    layer.orbit_system.color = RangerGame.olive
     push!(layer.children, layer.orbit_system);
 
     rect = Custom.OutlinedRectangle(world, "YellowOutlinedRectangle", layer)
@@ -73,18 +74,13 @@ end
 # Timing
 # --------------------------------------------------------
 function Nodes.update(layer::GameLayer, dt::Float64)
-    # println("GameLayer::update : ", layer)
-    inside = Geometry.is_point_inside(layer.yellow_rect.polygon, layer.local_point)
-    layer.inside_rect = inside
+    # inside = Geometry.is_point_inside(layer.yellow_rect.polygon, layer.local_point)
+    # layer.inside_rect = inside
 end
 
 # --------------------------------------------------------
-# Visits
+# Rendering
 # --------------------------------------------------------
-# function Ranger.Nodes.visit(layer::GameLayer, context::RenderContext, interpolation::Float64)
-#     # println("GameLayer visit ", layer);
-# end
-
 function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     if Nodes.is_dirty(layer)
         Rendering.transform!(context, layer.min, layer.max, layer.buc_min, layer.buc_max)
@@ -100,13 +96,13 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 
     # Map device/mouse coords to local-space of node.
-    Nodes.map_device_to_node!(context, Int32(layer.device_point.x), Int32(layer.device_point.y),
-        layer.yellow_rect, layer.local_point)
+    # Nodes.map_device_to_node!(context, Int32(layer.device_point.x), Int32(layer.device_point.y),
+    #     layer.yellow_rect, layer.local_point)
 
     # Draw debug local-space coords
-    Rendering.set_draw_color(context, RangerGame.lime)
-    text = @sprintf("L: %2.4f, %2.4f", layer.local_point.x, layer.local_point.y)
-    Rendering.draw_text(context, 10, 70, text, 2, 2, false)
+    # Rendering.set_draw_color(context, RangerGame.lime)
+    # text = @sprintf("L: %2.4f, %2.4f", layer.local_point.x, layer.local_point.y)
+    # Rendering.draw_text(context, 10, 70, text, 2, 2, false)
 
     # Draw AABB box around yellow triangle
     if layer.inside_rect
@@ -147,9 +143,7 @@ end
 
 function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
     # println("io_event ", event, ", node: ", node)
-    Geometry.set!(node.device_point, Float64(event.x), Float64(event.y))
-    # tnode = node.orbit_system
-    # Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
+    # Geometry.set!(node.device_point, Float64(event.x), Float64(event.y))
 end
 
 # --------------------------------------------------------

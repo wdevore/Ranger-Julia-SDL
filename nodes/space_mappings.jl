@@ -13,6 +13,7 @@ nil_node = Nodes.NodeNil()
 function map_device_to_node!(context::Rendering.RenderContext,
     dx::Int32, dy::Int32, node::Ranger.AbstractNode, local_point::Geometry.Point{Float64})
     wtn = world_to_node_transform(node, nil_node)
+    # println(wtn)
     map_device_to_view(context, dx, dy, view_point)
     Math.transform!(wtn, view_point.x, view_point.y, local_point)
     # local_point.x *= node.transform.scale.x
@@ -31,7 +32,7 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
     # println("node: ", node, ", aft: ", aft)
 
     # A transform to accumulate the parent transforms.
-    child = Math.copy(aft)
+    comp = Math.copy(aft)
 
     out = Math.AffineTransform{Float64}()
 
@@ -39,30 +40,29 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
     # starting with this child's parent.
     p = node.base.parent
     while (!Nodes.is_nil(p)) 
-        # println("p: ", p, ", child: ", child)
+        # println("p: ", p, ", comp: ", comp)
         parentT = Nodes.calc_transform!(p.transform)
         # println("parentT: ", parentT)
 
         # Because we are iterating upwards we need to pre-multiply each
         # child. Ex: [child] x [parent]
         # ----------------------------------------------------------
-        #           [child] x [parentT]
+        #           [comp] x [parentT]
         #               |
+        #               | out
         #               v
-        #              [child] x [parentT] 
+        #             [comp] x [parentT] 
         #                  |
+        #                  | out
         #                  v
-        #                 [child] x [parentT...]
+        #               [comp] x [parentT...]
         #
         # This is a pre-multiply order
         # [child] x [parent of child] x [parent of parent of child]...
         #
         # In other words the child is mutiplied "into" the parent.
-        
-        # Multiply [child] x [parentT] and place in [child]
-        # out = m * n
-        Math.multiply!(child, parentT, out)
-        Math.set!(child, out)
+        Math.multiply!(comp, parentT, out)
+        Math.set!(comp, out)
 
         if (p == psuedoRoot)
             println("Hit psuedoRoot")
@@ -73,5 +73,5 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
         p = p.base.parent
     end
 
-    child
+    comp
 end

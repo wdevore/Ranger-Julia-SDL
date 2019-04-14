@@ -2,7 +2,7 @@ using Base: min, max
 
 export 
     Polygon,
-    add_vertex!, build!
+    add_vertex!, build!, is_point_inside
 
 import .Geometry.add_vertex!
 import .Geometry.build!
@@ -28,16 +28,25 @@ function is_point_inside(poly::Polygon{T}, p::Point{T}) where {T <: AbstractFloa
     c = false
     vertices = poly.mesh.vertices
     nvert = length(vertices)
-    j = nvert - 2 # Julia is 1-based indexing
-    
+    j = 2
+
     while i < nvert
         if ((vertices[i].y > p.y) ≠ (vertices[j].y > p.y)) &&
             (p.x < (vertices[j].x - vertices[i].x) * (p.y - vertices[i].y) /
               (vertices[j].y - vertices[i].y) + vertices[i].x)
             c = !c
         end
-        j += 1
         i += 1
+        j += 1
+    end
+
+    # Last edge to close loop
+    i = j - 1
+    j = 1
+    if ((vertices[i].y > p.y) ≠ (vertices[j].y > p.y)) &&
+        (p.x < (vertices[j].x - vertices[i].x) * (p.y - vertices[i].y) /
+          (vertices[j].y - vertices[i].y) + vertices[i].x)
+        c = !c
     end
 
     c
