@@ -29,6 +29,7 @@ function initialize(title::String, build::Function)
     ranger_path = joinpath(@__DIR__, "../")
     println("Ranger path: ", ranger_path)
 
+    println("Loading fonts...")
     raster_font = Rendering.RasterFont()
     loaded = Rendering.load_font!(raster_font, ranger_path * "assets/raster_font.data")
 
@@ -44,6 +45,8 @@ function initialize(title::String, build::Function)
         println("Engine failed to initialize")
         return nothing
     end
+
+    println("Fonts loaded.")
 
     world = Ranger.World(title)
 
