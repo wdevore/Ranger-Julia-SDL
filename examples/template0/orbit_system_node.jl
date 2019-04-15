@@ -79,14 +79,12 @@ function build(node::OrbitSystemNode, world::Ranger.World)
 
     # Now we add children of the filter.
     node.triangle = Custom.OutlinedTriangle(world, "YellowTriangle", anchor_filter)
-    # node.triangle = Custom.OutlinedTriangle(world, "YellowTriangle", node.anchor)
     Nodes.set_scale!(node.triangle, 50.0)
     Nodes.set_position!(node.triangle, 200.0, 0.0)
     # Nodes.set_scale!(node.triangle, 2.0)
     # Nodes.set_position!(node.triangle, 3.0, 0.0)
     node.triangle.color = RangerGame.yellow
     push!(anchor_filter.children, node.triangle);
-    # push!(node.children, node.triangle);
     node.tri_motion.angle = -90.0    # degrees/second
 end
 
@@ -99,10 +97,10 @@ function Nodes.update(node::OrbitSystemNode, dt::Float64)
     Animation.update!(node.anchor_motion, dt);
     Animation.update!(node.tri_motion, dt);
 
-    # inside = Geometry.is_point_inside(node.triangle.polygon, node.local_point)
-    # node.inside_rect = inside
-    inside = Geometry.is_point_inside(node.polygon, node.local_point)
+    inside = Geometry.is_point_inside(node.triangle.polygon, node.local_point)
     node.inside_rect = inside
+    # inside = Geometry.is_point_inside(node.polygon, node.local_point)
+    # node.inside_rect = inside
 end
 
 function Nodes.interpolate(node::OrbitSystemNode, interpolation::Float64)
@@ -143,12 +141,12 @@ function Nodes.draw(node::OrbitSystemNode, context::Rendering.RenderContext)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
 
     # Map device/mouse coords to local-space of node.
-    # Nodes.map_device_to_node!(context, 
-    #     Int32(node.device_point.x), Int32(node.device_point.y),
-    #     node.triangle, node.local_point)
     Nodes.map_device_to_node!(context, 
         Int32(node.device_point.x), Int32(node.device_point.y),
-        node, node.local_point)
+        node.triangle, node.local_point)
+    # Nodes.map_device_to_node!(context, 
+    #     Int32(node.device_point.x), Int32(node.device_point.y),
+    #     node, node.local_point)
 
     Rendering.set_draw_color(context, RangerGame.lime)
     text = @sprintf("L: %2.4f, %2.4f", node.local_point.x, node.local_point.y)
@@ -160,8 +158,8 @@ function Nodes.draw(node::OrbitSystemNode, context::Rendering.RenderContext)
     else
         Rendering.set_draw_color(context, RangerGame.red)
     end
-    # Geometry.expand!(node.aabb, Nodes.get_bucket(node.triangle))
-    Geometry.expand!(node.aabb, Nodes.get_bucket(node))
+    Geometry.expand!(node.aabb, Nodes.get_bucket(node.triangle))
+    # Geometry.expand!(node.aabb, Nodes.get_bucket(node))
     Rendering.render_aabb_rectangle(context, node.aabb)
 end
 

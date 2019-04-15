@@ -26,8 +26,6 @@ mutable struct TransformFilter <: Ranger.AbstractNode
 
         o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
         o.transform = Nodes.TransformProperties{Float64}()
-        # This is a filter node type. The node will calc the transform directly.
-        o.transform.managed = true
         o.children = Array{Ranger.AbstractNode,1}[]
 
         o.components = Math.AffineTransform{Float64}()
@@ -87,32 +85,9 @@ function Nodes.visit(node::TransformFilter, context::Rendering.RenderContext, in
     Rendering.restore!(context)
 end
 
-# function Nodes.calc_transform!(node::TransformFilter, context::Rendering.RenderContext)
-#     if Nodes.has_parent(node)
-#         parent = node.base.parent
-
-#         # This removes the immediate parent's transform effects
-#         Rendering.apply!(context, parent.transform.inverse)
-
-#         # Re-introduce only the parent's components as defined by
-#         # exclusion flags.
-#         Nodes.calc_filtered_transform!(parent.transform, 
-#             node.exclude_translation, node.exclude_rotation, node.exclude_scale,
-#             node.components)
-
-#         # Merge them with the current context.
-#         # Rendering.apply!(context, node.components)
-#         # post = Math.AffineTransform{Float64}()
-#         # Math.multiply!(node.components, context.current, post)
-#         # Math.set!(node.components, post)
-#         println("*******************")
-#     else
-#         println("TransformFilter::visit: ", node, " has NO parent")
-#         return;
-#     end
-
-#     node.components
-# end
+function Nodes.calc_transform!(node::TransformFilter)
+    node.transform.aft
+end
 
 # --------------------------------------------------------
 # Grouping

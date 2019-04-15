@@ -89,7 +89,8 @@ function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, inte
     aft = node.transform.aft
 
     if is_dirty(node)
-        aft = calc_transform!(node.transform)
+        # aft = calc_transform!(node.transform)
+        aft = calc_transform!(node)
         # println(node.base.name, " aft: ", aft)
     end
 
@@ -111,10 +112,26 @@ function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, inte
     # println("End visit ----------------------------------------------")
 end
 
-# function calc_transform!(node::Ranger.AbstractNode, context::Rendering.RenderContext)
-#     # println(node)
-#     calc_transform!(node.transform)
-# end
+function calc_transform!(node::Ranger.AbstractNode)
+    prop = node.transform
+
+    if is_dirty(node)
+        # if !prop.managed || is_dirty(node)
+        make_translate!(prop.aft, prop.position.x, prop.position.y)
+
+        if prop.rotation ≠ 0.0
+            rotate!(prop.aft, prop.rotation)
+        end
+
+        if prop.scale.x ≠ 1.0 || prop.scale.y ≠ 1.0
+            scale!(prop.aft, prop.scale.x, prop.scale.y)
+        end
+
+        Math.invert!(prop.aft, prop.inverse)
+    end
+
+    prop.aft
+end
 
 function interpolate(node::Ranger.AbstractNode, interpolation::Float64)
     # println("AbstractNode::interpolate ", node);

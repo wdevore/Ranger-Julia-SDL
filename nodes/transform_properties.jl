@@ -8,9 +8,6 @@ mutable struct TransformProperties{T <: AbstractFloat}
     rotation::T       # radians
     scale::Point{T}
 
-    # A flag that nodes use to indicate that they manage the Transform
-    # directly. Filter nodes use this flag exclusively.
-    managed::Bool
     aft::Math.AffineTransform{T}
     inverse::Math.AffineTransform{T}
 
@@ -18,7 +15,6 @@ mutable struct TransformProperties{T <: AbstractFloat}
         new(Point{T}(),
             0.0,
             Point{T}(1.0, 1.0),
-            false, # Default to unmanaged. Managed is used by filters.
             Math.AffineTransform{T}(),
             Math.AffineTransform{T}())
     end
@@ -69,22 +65,4 @@ function calc_filtered_transform!(prop::TransformProperties{T},
     end
 
     nothing
-end
-
-function calc_transform!(prop::TransformProperties{T}) where {T <: AbstractFloat}
-    if !prop.managed
-        make_translate!(prop.aft, prop.position.x, prop.position.y)
-
-        if prop.rotation ≠ 0.0
-            rotate!(prop.aft, prop.rotation)
-        end
-
-        if prop.scale.x ≠ 1.0 || prop.scale.y ≠ 1.0
-            scale!(prop.aft, prop.scale.x, prop.scale.y)
-        end
-
-        Math.invert!(prop.aft, prop.inverse)
-    end
-
-    prop.aft
 end

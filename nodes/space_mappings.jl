@@ -28,7 +28,8 @@ end
 
 function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.AbstractNode)
     # println("*****************************")
-    aft = Nodes.calc_transform!(node.transform)
+    # aft = Nodes.calc_transform!(node.transform)
+    aft = Nodes.calc_transform!(node)
     # println("node: ", node, ", aft: ", aft)
 
     # A transform to accumulate the parent transforms.
@@ -41,7 +42,8 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
     p = node.base.parent
     while (!Nodes.is_nil(p)) 
         # println("p: ", p, ", comp: ", comp)
-        parentT = Nodes.calc_transform!(p.transform)
+        # parentT = Nodes.calc_transform!(p.transform)
+        parentT = Nodes.calc_transform!(p)
         # println("parentT: ", parentT)
 
         # Because we are iterating upwards we need to pre-multiply each child.
