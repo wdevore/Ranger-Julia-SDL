@@ -7,7 +7,7 @@ module Nodes
 
 export 
     visit, enter_node, exit_node,
-    set_position!
+    set_position!, calc_transform!
 
 using ..Geometry
 using ..Ranger
@@ -36,6 +36,7 @@ function has_replacement end
 function has_parent end
 
 function update end
+function calc_transform! end
 
 function get_children end
 
@@ -72,6 +73,7 @@ end
 
 using ..Rendering
 
+# visit() goes "down" the heirarchy while space-mappings goes upward.
 function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, interpolation::Float64)
     # println("AbstractNode::visit ", node);
     if !is_visible(node)
@@ -108,6 +110,11 @@ function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, inte
 
     # println("End visit ----------------------------------------------")
 end
+
+# function calc_transform!(node::Ranger.AbstractNode, context::Rendering.RenderContext)
+#     # println(node)
+#     calc_transform!(node.transform)
+# end
 
 function interpolate(node::Ranger.AbstractNode, interpolation::Float64)
     # println("AbstractNode::interpolate ", node);
