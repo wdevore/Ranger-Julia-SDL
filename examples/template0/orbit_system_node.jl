@@ -24,10 +24,9 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
     anchor::Custom.AnchorNode
     triangle::Custom.OutlinedTriangle
 
-    device_point::Geometry.Point{Float64}
-    local_point::Geometry.Point{Float64}
+    detection::Nodes.Detection
+
     aabb::Geometry.AABB{Float64}
-    inside_rect::Bool
 
     function OrbitSystemNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -41,10 +40,8 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
         o.anchor_motion = Animation.AngularMotion{Float64}()
         o.tri_motion = Animation.AngularMotion{Float64}()
 
-        o.device_point = Geometry.Point{Float64}()
-        o.local_point = Geometry.Point{Float64}()
         o.aabb = Geometry.AABB{Float64}()
-        o.inside_rect = false
+        o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
 
         o
     end
@@ -97,10 +94,9 @@ function Nodes.update(node::OrbitSystemNode, dt::Float64)
     Animation.update!(node.anchor_motion, dt);
     Animation.update!(node.tri_motion, dt);
 
-    inside = Geometry.is_point_inside(node.triangle.polygon, node.local_point)
-    node.inside_rect = inside
-    # inside = Geometry.is_point_inside(node.polygon, node.local_point)
-    # node.inside_rect = inside
+    Nodes.update!(node.detection, node)
+
+    Nodes.update(node.triangle, dt)
 end
 
 function Nodes.interpolate(node::OrbitSystemNode, interpolation::Float64)
@@ -140,26 +136,11 @@ function Nodes.draw(node::OrbitSystemNode, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, node.color)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
 
-    # Map device/mouse coords to local-space of node.
-    Nodes.map_device_to_node!(context, 
-        Int32(node.device_point.x), Int32(node.device_point.y),
-        node.triangle, node.local_point)
-    # Nodes.map_device_to_node!(context, 
-    #     Int32(node.device_point.x), Int32(node.device_point.y),
-    #     node, node.local_point)
+    aabb_color = Nodes.check!(node.detection, node, context)
+    Nodes.draw(node.detection, context)
+    Rendering.set_draw_color(context, aabb_color)
 
-    Rendering.set_draw_color(context, RangerGame.lime)
-    text = @sprintf("L: %2.4f, %2.4f", node.local_point.x, node.local_point.y)
-    Rendering.draw_text(context, 10, 70, text, 2, 2, false)
-
-    # Draw AABB box around triangle
-    if node.inside_rect
-        Rendering.set_draw_color(context, RangerGame.lime)
-    else
-        Rendering.set_draw_color(context, RangerGame.red)
-    end
-    Geometry.expand!(node.aabb, Nodes.get_bucket(node.triangle))
-    # Geometry.expand!(node.aabb, Nodes.get_bucket(node))
+    Geometry.expand!(node.aabb, Nodes.get_bucket(node))
     Rendering.render_aabb_rectangle(context, node.aabb)
 end
 
@@ -177,7 +158,8 @@ end
 # --------------------------------------------------------
 function Nodes.io_event(node::OrbitSystemNode, event::Events.MouseEvent)
     # println("io_event ", event, ", node: ", node)
-    Geometry.set!(node.device_point, Float64(event.x), Float64(event.y))
+    Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
+    Nodes.io_event(node.triangle, event)
 end
 
 # --------------------------------------------------------

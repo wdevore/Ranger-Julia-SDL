@@ -15,10 +15,8 @@ mutable struct GameLayer <: Ranger.AbstractNode
     orbit_system::OrbitSystemNode
     yellow_rect::Custom.OutlinedRectangle
 
-    device_point::Geometry.Point{Float64}
-    local_point::Geometry.Point{Float64}
     aabb::Geometry.AABB{Float64}
-    inside_rect::Bool
+    detection::Nodes.Detection
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -32,10 +30,8 @@ mutable struct GameLayer <: Ranger.AbstractNode
         o.buc_min = Geometry.Point{Float64}()
         o.buc_max = Geometry.Point{Float64}()
 
-        o.device_point = Geometry.Point{Float64}()
-        o.local_point = Geometry.Point{Float64}()
         o.aabb = Geometry.AABB{Float64}()
-        o.inside_rect = false
+        o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
 
         o
     end
@@ -74,8 +70,7 @@ end
 # Timing
 # --------------------------------------------------------
 function Nodes.update(layer::GameLayer, dt::Float64)
-    # inside = Geometry.is_point_inside(layer.yellow_rect.polygon, layer.local_point)
-    # layer.inside_rect = inside
+    Nodes.update!(layer.detection, layer.yellow_rect)
 end
 
 # --------------------------------------------------------
@@ -95,21 +90,10 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 
-    # Map device/mouse coords to local-space of node.
-    # Nodes.map_device_to_node!(context, Int32(layer.device_point.x), Int32(layer.device_point.y),
-    #     layer.yellow_rect, layer.local_point)
-
-    # Draw debug local-space coords
-    # Rendering.set_draw_color(context, RangerGame.lime)
-    # text = @sprintf("L: %2.4f, %2.4f", layer.local_point.x, layer.local_point.y)
-    # Rendering.draw_text(context, 10, 70, text, 2, 2, false)
-
     # Draw AABB box around yellow triangle
-    if layer.inside_rect
-        Rendering.set_draw_color(context, RangerGame.lime)
-    else
-        Rendering.set_draw_color(context, RangerGame.red)
-    end
+    aabb_color = Nodes.check!(layer.detection, layer.yellow_rect, context)
+    Rendering.set_draw_color(context, aabb_color)
+
     Geometry.expand!(layer.aabb, Nodes.get_bucket(layer.yellow_rect))
     Rendering.render_aabb_rectangle(context, layer.aabb)
 end
@@ -134,16 +118,12 @@ end
 # Events
 # --------------------------------------------------------
 # Here we elect to receive keyboard events.
-function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
-    # println("io_event ", event, ", node: ", node)
-    
-    # tnode = node.orbit_system
-    # Nodes.set_position!(tnode, tnode.transform.position.x + 5.0, tnode.transform.position.y)
-end
+# function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
+# end
 
 function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
-    # println("io_event ", event, ", node: ", node)
-    # Geometry.set!(node.device_point, Float64(event.x), Float64(event.y))
+    Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
+
 end
 
 # --------------------------------------------------------

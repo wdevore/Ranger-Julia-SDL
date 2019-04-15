@@ -8,6 +8,7 @@ using ..Geometry
 using ..Rendering
 using ..Math
 using ..Nodes.Filters
+using ..Events
 
 include("cross_node.jl")
 include("aa_rectangle.jl")

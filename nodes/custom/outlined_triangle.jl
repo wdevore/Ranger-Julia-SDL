@@ -12,6 +12,10 @@ mutable struct OutlinedTriangle <: Ranger.AbstractNode
 
     polygon::Geometry.Polygon
 
+    aabb::Geometry.AABB{Float64}
+
+    detection::Nodes.Detection
+
     function OutlinedTriangle(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
@@ -21,6 +25,9 @@ mutable struct OutlinedTriangle <: Ranger.AbstractNode
 
         o.polygon = Geometry.Polygon{Float64}()
 
+        o.aabb = Geometry.AABB{Float64}()
+        o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
+        
         Geometry.add_vertex!(o.polygon, -0.5, 0.5)
         Geometry.add_vertex!(o.polygon, 0.5, 0.5)
         Geometry.add_vertex!(o.polygon, 0.0, -0.5)
@@ -33,6 +40,13 @@ mutable struct OutlinedTriangle <: Ranger.AbstractNode
     end
 end
 
+# --------------------------------------------------------
+# Timing: either called by NodeManager or by a parent node
+# --------------------------------------------------------
+function Nodes.update(node::OutlinedTriangle, dt::Float64)
+    Nodes.update!(node.detection, node)
+end
+
 function Nodes.draw(node::OutlinedTriangle, context::Rendering.RenderContext)
     if Nodes.is_dirty(node)
         Rendering.transform!(context, node.polygon)
@@ -41,6 +55,20 @@ function Nodes.draw(node::OutlinedTriangle, context::Rendering.RenderContext)
 
     Rendering.set_draw_color(context, node.color)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
+
+    aabb_color = Nodes.check!(node.detection, node, context)
+    Rendering.set_draw_color(context, aabb_color)
+
+    Geometry.expand!(node.aabb, Nodes.get_bucket(node))
+    Rendering.render_aabb_rectangle(context, node.aabb)
+end
+
+# --------------------------------------------------------
+# Events
+# --------------------------------------------------------
+function Nodes.io_event(node::OutlinedTriangle, event::Events.MouseEvent)
+    # println("io_event ", event, ", node: ", node)
+    Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
 end
 
 function set!(node::OutlinedTriangle, v1::Point{Float64}, v2::Point{Float64}, v3::Point{Float64})

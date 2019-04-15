@@ -59,6 +59,7 @@ include("node_manager.jl")
 include("filters/filters.jl")
 
 include("space_mappings.jl")
+include("detection.jl")
 
 # -----------------------------------------------------------
 # Abstract Nodes
@@ -89,7 +90,6 @@ function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, inte
     aft = node.transform.aft
 
     if is_dirty(node)
-        # aft = calc_transform!(node.transform)
         aft = calc_transform!(node)
         # println(node.base.name, " aft: ", aft)
     end
@@ -116,7 +116,6 @@ function calc_transform!(node::Ranger.AbstractNode)
     prop = node.transform
 
     if is_dirty(node)
-        # if !prop.managed || is_dirty(node)
         make_translate!(prop.aft, prop.position.x, prop.position.y)
 
         if prop.rotation ≠ 0.0

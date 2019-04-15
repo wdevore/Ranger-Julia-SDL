@@ -46,6 +46,7 @@ function set_nonuniform_scale!(prop::TransformProperties{T}, sx::T, sy::T) where
     Geometry.set!(prop.scale, sx, sy);
 end
 
+# Mostly used by Filter type nodes
 function calc_filtered_transform!(prop::TransformProperties{T},
         exclude_translation::Bool, exclude_rotation::Bool, exclude_scale::Bool,
         aft::Math.AffineTransform{T},

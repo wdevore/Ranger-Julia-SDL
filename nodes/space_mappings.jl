@@ -7,15 +7,24 @@ function map_device_to_view(context::Rendering.RenderContext,
     Math.transform!(context.inv_view_space, Float64(dx), Float64(dy), view_point);
 end
 
+# intermediate view-space node.
 view_point = Geometry.Point{Float64}()
+# Standin signalling no psuedoRoot.
 nil_node = Nodes.NodeNil()
 
 function map_device_to_node!(context::Rendering.RenderContext,
     dx::Int32, dy::Int32, node::Ranger.AbstractNode, local_point::Geometry.Point{Float64})
+    # Mapping from device to node requires to transforms from to "directions"
+    # 1st is upwards transform and the 2nd is downwards transform.
+
+    # Upwards from node to world-space (aka view-space)
     wtn = world_to_node_transform(node, nil_node)
-    # println(wtn)
+    # downwards from device-space to view-space
     map_device_to_view(context, dx, dy, view_point)
+
+    # Now map view-space point to local-space of node
     Math.transform!(wtn, view_point.x, view_point.y, local_point)
+    # Optional scaling
     # local_point.x *= node.transform.scale.x
     # local_point.y *= node.transform.scale.y
 end
@@ -28,7 +37,6 @@ end
 
 function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.AbstractNode)
     # println("*****************************")
-    # aft = Nodes.calc_transform!(node.transform)
     aft = Nodes.calc_transform!(node)
     # println("node: ", node, ", aft: ", aft)
 
@@ -42,7 +50,6 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
     p = node.base.parent
     while (!Nodes.is_nil(p)) 
         # println("p: ", p, ", comp: ", comp)
-        # parentT = Nodes.calc_transform!(p.transform)
         parentT = Nodes.calc_transform!(p)
         # println("parentT: ", parentT)
 
@@ -54,9 +61,9 @@ function node_to_world_transform(node::Ranger.AbstractNode, psuedoRoot::Ranger.A
         #               | out
         #               v
         #             [comp] x [parentT] 
-        #                  |
-        #                  | out
-        #                  v
+        #                 |
+        #                 | out
+        #                 v
         #               [comp] x [parentT...]
         #
         # This is a pre-multiply order
