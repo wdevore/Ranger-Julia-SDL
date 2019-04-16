@@ -4,6 +4,8 @@ export
 
 using Printf
 
+# Detection is for detecting if a device point is within
+# the node's polygon.
 mutable struct Detection
     local_point::Geometry.Point{Float64}
     device_point::Geometry.Point{Float64}
@@ -50,11 +52,12 @@ end
 
 # Draw debug local-space coords
 function draw(detection::Detection, context::Rendering.RenderContext)
-    if detection.inside_node
-        Rendering.set_draw_color(context, detection.inside_color)
+    color = if detection.inside_node
+        detection.inside_color
     else
-        Rendering.set_draw_color(context, detection.outside_color)
+        detection.outside_color
     end
+    Rendering.set_draw_color(context, color)
     text = @sprintf("L: %2.4f, %2.4f", detection.local_point.x, detection.local_point.y)
     Rendering.draw_text(context, 10, 70, text, 2, 2, false)
 end
