@@ -1,11 +1,11 @@
 export 
-    OutlinedRectangle,
+    OutlinedCircle,
     set!, update
 
 import ..Nodes.draw
 # import ..Nodes.update!
 
-mutable struct OutlinedRectangle <: Ranger.AbstractNode
+mutable struct OutlinedCircle <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
 
@@ -14,26 +14,20 @@ mutable struct OutlinedRectangle <: Ranger.AbstractNode
     polygon::Geometry.Polygon
 
     aabb::Geometry.AABB{Float64}
+
     detection::Nodes.Detection
 
-    function OutlinedRectangle(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
+    function OutlinedCircle(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
         o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
         o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
 
-        o.aabb = Geometry.AABB{Float64}()
-        o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
-
         o.polygon = Geometry.Polygon{Float64}()
 
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-        Geometry.add_vertex!(o.polygon, 0.0, 0.0)
-
-        Geometry.build!(o.polygon)
+        o.aabb = Geometry.AABB{Float64}()
+        o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
 
         o
     end
@@ -42,11 +36,11 @@ end
 # --------------------------------------------------------
 # Timing: either called by NodeManager or by a parent node
 # --------------------------------------------------------
-function Nodes.update(node::OutlinedRectangle, dt::Float64)
+function Nodes.update(node::OutlinedCircle, dt::Float64)
     Nodes.update!(node.detection, node)
 end
 
-function Nodes.draw(node::OutlinedRectangle, context::Rendering.RenderContext)
+function Nodes.draw(node::OutlinedCircle, context::Rendering.RenderContext)
     if Nodes.is_dirty(node)
         Rendering.transform!(context, node.polygon)
         Nodes.set_dirty!(node, false)
@@ -62,19 +56,20 @@ function Nodes.draw(node::OutlinedRectangle, context::Rendering.RenderContext)
     Rendering.render_aabb_rectangle(context, node.aabb)
 end
 
-function set!(node::OutlinedRectangle, minx::Float64, miny::Float64, maxx::Float64, maxy::Float64)
-    Geometry.set!(node.polygon.mesh.vertices[1], minx, miny)
-    Geometry.set!(node.polygon.mesh.vertices[2], minx, maxy)
-    Geometry.set!(node.polygon.mesh.vertices[3], maxx, maxy)
-    Geometry.set!(node.polygon.mesh.vertices[4], maxx, miny)
-    
+function set!(node::OutlinedCircle, segment_size::Float64)
+    for degree in 0.0:segment_size:360.0
+        Geometry.add_vertex!(node.polygon, cos(deg2rad(degree)), sin(deg2rad(degree)))
+    end
+
+    Geometry.build!(node.polygon)
+
     Nodes.set_dirty!(node, true)
 end
 
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-function Nodes.io_event(node::OutlinedRectangle, event::Events.MouseEvent)
+function Nodes.io_event(node::OutlinedCircle, event::Events.MouseEvent)
     # println("io_event ", event, ", node: ", node)
     Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
 end

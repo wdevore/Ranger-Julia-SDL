@@ -27,6 +27,7 @@ lightblue = Rendering.LightNavyBlue()
 red = Rendering.Red()
 lime = Rendering.Lime()
 olive = Rendering.Olive()
+lightpurple = Rendering.LightPurple()
 
 include("orbit_system_node.jl")
 include("scene_boot.jl")

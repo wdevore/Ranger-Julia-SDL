@@ -14,9 +14,7 @@ mutable struct GameLayer <: Ranger.AbstractNode
 
     orbit_system::OrbitSystemNode
     yellow_rect::Custom.OutlinedRectangle
-
-    aabb::Geometry.AABB{Float64}
-    detection::Nodes.Detection
+    circle::Custom.OutlinedCircle
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -29,9 +27,6 @@ mutable struct GameLayer <: Ranger.AbstractNode
         o.max = Geometry.Point{Float64}()
         o.buc_min = Geometry.Point{Float64}()
         o.buc_max = Geometry.Point{Float64}()
-
-        o.aabb = Geometry.AABB{Float64}()
-        o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
 
         o
     end
@@ -64,13 +59,22 @@ function build(layer::GameLayer, world::Ranger.World)
     Nodes.set_rotation_in_degrees!(rect, 30.0)
     rect.color = RangerGame.yellow
     push!(layer.children, rect);
+
+    circle = Custom.OutlinedCircle(world, "OutlinedCircle", layer)
+    layer.circle = circle
+    Custom.set!(circle, 20.0)
+    Nodes.set_scale!(circle, 100.0)
+    Nodes.set_position!(circle, 300.0, 300.0)
+    circle.color = RangerGame.lightpurple
+    push!(layer.children, circle);
 end
 
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
 function Nodes.update(layer::GameLayer, dt::Float64)
-    Nodes.update!(layer.detection, layer.yellow_rect)
+    Nodes.update(layer.yellow_rect, dt)
+    Nodes.update(layer.circle, dt)
 end
 
 # --------------------------------------------------------
@@ -89,13 +93,6 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     # Draw debug layer name
     Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
-
-    # Draw AABB box around yellow triangle
-    aabb_color = Nodes.check!(layer.detection, layer.yellow_rect, context)
-    Rendering.set_draw_color(context, aabb_color)
-
-    Geometry.expand!(layer.aabb, Nodes.get_bucket(layer.yellow_rect))
-    Rendering.render_aabb_rectangle(context, layer.aabb)
 end
 
 # --------------------------------------------------------
@@ -122,8 +119,8 @@ end
 # end
 
 function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
-    Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
-
+    Nodes.io_event(node.yellow_rect, event)
+    Nodes.io_event(node.circle, event)
 end
 
 # --------------------------------------------------------

@@ -12,9 +12,11 @@ using ..Events
 
 include("cross_node.jl")
 include("aa_rectangle.jl")
-include("outlined_rectangle.jl")
 include("vector_text_node.jl")
+include("outlined_rectangle.jl")
 include("outlined_triangle.jl")
+include("outlined_circle.jl")
+
 include("anchor_node.jl")
 
 end
