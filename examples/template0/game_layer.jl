@@ -15,6 +15,7 @@ mutable struct GameLayer <: Ranger.AbstractNode
     orbit_system::OrbitSystemNode
     yellow_rect::Custom.OutlinedRectangle
     circle::Custom.OutlinedCircle
+    ship::Ship
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -62,11 +63,18 @@ function build(layer::GameLayer, world::Ranger.World)
 
     circle = Custom.OutlinedCircle(world, "OutlinedCircle", layer)
     layer.circle = circle
-    Custom.set!(circle, 20.0)
+    Custom.set!(circle, 18.0)
     Nodes.set_scale!(circle, 100.0)
     Nodes.set_position!(circle, 300.0, 300.0)
     circle.color = RangerGame.lightpurple
     push!(layer.children, circle);
+
+    layer.ship = Ship(world, "Ship", layer)
+    Nodes.set_scale!(layer.ship, 30.0)
+    Nodes.set_position!(layer.ship, -100.0, -100.0)
+    Nodes.set_rotation_in_degrees!(layer.ship, 30.0)
+    layer.ship.color = RangerGame.peach
+    push!(layer.children, layer.ship);
 end
 
 # --------------------------------------------------------

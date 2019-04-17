@@ -28,11 +28,15 @@ red = Rendering.Red()
 lime = Rendering.Lime()
 olive = Rendering.Olive()
 lightpurple = Rendering.LightPurple()
+peach = Rendering.Peach()
 
 include("orbit_system_node.jl")
 include("scene_boot.jl")
 include("splash_scene.jl")
+
+include("ship_node.jl")
 include("game_layer.jl")
+
 include("game_scene.jl")
 
 export go

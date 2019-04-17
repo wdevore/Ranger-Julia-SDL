@@ -83,6 +83,11 @@ function Yellow()
     Palette(0xFFDC00FF)
 end
 
+function Peach()
+    Palette(0xF1C6A7FF)
+end
+
+
 # ----------------------------------------------------
 # Green hues
 # ----------------------------------------------------

@@ -4,7 +4,7 @@ export
 
 using Printf
 
-import ..Nodes.draw
+# import ..Nodes.draw
 
 mutable struct OrbitSystemNode <: Ranger.AbstractNode
     base::Nodes.NodeData
