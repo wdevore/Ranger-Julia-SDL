@@ -83,7 +83,6 @@ end
 function Nodes.update(layer::GameLayer, dt::Float64)
     Nodes.update(layer.yellow_rect, dt)
     Nodes.update(layer.circle, dt)
-    Nodes.update(layer.ship, dt)
 end
 
 # --------------------------------------------------------
@@ -111,13 +110,17 @@ function Nodes.enter_node(layer::GameLayer, man::Nodes.NodeManager)
     println("enter ", layer);
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, layer)
+    Nodes.register_target(man, layer.ship)
     Nodes.register_event_target(man, layer);
+    Nodes.register_event_target(man, layer.ship);
 end
 
 function Nodes.exit_node(layer::GameLayer, man::Nodes.NodeManager)
     println("exit ", layer);
     Nodes.unregister_target(man, layer);
+    Nodes.unregister_target(man, layer.ship);
     Nodes.unregister_event_target(man, layer);
+    Nodes.unregister_event_target(man, layer.ship);
 end
 
 # --------------------------------------------------------
@@ -130,7 +133,6 @@ end
 function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
     Nodes.io_event(node.yellow_rect, event)
     Nodes.io_event(node.circle, event)
-    Nodes.io_event(node.ship, event)
 end
 
 # --------------------------------------------------------

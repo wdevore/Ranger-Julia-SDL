@@ -102,6 +102,7 @@ function Nodes.draw(node::Ship, context::Rendering.RenderContext)
     inside = Nodes.check!(node.det_disc, node, context)
     inside = inside || Nodes.check!(node.det_left, node, context)
     inside = inside || Nodes.check!(node.det_right, node, context)
+    
     Nodes.draw(node.det_disc, context)
     aabb_color = Nodes.highlight_color(node.det_disc, inside)
     Rendering.set_draw_color(context, aabb_color)
