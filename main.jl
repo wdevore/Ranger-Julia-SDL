@@ -16,7 +16,7 @@ println("p: $p")
 aft = RMath.AffineTransform{Float64}()
 println("aft: $aft")
 
-RMath.set!(aft, 1.1,2.2,3.3,4.4,5.5,6.6)
+RMath.set!(aft, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6)
 println("aft: $aft")
 
 RMath.to_identity!(aft)
@@ -57,7 +57,7 @@ p2 = RGeo.Point{Float64}(7.5, 10.0)
 
 aabb = RGeo.AABB{Float64}()
 println("aabb: $aabb")
-RGeo.expand!(aabb, p0, p1, p2)
+RGeo.set!(aabb, p0, p1, p2)
 println("aabb: $aabb")
 
 println("--------------------------")
@@ -66,7 +66,7 @@ verts = [p0, p1, p2]
 
 aabb = RGeo.AABB{Float64}()
 println("A Verts aabb: $aabb")
-RGeo.expand!(aabb, verts)
+RGeo.set!(aabb, verts)
 println("B Verts aabb: $aabb")
 
 println("intersection rectangle --------------------------")

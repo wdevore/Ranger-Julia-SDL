@@ -1,6 +1,6 @@
 export
     Detection,
-    check!, update!, set_device_point!, draw
+    check!, update!, set_device_point!, draw, highlight_color
 
 using Printf
 
@@ -33,16 +33,24 @@ function check!(detection::Detection, node::Ranger.AbstractNode, context::Render
         Int32(detection.device_point.x), Int32(detection.device_point.y),
         node, detection.local_point)
 
-    if detection.inside_node
+    detection.inside_node
+end
+
+function highlight_color(detection::Detection, inside::Bool)
+    if inside
         return detection.inside_color
     else
         return detection.outside_color
-    end
+    end    
 end
 
 # Typically called from a Nodes.update
 function update!(detection::Detection, node::Ranger.AbstractNode)
     detection.inside_node = Geometry.is_point_inside(node.polygon, detection.local_point)
+end
+
+function update!(detection::Detection, polygon::Geometry.Polygon)
+    detection.inside_node = Geometry.is_point_inside(polygon, detection.local_point)
 end
 
 # Typically called from a Nodes.io_event

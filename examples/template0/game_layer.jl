@@ -83,6 +83,7 @@ end
 function Nodes.update(layer::GameLayer, dt::Float64)
     Nodes.update(layer.yellow_rect, dt)
     Nodes.update(layer.circle, dt)
+    Nodes.update(layer.ship, dt)
 end
 
 # --------------------------------------------------------
@@ -129,6 +130,7 @@ end
 function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
     Nodes.io_event(node.yellow_rect, event)
     Nodes.io_event(node.circle, event)
+    Nodes.io_event(node.ship, event)
 end
 
 # --------------------------------------------------------

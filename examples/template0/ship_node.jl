@@ -67,6 +67,10 @@ function build(node::Ship, world::Ranger.World)
     Geometry.add_vertex!(node.right_cell, 0.75, 0.0)
     Geometry.build!(node.right_cell)
     
+    node.det_disc = Nodes.Detection(Rendering.Lime(), Rendering.Red())
+    node.det_left = Nodes.Detection(Rendering.Lime(), Rendering.Red())
+    node.det_right = Nodes.Detection(Rendering.Lime(), Rendering.Red())
+
     Nodes.set_dirty!(node, true)
 end
 
@@ -74,6 +78,9 @@ end
 # Timing
 # --------------------------------------------------------
 function Nodes.update(node::Ship, dt::Float64)
+    Nodes.update!(node.det_disc, node.disc)
+    Nodes.update!(node.det_left, node.left_cell)
+    Nodes.update!(node.det_right, node.right_cell)
 end
 
 # --------------------------------------------------------
@@ -91,6 +98,18 @@ function Nodes.draw(node::Ship, context::Rendering.RenderContext)
     Rendering.render_outlined_polygon(context, node.disc, Rendering.CLOSED);
     Rendering.render_outlined_polygon(context, node.left_cell, Rendering.CLOSED);
     Rendering.render_outlined_polygon(context, node.right_cell, Rendering.CLOSED);
+
+    inside = Nodes.check!(node.det_disc, node, context)
+    inside = inside || Nodes.check!(node.det_left, node, context)
+    inside = inside || Nodes.check!(node.det_right, node, context)
+    Nodes.draw(node.det_disc, context)
+    aabb_color = Nodes.highlight_color(node.det_disc, inside)
+    Rendering.set_draw_color(context, aabb_color)
+
+    Geometry.set!(node.aabb, node.disc.mesh.bucket)
+    Geometry.expand!(node.aabb, node.left_cell.mesh.bucket)
+    Geometry.expand!(node.aabb, node.right_cell.mesh.bucket)
+    Rendering.render_aabb_rectangle(context, node.aabb)
 
 end
 
@@ -114,4 +133,7 @@ end
 
 function Nodes.io_event(node::Ship, event::Events.MouseEvent)
     # Nodes.io_event(node.circle, event)
+    Nodes.set_device_point!(node.det_disc, Float64(event.x), Float64(event.y))
+    Nodes.set_device_point!(node.det_left, Float64(event.x), Float64(event.y))
+    Nodes.set_device_point!(node.det_right, Float64(event.x), Float64(event.y))
 end

@@ -136,11 +136,12 @@ function Nodes.draw(node::OrbitSystemNode, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, node.color)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
 
-    aabb_color = Nodes.check!(node.detection, node, context)
-    Nodes.draw(node.detection, context)
+    inside = Nodes.check!(node.detection, node, context)
+    # Nodes.draw(node.detection, context)
+    aabb_color = Nodes.highlight_color(node.detection, inside)
     Rendering.set_draw_color(context, aabb_color)
 
-    Geometry.expand!(node.aabb, Nodes.get_bucket(node))
+    Geometry.set!(node.aabb, Nodes.get_bucket(node))
     Rendering.render_aabb_rectangle(context, node.aabb)
 end
 
