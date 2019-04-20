@@ -201,6 +201,11 @@ function transform!(context::RenderContext, polygon::Math.Polygon)
     end
 end
 
+function transform!(context::RenderContext, line::Math.Line)
+    Math.transform!(context.current, line.p1, line.bucket[1])
+    Math.transform!(context.current, line.p2, line.bucket[2])
+end
+
 # ,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.,--.
 # Draw functions render directly to the device.
 # ,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.,__.

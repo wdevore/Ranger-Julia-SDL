@@ -126,10 +126,6 @@ end
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-# Here we elect to receive keyboard events.
-# function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
-# end
-
 function Nodes.io_event(node::GameLayer, event::Events.MouseEvent)
     Nodes.io_event(node.yellow_rect, event)
     Nodes.io_event(node.circle, event)

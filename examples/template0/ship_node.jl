@@ -1,9 +1,14 @@
 # This node is made up of a circle and 2 rectangles
 export Ship
 
+include("keystate.jl")
+
 mutable struct Ship <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
+
+    # Collection for overlays
+    children::Array{Ranger.AbstractNode,1}
 
     # Colors
     color::Rendering.Palette
@@ -21,11 +26,17 @@ mutable struct Ship <: Ranger.AbstractNode
     det_left::Nodes.Detection
     det_right::Nodes.Detection
 
+    keystate::KeyState
+    thrust_angle::Float64
+    turning_rate::Float64  # degrees/second
+    thrust_line::Custom.LineNode
+
     function Ship(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
         o.base = Nodes.NodeData(gen_id(world), name, parent)
         o.transform = Nodes.TransformProperties{Float64}()
+        o.children = Array{Ranger.AbstractNode,1}[]
         o.color = Rendering.White()
 
         o.aabb = Geometry.AABB{Float64}()
@@ -38,6 +49,8 @@ mutable struct Ship <: Ranger.AbstractNode
 
         o.right_cell = Geometry.Polygon{Float64}()
         o.det_right = Nodes.Detection(Rendering.Yellow(), Rendering.Red())
+
+        o.keystate = KeyState(false, false, Int8(0))
 
         build(o, world)
         o
@@ -71,7 +84,27 @@ function build(node::Ship, world::Ranger.World)
     node.det_left = Nodes.Detection(Rendering.Lime(), Rendering.Red())
     node.det_right = Nodes.Detection(Rendering.Lime(), Rendering.Red())
 
-    Nodes.set_dirty!(node, true)
+    # amgle is measured in angular-velocity or "degrees/second"
+    node.turning_rate = 45.0    # degrees/second
+    node.thrust_angle = 90.0   # Start in +Y direction (downward)
+
+    # Overlays don't want scale transforms which is the default for
+    # transform filters
+    filter = Filters.TransformFilter(world, "TransformFilter", node)
+    # However, we do want the rotation of the ship which means we DON'T
+    # want to exclude it. The default was to exclude it.
+    filter.exclude_rotation = false
+    push!(node.children, filter)
+
+    # Add thrust line indicator
+    node.thrust_line = Custom.LineNode(world, "ThrustLineNode", filter)
+    Custom.set!(node.thrust_line, 0.0, 0.0, 1.0, 0.0)
+    Nodes.set_scale!(node.thrust_line, 50.0)
+    Nodes.set_rotation_in_degrees!(node.thrust_line, node.thrust_angle)
+
+    push!(filter.children, node.thrust_line)
+
+    Nodes.set_dirty!(node, true);
 end
 
 # --------------------------------------------------------
@@ -81,6 +114,24 @@ function Nodes.update(node::Ship, dt::Float64)
     Nodes.update!(node.det_disc, node.disc)
     Nodes.update!(node.det_left, node.left_cell)
     Nodes.update!(node.det_right, node.right_cell)
+
+    if firing(node.keystate)
+        println("fired")
+    end
+
+    if thrusting(node.keystate)
+        println("thrusting")
+    end
+
+    if turning(node.keystate) < 0
+        # println("turning ccw")
+        node.thrust_angle -= node.turning_rate * (dt / 1000.0)
+        println(node.thrust_angle)
+    elseif turning(node.keystate) > 0
+        # println("turning cw")
+        node.thrust_angle += node.turning_rate * (dt / 1000.0)
+        println(node.thrust_angle)
+    end
 end
 
 # --------------------------------------------------------
@@ -91,6 +142,7 @@ function Nodes.draw(node::Ship, context::Rendering.RenderContext)
         Rendering.transform!(context, node.disc)
         Rendering.transform!(context, node.left_cell)
         Rendering.transform!(context, node.right_cell)
+
         Nodes.set_dirty!(node, false)
     end
 
@@ -99,9 +151,13 @@ function Nodes.draw(node::Ship, context::Rendering.RenderContext)
     Rendering.render_outlined_polygon(context, node.left_cell, Rendering.CLOSED);
     Rendering.render_outlined_polygon(context, node.right_cell, Rendering.CLOSED);
 
-    inside = Nodes.check!(node.det_disc, node, context)
-    inside = inside || Nodes.check!(node.det_left, node, context)
-    inside = inside || Nodes.check!(node.det_right, node, context)
+    inside = Nodes.check!(node.det_right, node, context)
+    if !inside
+        inside = Nodes.check!(node.det_left, node, context)
+        if !inside
+            inside = Nodes.check!(node.det_disc, node, context)
+        end
+    end
     
     Nodes.draw(node.det_disc, context)
     aabb_color = Nodes.highlight_color(node.det_disc, inside)
@@ -129,12 +185,22 @@ end
 # Events
 # --------------------------------------------------------
 # Here we elect to receive keyboard events.
-# function Nodes.io_event(node::GameLayer, event::Events.KeyboardEvent)
-# end
+function Nodes.io_event(node::Ship, event::Events.KeyboardEvent)
+    # Events.print(event)
+
+    set_state!(node.keystate, event)
+end
 
 function Nodes.io_event(node::Ship, event::Events.MouseEvent)
     # Nodes.io_event(node.circle, event)
     Nodes.set_device_point!(node.det_disc, Float64(event.x), Float64(event.y))
     Nodes.set_device_point!(node.det_left, Float64(event.x), Float64(event.y))
     Nodes.set_device_point!(node.det_right, Float64(event.x), Float64(event.y))
+end
+
+# --------------------------------------------------------
+# Grouping
+# --------------------------------------------------------
+function Nodes.get_children(node::Ship)
+    node.children
 end

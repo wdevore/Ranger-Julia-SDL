@@ -105,7 +105,7 @@ function run(world::Ranger.World)
             if haveEvents
                 ev_type = Events.get_event_type(event)
 
-                if (ev_type == SDL2.KEYDOWN)
+                if (ev_type == SDL2.KEYDOWN || ev_type == SDL2.KEYUP)
                     keySym = Events.get_key_code_sym(event)
     
                     if (keySym == SDL2.SDLK_ESCAPE)

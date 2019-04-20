@@ -8,9 +8,11 @@ const SDL2 = SimpleDirectMediaLayer
 export
     KeyboardEvent, MouseEvent,
     get_key_code_sym, get_scancode, get_modifier, get_repeat,
-    poll_event!, get_event_type, set!
+    poll_event!, get_event_type, set!, print
 
 using ..Ranger
+
+import Base.print
 
 # --------------------------------------------------------------------
 # Event utilities
@@ -46,7 +48,8 @@ end
 get_key_code_sym(event::Array{UInt8}) = extract_4byte_host(21, event)
 get_scancode(event::Array{UInt8}) = extract_4byte_host(17, event)
 get_modifier(event::Array{UInt8}) = extract_2byte_host(25, event)
-get_repeat(event::Array{UInt8}) = event[13]
+get_state(event::Array{UInt8}) = event[13]
+get_repeat(event::Array{UInt8}) = event[14]
 
 SDL_Event() = Array{UInt8}(zeros(56))
 event = SDL_Event()
@@ -55,6 +58,19 @@ function poll_event!()
     success = (SDL2.PollEvent(event) ≠ 0)
     event, success
 end
+
+# --------------------------------------------------------------
+# Key maps
+# --------------------------------------------------------------
+const KEY_A = SDL2.SDLK_a
+const KEY_S = SDL2.SDLK_s
+const KEY_UP = SDL2.SDLK_UP
+const KEY_DOWN = SDL2.SDLK_DOWN
+const KEY_LEFT = SDL2.SDLK_LEFT
+const KEY_RIGHT = SDL2.SDLK_RIGHT
+const KEY_PRESSED = 1
+const KEY_RELEASED = 0
+const KEY_REPEATING = 1
 
 # --------------------------------------------------------------
 # Debugging printing and misc.
@@ -151,6 +167,7 @@ mutable struct KeyboardEvent <: Ranger.AbstractIOEvent
     scancode::UInt32
     modifier::UInt16
     repeat::UInt8
+    state::UInt8
 
     function KeyboardEvent()
         new(0, 0, 0, 0)
@@ -162,6 +179,15 @@ function set!(keyboard::KeyboardEvent, event::Array{UInt8,1})
     keyboard.scancode = get_scancode(event)
     keyboard.modifier = get_modifier(event)
     keyboard.repeat = get_repeat(event)
+    keyboard.state = get_state(event)
+end
+
+function print(keyboard::KeyboardEvent)
+    println("key: ", keyboard.keycode,
+    ", scan: ", keyboard.scancode,
+    ", mod: ", keyboard.modifier,
+    ", rep: ", keyboard.repeat,
+    ", state: ", keyboard.state)
 end
 
 mutable struct MouseEvent <: Ranger.AbstractIOEvent

@@ -74,7 +74,7 @@ end
 
 using ..Rendering
 
-# visit() goes "down" the heirarchy while space-mappings goes upward.
+# visit() traverse "downward" the heirarchy while space-mappings traverse upward.
 function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, interpolation::Float64)
     # println("AbstractNode::visit ", node);
     if !is_visible(node)
