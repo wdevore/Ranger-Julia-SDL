@@ -140,6 +140,9 @@ function run(world::Ranger.World)
         elapsed_t = current_t - previous_t
         previous_t = current_t
 
+        # Note: This update loop is based on:
+        # https://gameprogrammingpatterns.com/game-loop.html
+        
         if !step_enabled
             lag += elapsed_t
             lagging = true
@@ -162,7 +165,7 @@ function run(world::Ranger.World)
         Nodes.pre_visit(manager)
         # **** Any rendering must occur AFTER this point ****
 
-        # Capture time AFTER pre_visit. If vsync is enabled
+        # Capture time AFTER pre_visit otherwise if vsync is enabled
         # then time includes the vertical refresh which ~16.667ms
         render_t = time_ns()
 

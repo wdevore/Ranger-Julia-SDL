@@ -1,5 +1,6 @@
 # This node is made up of a circle and 2 rectangles
-export Ship
+export
+    Ship, set_direction!
 
 include("keystate.jl")
 
@@ -27,7 +28,11 @@ mutable struct Ship <: Ranger.AbstractNode
     det_right::Nodes.Detection
 
     keystate::KeyState
+
+    # Thrust vars
     thrust_angle::Float64
+    prev_thrust_angle::Float64
+    angular_thrust_motion::Animation.AngularMotion{Float64}
     turning_rate::Float64  # degrees/second
     thrust_line::Custom.LineNode
 
@@ -51,6 +56,7 @@ mutable struct Ship <: Ranger.AbstractNode
         o.det_right = Nodes.Detection(Rendering.Yellow(), Rendering.Red())
 
         o.keystate = KeyState(false, false, Int8(0))
+        o.angular_thrust_motion = Animation.AngularMotion{Float64}()
 
         build(o, world)
         o
@@ -66,14 +72,16 @@ function build(node::Ship, world::Ranger.World)
     end
     Geometry.build!(node.disc)
 
-    # Left cell vertically narrow
+    # vertices are defined such that they are vertically aligned
+    # down the +Y axis
+    # Left cell horizontally narrow
     Geometry.add_vertex!(node.left_cell, -0.75, 0.0)
     Geometry.add_vertex!(node.left_cell, -0.75, 1.7)
     Geometry.add_vertex!(node.left_cell, -0.30, 1.7)
     Geometry.add_vertex!(node.left_cell, -0.30, 0.0)
     Geometry.build!(node.left_cell)
 
-    # right cell vertically narrow
+    # right cell horizontally narrow
     Geometry.add_vertex!(node.right_cell, 0.30, 0.0)
     Geometry.add_vertex!(node.right_cell, 0.30, 1.7)
     Geometry.add_vertex!(node.right_cell, 0.75, 1.7)
@@ -85,9 +93,13 @@ function build(node::Ship, world::Ranger.World)
     node.det_right = Nodes.Detection(Rendering.Lime(), Rendering.Red())
 
     # amgle is measured in angular-velocity or "degrees/second"
-    node.turning_rate = 45.0    # degrees/second
-    node.thrust_angle = 90.0   # Start in +Y direction (downward)
+    node.turning_rate = 90.0
+    node.angular_thrust_motion.angle = 0.0
+    node.angular_thrust_motion.auto_wrap = false
 
+    node.thrust_angle = 0.0   # Start in +Y direction (downward)
+    node.prev_thrust_angle = 0.0
+    
     # Overlays don't want scale transforms which is the default for
     # transform filters
     filter = Filters.TransformFilter(world, "TransformFilter", node)
@@ -96,15 +108,22 @@ function build(node::Ship, world::Ranger.World)
     filter.exclude_rotation = false
     push!(node.children, filter)
 
-    # Add thrust line indicator
+    # Add thrust direction indicator
     node.thrust_line = Custom.LineNode(world, "ThrustLineNode", filter)
-    Custom.set!(node.thrust_line, 0.0, 0.0, 1.0, 0.0)
-    Nodes.set_scale!(node.thrust_line, 50.0)
-    Nodes.set_rotation_in_degrees!(node.thrust_line, node.thrust_angle)
+    # Set thrust line pointing down the +Y axis
+    Custom.set!(node.thrust_line, 0.0, 0.0, 0.0, 1.0)
+    Nodes.set_scale!(node.thrust_line, 40.0)
 
     push!(filter.children, node.thrust_line)
 
     Nodes.set_dirty!(node, true);
+end
+
+function set_direction!(node::Ship, degrees::Float64)
+    node.thrust_angle = degrees
+    node.prev_thrust_angle = node.thrust_angle
+    Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
+    Nodes.set_rotation_in_degrees!(node, node.thrust_angle)    
 end
 
 # --------------------------------------------------------
@@ -115,6 +134,10 @@ function Nodes.update(node::Ship, dt::Float64)
     Nodes.update!(node.det_left, node.left_cell)
     Nodes.update!(node.det_right, node.right_cell)
 
+    # Because the ship's thrust direction is irregular using update! doesn't
+    # make sense. update! is for motion in a single direction.
+    # Animation.update!(node.angular_thrust_motion, dt)
+
     if firing(node.keystate)
         println("fired")
     end
@@ -124,14 +147,32 @@ function Nodes.update(node::Ship, dt::Float64)
     end
 
     if turning(node.keystate) < 0
-        # println("turning ccw")
+        # CCW
+        node.prev_thrust_angle = node.thrust_angle
+        # By dividing "dt" by 1000 we are mapping to degrees/second rather than
+        # degrees/ms. 45 degrees/ms would lead to a blur on the screen. ;-)
         node.thrust_angle -= node.turning_rate * (dt / 1000.0)
-        println(node.thrust_angle)
+        Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
     elseif turning(node.keystate) > 0
-        # println("turning cw")
+        # CW
+        node.prev_thrust_angle = node.thrust_angle
         node.thrust_angle += node.turning_rate * (dt / 1000.0)
-        println(node.thrust_angle)
+        Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
+    else
+        # Because the turning rate isn't changing there should not be any change
+        # in the thrust angle (delta angle). This can be done by setting both the
+        # previous and current angles equal to each other thus delta = 0.
+        node.prev_thrust_angle = node.thrust_angle
+        # And we need to update the motion accordingly.
+        Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
     end
+end
+
+function Nodes.interpolate(node::Ship, interpolation::Float64)
+    # Each time the direction angle changes we want to interpolate towards the
+    # new angle.
+    value = Animation.interpolate!(node.angular_thrust_motion, interpolation)
+    Nodes.set_rotation_in_degrees!(node, value)
 end
 
 # --------------------------------------------------------
