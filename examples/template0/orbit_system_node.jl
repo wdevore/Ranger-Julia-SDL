@@ -56,7 +56,7 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     Geometry.build!(node.polygon)
 
     # amgle is measured in angular-velocity or "degrees/second"
-    node.angular_motion.angle = -45.0    # degrees/second
+    node.angular_motion.rate = -45.0    # degrees/second
 
     # The anchor will rotate and we want that rotation to propagate to the
     # children.
@@ -66,7 +66,7 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     node.anchor = Custom.AnchorNode(world, "AnchorNode", node)
     Nodes.set_scale!(node.anchor, 20.0)
     node.anchor.color = RangerGame.lightblue
-    node.anchor_motion.angle = 45.0
+    node.anchor_motion.rate = 45.0
 
     # The child filter of the anchor node above.
     anchor_filter = Filters.TransformFilter(world, "AnchorTransformFilter", node.anchor)
@@ -82,7 +82,7 @@ function build(node::OrbitSystemNode, world::Ranger.World)
     # Nodes.set_position!(node.triangle, 3.0, 0.0)
     node.triangle.color = RangerGame.yellow
     push!(anchor_filter.children, node.triangle);
-    node.tri_motion.angle = -90.0    # degrees/second
+    node.tri_motion.rate = -90.0    # degrees/second
 end
 
 # --------------------------------------------------------

@@ -108,7 +108,7 @@ function build(node::Ship, world::Ranger.World)
 
     # amgle is measured in angular-velocity or "degrees/second"
     node.turning_rate = 90.0
-    node.angular_thrust_motion.angle = 0.0
+    node.angular_thrust_motion.rate = 0.0
     node.angular_thrust_motion.auto_wrap = false
 
     node.thrust_angle = 0.0   # Start in +Y direction (downward)
@@ -172,7 +172,6 @@ function Nodes.update(node::Ship, dt::Float64)
         node.prev_thrust_angle = node.thrust_angle
         node.thrust_angle += node.turning_rate * (dt / 1000.0)
 
-        # Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
         set_direction!(node)
     else
         # Because the turning rate isn't changing there should not be any change
@@ -186,7 +185,7 @@ function Nodes.update(node::Ship, dt::Float64)
     else
         # If there is no thrust being applied then the thrust slowly dies off.
         apply_thrust!(node, THRUST_DECREASE_RATE)
-        # Instant turn-off
+        # Or Instant turn-off
         # Math.set_magnitude!(node.vector_motion.vector_force, 0.0)
     end
 
@@ -214,6 +213,8 @@ function Nodes.interpolate(node::Ship, interpolation::Float64)
     # new angle.
     value = Animation.interpolate!(node.angular_thrust_motion, interpolation)
     Nodes.set_rotation_in_degrees!(node, value)
+
+    # We also need to interpolate the position.
 end
 
 # --------------------------------------------------------

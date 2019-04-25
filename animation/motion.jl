@@ -8,7 +8,7 @@ mutable struct AngularMotion{T <: AbstractFloat}
     # Range is [from:to]
     from::T
     to::T
-    angle::T
+    rate::T
     time_scale::T  # typically 1000.0ms = 1sec
 
     # It is enabled by default.
@@ -24,12 +24,12 @@ function set!(angMo::AngularMotion{T}, from::T, to::T) where {T <: AbstractFloat
     angMo.to = to;
 end
 
-function set!(angMo::AngularMotion{T}, from::T, to::T, angle::T) where {T <: AbstractFloat}
+function set!(angMo::AngularMotion{T}, from::T, to::T, rate::T) where {T <: AbstractFloat}
     set!(angMo, from, to)
-    angMo.angle = angle;
+    angMo.rate = rate;
 end
 
-# Base on:
+# Inferred from:
 # https://gameprogrammingpatterns.com/game-loop.html
 
 # interpolate is called during rendering (aka visits) which happens more often than updates
@@ -40,7 +40,7 @@ function interpolate!(angMo::AngularMotion{T}, t::T) where {T <: AbstractFloat}
 
     # Adjust angle if exited the range
     if angMo.auto_wrap
-        if angMo.angle > 0.0
+        if angMo.rate > 0.0
             if angle >= 360.0
                 # Wrap range back around
                 angMo.from = 0.0
@@ -67,7 +67,7 @@ function update!(angMo::AngularMotion{T}, dt::T) where {T <: AbstractFloat}
     # During each frame the "from" becomes the current "to"
     angMo.from = angMo.to
 
-    # "to" is now moved to the next 
+    # "to" is now moved to the next value
     # divide by 1000 to get seconds
-    angMo.to += angMo.angle * (dt / angMo.time_scale);
+    angMo.to += angMo.rate * (dt / angMo.time_scale);
 end
