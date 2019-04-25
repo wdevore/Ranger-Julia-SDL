@@ -2,7 +2,19 @@
 export
     Ship, set_direction!
 
+# Magnitude needs to high enough such that the ship doens't appear
+# to "drive". It should "drift" a bit on turns. Too low and the thrust
+# overpowers the momentum.
+const MAX_MAGNITUDE = 20.0
+const MAX_THRUST_MAGNITUDE = 0.1
+
+# How quickly the ship comes to a rest with no thrust applied
+const MOMENTUM_DRAG = 0.05
+const THRUST_INCREASE_RATE = 0.01
+const THRUST_DECREASE_RATE = -0.05
+    
 include("keystate.jl")
+include("vector_motion.jl")
 
 mutable struct Ship <: Ranger.AbstractNode
     base::Nodes.NodeData
@@ -35,6 +47,7 @@ mutable struct Ship <: Ranger.AbstractNode
     angular_thrust_motion::Animation.AngularMotion{Float64}
     turning_rate::Float64  # degrees/second
     thrust_line::Custom.LineNode
+    vector_motion::VectorMotion
 
     function Ship(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -57,6 +70,7 @@ mutable struct Ship <: Ranger.AbstractNode
 
         o.keystate = KeyState(false, false, Int8(0))
         o.angular_thrust_motion = Animation.AngularMotion{Float64}()
+        o.vector_motion = VectorMotion()
 
         build(o, world)
         o
@@ -121,9 +135,16 @@ end
 
 function set_direction!(node::Ship, degrees::Float64)
     node.thrust_angle = degrees
+    set_direction!(node)
+end
+
+function set_direction!(node::Ship)
     node.prev_thrust_angle = node.thrust_angle
+
     Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
-    Nodes.set_rotation_in_degrees!(node, node.thrust_angle)    
+    Nodes.set_rotation_in_degrees!(node, node.thrust_angle)
+
+    Math.set_direction!(node.vector_motion.vector_force, node.thrust_angle - 90.0);
 end
 
 # --------------------------------------------------------
@@ -134,16 +155,8 @@ function Nodes.update(node::Ship, dt::Float64)
     Nodes.update!(node.det_left, node.left_cell)
     Nodes.update!(node.det_right, node.right_cell)
 
-    # Because the ship's thrust direction is irregular using update! doesn't
-    # make sense. update! is for motion in a single direction.
-    # Animation.update!(node.angular_thrust_motion, dt)
-
     if firing(node.keystate)
         println("fired")
-    end
-
-    if thrusting(node.keystate)
-        println("thrusting")
     end
 
     if turning(node.keystate) < 0
@@ -152,20 +165,48 @@ function Nodes.update(node::Ship, dt::Float64)
         # By dividing "dt" by 1000 we are mapping to degrees/second rather than
         # degrees/ms. 45 degrees/ms would lead to a blur on the screen. ;-)
         node.thrust_angle -= node.turning_rate * (dt / 1000.0)
-        Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
+
+        set_direction!(node)
     elseif turning(node.keystate) > 0
         # CW
         node.prev_thrust_angle = node.thrust_angle
         node.thrust_angle += node.turning_rate * (dt / 1000.0)
-        Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
+
+        # Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
+        set_direction!(node)
     else
         # Because the turning rate isn't changing there should not be any change
         # in the thrust angle (delta angle). This can be done by setting both the
         # previous and current angles equal to each other thus delta = 0.
         node.prev_thrust_angle = node.thrust_angle
-        # And we need to update the motion accordingly.
-        Animation.set!(node.angular_thrust_motion, node.prev_thrust_angle, node.thrust_angle)
     end
+
+    if thrusting(node.keystate)
+        apply_thrust!(node, THRUST_INCREASE_RATE)
+    else
+        # If there is no thrust being applied then the thrust slowly dies off.
+        apply_thrust!(node, THRUST_DECREASE_RATE)
+        # Instant turn-off
+        # Math.set_magnitude!(node.vector_motion.vector_force, 0.0)
+    end
+
+
+    # Update the ship's position based on the momentum. If there is drag
+    # then the momentum will steadily decrease until it reaches a magnitude
+    # of zero.
+    # Take the ship's current momentum--which is independent of the ship's
+    # current thrust direction--and apply thrust/force to it. We want to change the
+    # ship's momentum not direction.
+    apply_force!(node.vector_motion)
+    
+    # Now update the ship's position based on the momentum.
+    if Math.get_magnitude(node.vector_motion.momentum) > 0.0
+        Math.apply!(node.vector_motion.momentum, node.transform.position)
+        Nodes.set_dirty!(node, true)
+    end
+
+    # Update momentum if there is drag.
+    decrease_momentum!(node.vector_motion, MOMENTUM_DRAG);
 end
 
 function Nodes.interpolate(node::Ship, interpolation::Float64)
@@ -245,3 +286,11 @@ end
 function Nodes.get_children(node::Ship)
     node.children
 end
+
+# --------------------------------------------------------
+# Ship specific functionality
+# --------------------------------------------------------
+function apply_thrust!(node::Ship, mag::Float64)
+    increase_force!(node.vector_motion, mag)
+end
+

@@ -1,5 +1,5 @@
 # A simple Unicode raster 8x8 font
-# The code was ported from a Rust crate:
+# The raw font data was ported from a Rust crate:
 # https://crates.io/crates/font8x8/0.2.3
 
 export
@@ -24,7 +24,7 @@ function load_font!(font::RasterFont, file::String)
     # ! 0x18 0x3C 0x3C 0x18 0x18 0x00 0x18 0x00
     # ^ 
     # |
-    #  \- This is the character a "!"
+    #  \- This is the character = "!"
 
     try
         idx = 1

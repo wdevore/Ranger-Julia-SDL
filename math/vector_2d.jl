@@ -49,6 +49,10 @@ end
 scv = Vector2D{Float64}()
 scv2 = Vector2D{Float64}()
 
+function add!(v1::Vector2D{T}, v2::Vector2D{T}, out::Vector2D{T}) where {T <: AbstractFloat}
+    set!(out, v1.x + v2.x, v1.y + v2.y)
+end
+
 function sub!(v1::Vector2D{T}, v2::Vector2D{T}, out::Vector2D{T}) where {T <: AbstractFloat}
     set!(out, v1.x - v2.x, v1.y - v2.y)
 end
