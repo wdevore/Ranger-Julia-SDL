@@ -128,7 +128,7 @@ function sub!(vA::Velocity{T}, vB::Velocity{T}) where {T <: AbstractFloat}
     # limit/clamp
     vA.magnitude = min(len, vA.max_magnitude)
 
-    set!(vA.direction, v2)
+    set!(vA.direction, v3)
     Math.normalize!(vA.direction)
 end
 
