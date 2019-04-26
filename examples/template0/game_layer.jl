@@ -71,7 +71,7 @@ function build(layer::GameLayer, world::Ranger.World)
 
     layer.ship = Ship(world, "Ship", layer)
     Nodes.set_scale!(layer.ship, 30.0)
-    Nodes.set_position!(layer.ship, -100.0, -100.0)
+    set_position!(layer.ship, -100.0, -100.0)
     set_direction!(layer.ship, 30.0)
     layer.ship.color = RangerGame.peach
     push!(layer.children, layer.ship);

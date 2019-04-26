@@ -57,6 +57,14 @@ function sub!(v1::Vector2D{T}, v2::Vector2D{T}, out::Vector2D{T}) where {T <: Ab
     set!(out, v1.x - v2.x, v1.y - v2.y)
 end
 
+function scale!(v::Vector2D{T}, s::T) where {T <: AbstractFloat}
+    set!(v, v.x * s, v.y * s)
+end
+
+function scale!(v::Vector2D{T}, s::T, out::Vector2D{T}) where {T <: AbstractFloat}
+    set!(out, v.x * s, v.y * s)
+end
+
 function div!(v::Vector2D{T}, value::T) where {T <: AbstractFloat}
     set!(v, v.x / value, v.y / value)
 end
