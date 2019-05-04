@@ -54,7 +54,7 @@ function set_magnitude!(v::Velocity{T}, magnitude::T) where {T <: AbstractFloat}
     if v.limit_magnitude
         # Push magnitude into the range
         v.magnitude = min(magnitude, v.max_magnitude)
-        v.magnitude = max(magnitude, v.min_magnitude)
+        v.magnitude = max(v.magnitude, v.min_magnitude)
     else
         v.magnitude = magnitude
     end

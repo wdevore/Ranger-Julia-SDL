@@ -5,15 +5,16 @@ export
 # Magnitude needs to high enough such that the ship doens't appear
 # to "drive". It should "drift" a bit on turns. Too low and the thrust
 # overpowers the momentum.
-const MAX_MAGNITUDE = 50.0
-const MAX_THRUST_MAGNITUDE = 0.1
+const MAX_MAGNITUDE = 25.0
+const MAX_THRUST_MAGNITUDE = 1.5
 
 # How quickly the ship comes to a rest with no thrust applied
 const MOMENTUM_DRAG = 0.025 * 100.0
-const THRUST_INCREASE_RATE = 0.015 * 100.0
-const THRUST_DECREASE_RATE = -0.1 * 100.0
 
-const TURNING_RATE = 180.0
+const THRUST_INCREASE_RATE = 0.03 * 100.0
+const THRUST_DECREASE_RATE = -0.05 * 100.0
+
+const TURNING_RATE = 180.0 + 45.0
 
 include("keystate.jl")
 include("vector_motion.jl")
