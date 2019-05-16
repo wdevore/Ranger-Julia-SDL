@@ -6,7 +6,7 @@ using SimpleDirectMediaLayer
 const SDL2 = SimpleDirectMediaLayer
 
 export
-    KeyboardEvent, MouseEvent,
+    KeyboardEvent, MouseEvent, MouseWheelEvent,
     get_key_code_sym, get_scancode, get_modifier, get_repeat,
     poll_event!, get_event_type, set!, print
 
@@ -214,4 +214,25 @@ function set!(mouse::MouseEvent, event::Array{UInt8,1})
     mouse.yrel = signed(extract_4byte_host(33, event))
 end
 
+mutable struct MouseWheelEvent <: Ranger.AbstractIOEvent
+    type::UInt32
+    which::UInt32
+    x::Int32
+    y::Int32
+    direction::UInt32
+
+    function MouseWheelEvent()
+        new(0, 0, 0, 0, 0)
+    end
 end
+
+function set!(mouse::MouseWheelEvent, event::Array{UInt8,1})
+    mouse.type = extract_4byte_host(1, event)
+    mouse.which = extract_4byte_host(13, event)
+    mouse.x = signed(extract_4byte_host(17, event))
+    mouse.y = signed(extract_4byte_host(21, event))
+    mouse.direction = signed(extract_4byte_host(25, event))
+end
+
+
+end # Module ------------------------------------------------------------

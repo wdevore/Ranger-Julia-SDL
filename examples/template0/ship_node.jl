@@ -233,6 +233,10 @@ end
 
 # Called during visit/rendering which is AFTER update()
 function Nodes.interpolate(node::Ship, interpolation::Float64)
+    # #!!!!!!!!!!!!!!!!!
+    # TODO We should check a dirty flag instead of blindly interpolating when
+    # nothing has changed.
+
     # Each time the direction angle changes we want to interpolate towards the
     # new angle.
     value = Animation.interpolate!(node.angular_thrust_motion, interpolation)

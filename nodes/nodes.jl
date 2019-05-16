@@ -87,12 +87,7 @@ function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, inte
     # on lerping we perform interpolation first.
     interpolate(node, interpolation)
 
-    aft = node.transform.aft
-
-    if is_dirty(node)
-        aft = calc_transform!(node)
-        # println(node.base.name, " aft: ", aft)
-    end
+    aft = calc_transform!(node)
 
     Rendering.apply!(context, aft)
 
@@ -113,23 +108,28 @@ function visit(node::Ranger.AbstractNode, context::Rendering.RenderContext, inte
 end
 
 function calc_transform!(node::Ranger.AbstractNode)
-    prop = node.transform
+    tr = node.transform
 
     if is_dirty(node)
-        make_translate!(prop.aft, prop.position.x, prop.position.y)
+        # println("calc_transform dirty: ", node.base.name)
+        make_translate!(tr.aft, tr.position.x, tr.position.y)
 
-        if prop.rotation ≠ 0.0
-            rotate!(prop.aft, prop.rotation)
+        if tr.rotation ≠ 0.0
+            rotate!(tr.aft, tr.rotation)
         end
 
-        if prop.scale.x ≠ 1.0 || prop.scale.y ≠ 1.0
-            scale!(prop.aft, prop.scale.x, prop.scale.y)
+        if tr.scale.x ≠ 1.0 || tr.scale.y ≠ 1.0
+            scale!(tr.aft, tr.scale.x, tr.scale.y)
         end
 
-        Math.invert!(prop.aft, prop.inverse)
+        Math.invert!(tr.aft, tr.inverse)
     end
 
-    prop.aft
+    tr.aft
+end
+
+function get_transform(node::Ranger.AbstractNode)
+    node.transform.aft
 end
 
 function interpolate(node::Ranger.AbstractNode, interpolation::Float64)
@@ -165,6 +165,10 @@ end
 
 # ripple dirty flag
 function set_dirty!(node::Ranger.AbstractNode, dirty::Bool)
+    # if node.base.name == "ZoomNode"
+    #     println(stacktrace())
+    # end
+    # println("set_dirty: ", node.base.name)
     node.base.dirty = dirty
 end
 
@@ -176,6 +180,7 @@ function ripple_dirty!(node::Ranger.AbstractNode, dirty::Bool)
         end
     end
 
+    # println("ripple_dirty: ", node.base.name)
     set_dirty!(node, dirty)
 end
 

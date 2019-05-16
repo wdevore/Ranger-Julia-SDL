@@ -1,5 +1,18 @@
 module Ranger
 
+# Example:
+# Ranger.print_trace(stacktrace(), "run")
+function print_trace(trace, stop_at::String)
+    println("------- trace ---------")
+    for tr in trace
+        if string(tr.func) == stop_at
+            break
+        end
+        println(tr)
+    end
+    println("-----------------------")
+end
+
 include("world.jl")
 include("nodes/abstracts.jl")
 include("events/events.jl")

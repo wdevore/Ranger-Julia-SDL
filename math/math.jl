@@ -18,4 +18,6 @@ include("interpolation.jl")
 
 include("velocity.jl")
 
+include("zoom_transform.jl")
+
 end

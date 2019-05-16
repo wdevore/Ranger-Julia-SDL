@@ -191,3 +191,9 @@ function route_events(man::NodeManager, mouse::Events.MouseEvent)
         Nodes.io_event(target, mouse)
     end
 end
+
+function route_events(man::NodeManager, mouse::Events.MouseWheelEvent)
+    for target in man.event_targets
+        Nodes.io_event(target, mouse)
+    end
+end

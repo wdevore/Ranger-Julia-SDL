@@ -20,4 +20,6 @@ include("line_node.jl")
 
 include("anchor_node.jl")
 
+include("zoom_node.jl")
+
 end

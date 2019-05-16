@@ -88,6 +88,7 @@ function run(world::Ranger.World)
 
     keyboard = Events.KeyboardEvent()
     mouse = Events.MouseEvent()
+    mouse_wheel = Events.MouseWheelEvent()
 
     # Main game loop
     while running
@@ -130,6 +131,10 @@ function run(world::Ranger.World)
                     Events.set!(mouse, event)
 
                     Nodes.route_events(manager, mouse)
+                elseif ev_type == SDL2.MOUSEWHEEL
+                    Events.set!(mouse_wheel, event)
+
+                    Nodes.route_events(manager, mouse_wheel)
                 end
             end
         end        

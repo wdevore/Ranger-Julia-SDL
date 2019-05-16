@@ -18,7 +18,7 @@ mutable struct SDL
 
         SDL2.Init(UInt32(SDL2.INIT_VIDEO))
 
-        if world.view_centered
+        if world.window_centered
             world.window = SDL2.CreateWindow(world.title, Int32(SDL2.WINDOWPOS_CENTERED()), Int32(SDL2.WINDOWPOS_CENTERED()),
                 Int32(world.window_width), Int32(world.window_height),
                 UInt32(SDL2.WINDOW_SHOWN))

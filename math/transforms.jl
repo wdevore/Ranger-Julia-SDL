@@ -97,9 +97,10 @@ function set!(to::AffineTransform{T}, from::AffineTransform{T}) where {T <: Abst
     to.ty = from.ty;
 end
 
+# Concatenate translation
 function translate!(aft::AffineTransform{T}, tx::T, ty::T) where {T <: AbstractFloat}
-    aft.tx = tx
-    aft.ty = ty;
+    aft.tx += (aft.a * tx) + (aft.c * ty)
+    aft.ty += (aft.b * tx) + (aft.d * ty);
 end
 
 function make_translate!(aft::AffineTransform{T}, tx::T, ty::T) where {T <: AbstractFloat}
@@ -183,6 +184,22 @@ function multiply_pre!(aft::AffineTransform{T}, at::AffineTransform{T}) where {T
     aft.d = c * at.b + d * at.d
     aft.tx = (tx * at.a) + (ty * at.c) + at.tx
     aft.ty = (tx * at.b) + (ty * at.d) + at.ty;
+end
+
+# at = aft * at
+function multiply_post!(aft::AffineTransform{T}, at::AffineTransform{T}) where {T <: AbstractFloat}
+    a = at.a
+    b = at.b
+    c = at.c
+    d = at.d
+    tx = at.tx
+    ty = at.ty
+    at.a = a * aft.a + b * aft.c
+    at.b = a * aft.b + b * aft.d
+    at.c = c * aft.a + d * aft.c
+    at.d = c * aft.b + d * aft.d
+    at.tx = (tx * aft.a) + (ty * aft.c) + aft.tx
+    at.ty = (tx * aft.b) + (ty * aft.d) + aft.ty;
 end
 
 # out = m * n

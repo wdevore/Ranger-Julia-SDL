@@ -17,6 +17,8 @@ mutable struct GameLayer <: Ranger.AbstractNode
     circle::Custom.OutlinedCircle
     ship::Ship
 
+    zoom::Custom.ZoomNode
+
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
@@ -52,22 +54,28 @@ function build(layer::GameLayer, world::Ranger.World)
     layer.orbit_system.color = RangerGame.olive
     push!(layer.children, layer.orbit_system);
 
-    rect = Custom.OutlinedRectangle(world, "YellowOutlinedRectangle", layer)
+    # Zoom Testing -----------------------------------------------------
+    layer.zoom = Custom.ZoomNode(world, "ZoomNode", layer)
+
+    rect = Custom.OutlinedRectangle(world, "YellowOutlinedRectangle", layer.zoom)
     layer.yellow_rect = rect
     Custom.set!(rect, -0.5, -0.5, 0.5, 0.5) # centered
     Nodes.set_scale!(rect, 200.0)
     Nodes.set_position!(rect, -300.0, 300.0)
     Nodes.set_rotation_in_degrees!(rect, 30.0)
     rect.color = RangerGame.yellow
-    push!(layer.children, rect);
+    push!(layer.zoom.children, rect);
 
-    circle = Custom.OutlinedCircle(world, "OutlinedCircle", layer)
+    circle = Custom.OutlinedCircle(world, "OutlinedCircle", layer.zoom)
     layer.circle = circle
     Custom.set!(circle, 18.0)
     Nodes.set_scale!(circle, 100.0)
     Nodes.set_position!(circle, 300.0, 300.0)
     circle.color = RangerGame.lightpurple
-    push!(layer.children, circle);
+    push!(layer.zoom.children, circle);
+
+    push!(layer.children, layer.zoom);
+    # ------------------------------------------------------------
 
     layer.ship = Ship(world, "Ship", layer)
     Nodes.set_scale!(layer.ship, 30.0)
@@ -107,20 +115,25 @@ end
 # Life cycle events
 # --------------------------------------------------------
 function Nodes.enter_node(layer::GameLayer, man::Nodes.NodeManager)
-    println("enter ", layer);
+    println("enter ", layer)
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, layer)
     Nodes.register_target(man, layer.ship)
-    Nodes.register_event_target(man, layer);
-    Nodes.register_event_target(man, layer.ship);
+
+    # Register for io events such as keyboard or mouse
+    Nodes.register_event_target(man, layer)
+    Nodes.register_event_target(man, layer.ship)
+    Nodes.register_event_target(man, layer.zoom);
 end
 
 function Nodes.exit_node(layer::GameLayer, man::Nodes.NodeManager)
-    println("exit ", layer);
-    Nodes.unregister_target(man, layer);
-    Nodes.unregister_target(man, layer.ship);
-    Nodes.unregister_event_target(man, layer);
+    println("exit ", layer)
+    Nodes.unregister_target(man, layer)
+    Nodes.unregister_target(man, layer.ship)
+
+    Nodes.unregister_event_target(man, layer)
     Nodes.unregister_event_target(man, layer.ship);
+    Nodes.unregister_event_target(man, layer.zoom);
 end
 
 # --------------------------------------------------------
