@@ -170,36 +170,38 @@ function make_rotate!(aft::AffineTransform{T}, radians::T) where {T <: AbstractF
     aft.ty = 0.0;
 end
 
-# aft = aft * at
-function multiply_pre!(aft::AffineTransform{T}, at::AffineTransform{T}) where {T <: AbstractFloat}
-    a = aft.a
-    b = aft.b
-    c = aft.c
-    d = aft.d
-    tx = aft.tx
-    ty = aft.ty
-    aft.a = a * at.a + b * at.c
-    aft.b = a * at.b + b * at.d
-    aft.c = c * at.a + d * at.c
-    aft.d = c * at.b + d * at.d
-    aft.tx = (tx * at.a) + (ty * at.c) + at.tx
-    aft.ty = (tx * at.b) + (ty * at.d) + at.ty;
+# n = n * m
+function multiply_pre!(m::AffineTransform{T}, n::AffineTransform{T}) where {T <: AbstractFloat}
+    a = n.a
+    b = n.b
+    c = n.c
+    d = n.d
+    tx = n.tx
+    ty = n.ty
+
+    n.a = a * m.a + b * m.c
+    n.b = a * m.b + b * m.d
+    n.c = c * m.a + d * m.c
+    n.d = c * m.b + d * m.d
+    n.tx = (a, m.tx) + (c * m.ty) + m.tx
+    n.ty = (b, m.tx) + (d * m.ty) + m.ty;
 end
 
-# at = aft * at
-function multiply_post!(aft::AffineTransform{T}, at::AffineTransform{T}) where {T <: AbstractFloat}
-    a = at.a
-    b = at.b
-    c = at.c
-    d = at.d
-    tx = at.tx
-    ty = at.ty
-    at.a = a * aft.a + b * aft.c
-    at.b = a * aft.b + b * aft.d
-    at.c = c * aft.a + d * aft.c
-    at.d = c * aft.b + d * aft.d
-    at.tx = (tx * aft.a) + (ty * aft.c) + aft.tx
-    at.ty = (tx * aft.b) + (ty * aft.d) + aft.ty;
+# n = m * n
+function multiply_post!(m::AffineTransform{T}, n::AffineTransform{T}) where {T <: AbstractFloat}
+    a = m.a
+    b = m.b
+    c = m.c
+    d = m.d
+    tx = m.tx
+    ty = m.ty
+
+    n.a = a * n.a + b * n.c
+    n.b = a * n.b + b * n.d
+    n.c = c * n.a + d * n.c
+    n.d = c * n.b + d * n.d
+    n.tx = (a, n.tx) + (c * n.ty) + n.tx
+    n.ty = (b, n.tx) + (d * n.ty) + n.ty;
 end
 
 # out = m * n
