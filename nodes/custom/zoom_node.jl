@@ -39,18 +39,17 @@ function Nodes.draw(node::ZoomNode, context::Rendering.RenderContext)
 end
 
 function handle_movement(node::ZoomNode, context::Rendering.RenderContext)
-        # Map window/device-space to view-space
+    # Map window/device-space to zoom-space
     Nodes.map_device_to_node!(context, 
-            Int32(node.mouse_window_position.x), Int32(node.mouse_window_position.y),
-            node,
-            node.zoom_point)
+        Int32(node.mouse_window_position.x), Int32(node.mouse_window_position.y),
+        node,
+        node.zoom_point)
 
     Custom.set_focal_point!(node, node.zoom_point.x, node.zoom_point.y)
 end
 
 function handle_zoom(node::ZoomNode)
     if node.wheel_direction == 1
-        # Zoom in
         Custom.zoom_in!(node)
     elseif node.wheel_direction == -1
         Custom.zoom_out!(node)
