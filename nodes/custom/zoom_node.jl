@@ -10,7 +10,6 @@ mutable struct ZoomNode <: Ranger.AbstractNode
 
     # State management
     mouse_window_position::Geometry.Point{Float64}
-    mouse_moved::Bool
     zoom_point::Geometry.Point{Float64}
     wheel_direction::Int32   # 0 = not active, 1 = zoom-in, -1 = zoom-out
 
@@ -24,24 +23,32 @@ mutable struct ZoomNode <: Ranger.AbstractNode
         o.mouse_window_position = Geometry.Point{Float64}()
         o.zoom_point = Geometry.Point{Float64}()
         o.wheel_direction = Int32(0)
-        o.mouse_moved = false
 
         o
     end
 end
 
 function Nodes.draw(node::ZoomNode, context::Rendering.RenderContext)
-    # Map window/device-space to view-space
-    if node.mouse_moved
-        Nodes.map_device_to_node!(context, 
+    # Zoom node doesn't need to render but it does require the context
+    # for space mapping.
+
+    handle_movement(node, context)
+
+    handle_zoom(node)
+
+end
+
+function handle_movement(node::ZoomNode, context::Rendering.RenderContext)
+        # Map window/device-space to view-space
+    Nodes.map_device_to_node!(context, 
             Int32(node.mouse_window_position.x), Int32(node.mouse_window_position.y),
             node,
             node.zoom_point)
 
-        Custom.set_focal_point!(node, node.zoom_point.x, node.zoom_point.y)
-        node.mouse_moved = false
-    end
+    Custom.set_focal_point!(node, node.zoom_point.x, node.zoom_point.y)
+end
 
+function handle_zoom(node::ZoomNode)
     if node.wheel_direction == 1
         # Zoom in
         Custom.zoom_in!(node)
@@ -49,9 +56,8 @@ function Nodes.draw(node::ZoomNode, context::Rendering.RenderContext)
         Custom.zoom_out!(node)
     end
 
-    node.wheel_direction = 0;
+    node.wheel_direction = 0
 end
-
 # --------------------------------------------------------
 # Grouping
 # --------------------------------------------------------
@@ -110,7 +116,6 @@ end
 # --------------------------------------------------------
 function Nodes.io_event(node::ZoomNode, event::Events.MouseEvent)
     Geometry.set!(node.mouse_window_position, Float64(event.x), Float64(event.y))
-    node.mouse_moved = true
 end
 
 function Nodes.io_event(node::ZoomNode, event::Events.MouseWheelEvent)
