@@ -33,19 +33,12 @@ function build(scene::GameScene, world::Ranger.World)
     push!(scene.children, cross)
 
     text = Custom.VectorTextNode(world, "VectorTextNode", scene)
-    Nodes.set_scale!(text, 25.0)
-    # Nodes.set_rotation_in_degrees!(text, 45.0)
+    Nodes.set_scale!(text, 55.0)
+    Nodes.set_rotation_in_degrees!(text, 45.0)
     text.color = RangerGame.orange
-    Custom.set_text!(text, "RANGER IS A GO!")
-    # Custom.set_text!(text, "=,./!:_-")
+    Custom.set_text!(text, "PaRTIcLeS!")
+    Nodes.set_position!(text, 400.0, -400.0)
     push!(scene.children, text)
-
-    # Note: If you apply a scale that is the size of the view-space
-    # then the rest of your code will need to define all mesh data
-    # in unit-space.
-    # set_nonuniform_scale!(scene, world.view_width, world.view_height)
-    # # Bake in the transform rather repeatedly perform in draw()
-    # calc_transform!(scene.transform)
 
     # # This node/scene is never dirtied at the scene level
     Nodes.set_dirty!(scene, false);

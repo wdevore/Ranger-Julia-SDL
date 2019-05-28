@@ -2,9 +2,9 @@
 # Space mappings
 # ----------------------------------------------------------
 
-function map_device_to_view(context::Rendering.RenderContext,
+function map_device_to_view(world::Ranger.World,
     dx::Int32, dy::Int32, view_point::Geometry.Point{Float64})
-    Math.transform!(context.inv_view_space, Float64(dx), Float64(dy), view_point);
+    Math.transform!(world.inv_view_space, Float64(dx), Float64(dy), view_point);
 end
 
 # intermediate view-space node.
@@ -12,7 +12,7 @@ view_point = Geometry.Point{Float64}()
 # Standin signalling no psuedoRoot.
 nil_node = Nodes.NodeNil()
 
-function map_device_to_node!(context::Rendering.RenderContext,
+function map_device_to_node!(world::Ranger.World,
     dx::Int32, dy::Int32, node::Ranger.AbstractNode, local_point::Geometry.Point{Float64})
     # Mapping from device to node requires to transforms from to "directions"
     # 1st is upwards transform and the 2nd is downwards transform.
@@ -20,7 +20,7 @@ function map_device_to_node!(context::Rendering.RenderContext,
     # Upwards from node to world-space (aka view-space)
     wtn = world_to_node_transform(node, nil_node)
     # downwards from device-space to view-space
-    map_device_to_view(context, dx, dy, view_point)
+    map_device_to_view(world, dx, dy, view_point)
 
     # Now map view-space point to local-space of node
     Math.transform!(wtn, view_point.x, view_point.y, local_point)

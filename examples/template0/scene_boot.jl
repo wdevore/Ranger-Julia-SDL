@@ -7,7 +7,7 @@ mutable struct SceneBoot <: Ranger.AbstractScene
     function SceneBoot(world::Ranger.World, name::String, replacement::Ranger.AbstractScene)
         obj = new()
 
-        obj.base = Nodes.NodeData(gen_id(world), name, Nodes.NodeNil())
+        obj.base = Nodes.NodeData(name, Nodes.NodeNil(), world)
         obj.replacement = replacement
 
         obj

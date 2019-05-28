@@ -13,14 +13,15 @@ function print_trace(trace, stop_at::String)
     println("-----------------------")
 end
 
+include("geometry/geometry.jl")
+include("math/math.jl")
 include("world.jl")
 include("nodes/abstracts.jl")
 include("events/events.jl")
-include("geometry/geometry.jl")
-include("math/math.jl")
 include("animation/animation.jl")
 include("rendering/rendering.jl")
 include("nodes/nodes.jl")
+include("particles/particles.jl")
 
 include("nodes/custom/custom.jl")
 

@@ -14,7 +14,7 @@ mutable struct TranslateFilter <: Ranger.AbstractNode
     function TranslateFilter(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
         o.translate_component = Math.AffineTransform{Float64}()

@@ -40,10 +40,6 @@ mutable struct RenderContext
 
     post::Math.AffineTransform   # A preallocated cache
     
-    # view space to device-space projection
-    view_space::Math.AffineTransform
-    inv_view_space::Math.AffineTransform
-
     # Scratch working variables
     v1::Geometry.Point{Float64}
     v2::Geometry.Point{Float64}
@@ -63,8 +59,6 @@ mutable struct RenderContext
         
         o.current = AffineTransform{Float64}()
         o.post = AffineTransform{Float64}()
-        o.view_space = AffineTransform{Float64}()
-        o.inv_view_space = AffineTransform{Float64}()
 
         o.v1 = Geometry.Point{Float64}()
         o.v2 = Geometry.Point{Float64}()
@@ -88,29 +82,8 @@ function initialize(context::RenderContext, world::Ranger.World)
         push!(context.state, copy(state))
     end
 
-    set_view_space(context, world)
-end
-
-function set_view_space(context::RenderContext, world::Ranger.World)
-    # Apply view-space matrix
-    center = Math.AffineTransform{Float64}()
-
-    # What separates world from view is the ratio between the device (aka window)
-    # and an optional centering translation.
-    width_ratio = Float64(context.width) / world.view_width
-    height_ratio = Float64(context.height) / world.view_height
-
-    if world.view_centered 
-        Math.make_translate!(center, Float64(context.width) / 2.0, Float64(context.height) / 2.0)
-    end
-
-    Math.scale!(center, width_ratio, height_ratio)
-    context.view_space = center
-
-    Math.invert!(context.view_space, context.inv_view_space)
-
-    apply!(context, center);
-    # println("View center: ", center)
+    # Apply centered view-space matrix
+    apply!(context, world.view_space);
 end
 
 function apply!(context::RenderContext, aft::AffineTransform) 

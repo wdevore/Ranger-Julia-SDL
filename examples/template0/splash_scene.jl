@@ -12,7 +12,7 @@ mutable struct SplashScene <: Ranger.AbstractScene
         obj = new()
 
         # We use "obj" to represent a lack of parent.
-        obj.base = Nodes.NodeData(gen_id(world), name, Nodes.NodeNil())
+        obj.base = Nodes.NodeData(name, Nodes.NodeNil(), world)
         obj.replacement = replacement   # default to self/obj = No replacement present
         obj.transitioning = Nodes.TransitionProperties()
         obj.transform = Nodes.TransformProperties{Float64}()

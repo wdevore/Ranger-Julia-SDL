@@ -27,7 +27,7 @@ mutable struct AnchorNode <: Ranger.AbstractNode
         # Now make the anchor a child of the filter.
         push!(filter.children, o)
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, filter)
+        o.base = Nodes.NodeData(name, filter, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
         o.mesh = Geometry.Mesh()

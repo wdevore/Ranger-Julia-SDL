@@ -12,12 +12,7 @@ mutable struct GameLayer <: Ranger.AbstractNode
     buc_min::Geometry.Point{Float64}
     buc_max::Geometry.Point{Float64}
 
-    orbit_system::OrbitSystemNode
-    yellow_rect::Custom.OutlinedRectangle
-    circle::Custom.OutlinedCircle
-    ship::Ship
-
-    zoom::Custom.ZoomNode
+    host_node::HostNode
 
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
@@ -45,52 +40,17 @@ function build(layer::GameLayer, world::Ranger.World)
     # bottom-right
     Geometry.set!(layer.max, hw, hh)
 
-    layer.orbit_system = OrbitSystemNode(world, "OrbitSystemNode", layer)
-    build(layer.orbit_system, world)
-    set!(layer.orbit_system, -0.5, -0.5, 0.5, 0.5)
-    Nodes.set_rotation_in_degrees!(layer.orbit_system, 30.0)
-    Nodes.set_scale!(layer.orbit_system, 100.0)
-    Nodes.set_position!(layer.orbit_system, 100.0, -100.0)
-    layer.orbit_system.color = RangerGame.olive
-    push!(layer.children, layer.orbit_system);
+    layer.host_node = HostNode(world, "HostNode", layer)
+    Nodes.set_scale!(layer.host_node, 50.0)
+    # Nodes.set_position!(layer.host_node, 100.0, -100.0)
+    push!(layer.children, layer.host_node);
 
-    # Zoom Testing -----------------------------------------------------
-    layer.zoom = Custom.ZoomNode(world, "ZoomNode", layer)
-
-    rect = Custom.OutlinedRectangle(world, "YellowOutlinedRectangle", layer.zoom)
-    layer.yellow_rect = rect
-    Custom.set!(rect, -0.5, -0.5, 0.5, 0.5) # centered
-    Nodes.set_scale!(rect, 200.0)
-    Nodes.set_position!(rect, -300.0, 300.0)
-    Nodes.set_rotation_in_degrees!(rect, 30.0)
-    rect.color = RangerGame.yellow
-    push!(layer.zoom.children, rect);
-
-    circle = Custom.OutlinedCircle(world, "OutlinedCircle", layer.zoom)
-    layer.circle = circle
-    Custom.set!(circle, 18.0)
-    Nodes.set_scale!(circle, 100.0)
-    Nodes.set_position!(circle, 300.0, 300.0)
-    circle.color = RangerGame.lightpurple
-    push!(layer.zoom.children, circle);
-
-    push!(layer.children, layer.zoom);
-    # ------------------------------------------------------------
-
-    layer.ship = Ship(world, "Ship", layer)
-    Nodes.set_scale!(layer.ship, 30.0)
-    set_position!(layer.ship, -100.0, -100.0)
-    set_direction!(layer.ship, 30.0)
-    layer.ship.color = RangerGame.peach
-    push!(layer.children, layer.ship);
 end
 
 # --------------------------------------------------------
 # Timing
 # --------------------------------------------------------
 function Nodes.update(layer::GameLayer, dt::Float64)
-    Nodes.update(layer.yellow_rect, dt)
-    Nodes.update(layer.circle, dt)
 end
 
 # --------------------------------------------------------
@@ -116,33 +76,29 @@ end
 # --------------------------------------------------------
 function Nodes.enter_node(layer::GameLayer, man::Nodes.NodeManager)
     println("enter ", layer)
+
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, layer)
-    Nodes.register_target(man, layer.ship)
+
+    # Register host so it too can get updates
+    Nodes.register_target(man, layer.host_node)
+
 
     # Register for io events such as keyboard or mouse
     Nodes.register_event_target(man, layer)
-    Nodes.register_event_target(man, layer.ship)
-    Nodes.register_event_target(man, layer.zoom);
 end
 
 function Nodes.exit_node(layer::GameLayer, man::Nodes.NodeManager)
     println("exit ", layer)
     Nodes.unregister_target(man, layer)
-    Nodes.unregister_target(man, layer.ship)
+    Nodes.unregister_target(man, layer.host_node)
 
     Nodes.unregister_event_target(man, layer)
-    Nodes.unregister_event_target(man, layer.ship);
-    Nodes.unregister_event_target(man, layer.zoom);
 end
 
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-function Nodes.io_event(node::GameLayer, event::Events.MouseMotionEvent)
-    Nodes.io_event(node.yellow_rect, event)
-    Nodes.io_event(node.circle, event)
-end
 
 # --------------------------------------------------------
 # Grouping

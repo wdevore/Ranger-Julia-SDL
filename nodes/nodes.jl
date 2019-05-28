@@ -140,9 +140,6 @@ function draw(node::Ranger.AbstractNode, context::RenderContext)
     # println("AbstractNode::draw ", node);
 end
 
-function interpolate(node::Ranger.AbstractNode, interpolation::Float64)
-end
-
 function enter_node(node::Ranger.AbstractNode, man::NodeManager)
     # println("AbstractNode::enter ", node);
 end
@@ -165,10 +162,6 @@ end
 
 # ripple dirty flag
 function set_dirty!(node::Ranger.AbstractNode, dirty::Bool)
-    # if node.base.name == "ZoomNode"
-    #     println(stacktrace())
-    # end
-    # println("set_dirty: ", node.base.name)
     node.base.dirty = dirty
 end
 

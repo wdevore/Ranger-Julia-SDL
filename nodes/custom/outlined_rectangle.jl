@@ -15,16 +15,18 @@ mutable struct OutlinedRectangle <: Ranger.AbstractNode
 
     aabb::Geometry.AABB{Float64}
     detection::Nodes.Detection
+    inside::Bool
 
     function OutlinedRectangle(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
 
         o.aabb = Geometry.AABB{Float64}()
         o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
+        o.inside = false
 
         o.polygon = Geometry.Polygon{Float64}()
 
@@ -55,8 +57,7 @@ function Nodes.draw(node::OutlinedRectangle, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, node.color)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
 
-    inside = Nodes.check!(node.detection, node, context)
-    aabb_color = Nodes.highlight_color(node.detection, inside)
+    aabb_color = Nodes.highlight_color(node.detection, node.inside)
     Rendering.set_draw_color(context, aabb_color)
 
     Geometry.set!(node.aabb, Nodes.get_bucket(node))
@@ -75,8 +76,9 @@ end
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-function Nodes.io_event(node::OutlinedRectangle, event::Events.MouseEvent)
+function Nodes.io_event(node::OutlinedRectangle, event::Events.MouseMotionEvent)
     # println("io_event ", event, ", node: ", node)
     Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
+    node.inside = Nodes.check!(node.detection, node, node.base.world)
 end
 

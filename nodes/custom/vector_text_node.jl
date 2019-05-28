@@ -20,7 +20,7 @@ mutable struct VectorTextNode <: Ranger.AbstractNode
     function VectorTextNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
         o.mesh = Geometry.Mesh()

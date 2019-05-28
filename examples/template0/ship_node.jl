@@ -41,6 +41,7 @@ mutable struct Ship <: Ranger.AbstractNode
     det_disc::Nodes.Detection
     det_left::Nodes.Detection
     det_right::Nodes.Detection
+    inside::Bool
 
     keystate::KeyState
 
@@ -57,7 +58,7 @@ mutable struct Ship <: Ranger.AbstractNode
     function Ship(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
         o.color = Rendering.White()
@@ -72,6 +73,7 @@ mutable struct Ship <: Ranger.AbstractNode
 
         o.right_cell = Geometry.Polygon{Float64}()
         o.det_right = Nodes.Detection(Rendering.Yellow(), Rendering.Red())
+        o.inside = false
 
         o.keystate = KeyState(false, false, Int8(0))
         o.angular_thrust_motion = Animation.AngularMotion{Float64}()
@@ -264,16 +266,8 @@ function Nodes.draw(node::Ship, context::Rendering.RenderContext)
     Rendering.render_outlined_polygon(context, node.left_cell, Rendering.CLOSED);
     Rendering.render_outlined_polygon(context, node.right_cell, Rendering.CLOSED);
 
-    inside = Nodes.check!(node.det_right, node, context)
-    if !inside
-        inside = Nodes.check!(node.det_left, node, context)
-        if !inside
-            inside = Nodes.check!(node.det_disc, node, context)
-        end
-    end
-    
     Nodes.draw(node.det_disc, context)
-    aabb_color = Nodes.highlight_color(node.det_disc, inside)
+    aabb_color = Nodes.highlight_color(node.det_disc, node.inside)
     Rendering.set_draw_color(context, aabb_color)
 
     Geometry.set!(node.aabb, node.disc.mesh.bucket)
@@ -304,11 +298,19 @@ function Nodes.io_event(node::Ship, event::Events.KeyboardEvent)
     set_state!(node.keystate, event)
 end
 
-function Nodes.io_event(node::Ship, event::Events.MouseEvent)
+function Nodes.io_event(node::Ship, event::Events.MouseMotionEvent)
     # Nodes.io_event(node.circle, event)
     Nodes.set_device_point!(node.det_disc, Float64(event.x), Float64(event.y))
     Nodes.set_device_point!(node.det_left, Float64(event.x), Float64(event.y))
     Nodes.set_device_point!(node.det_right, Float64(event.x), Float64(event.y))
+
+    node.inside = Nodes.check!(node.det_right, node, node.base.world)
+    if !node.inside
+        node.inside = Nodes.check!(node.det_left, node, node.base.world)
+        if !node.inside
+            node.inside = Nodes.check!(node.det_disc, node, node.base.world)
+        end
+    end
 end
 
 # --------------------------------------------------------

@@ -25,13 +25,14 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
     triangle::Custom.OutlinedTriangle
 
     detection::Nodes.Detection
+    inside::Bool
 
     aabb::Geometry.AABB{Float64}
 
     function OrbitSystemNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
         o.color = Rendering.White()
@@ -42,6 +43,7 @@ mutable struct OrbitSystemNode <: Ranger.AbstractNode
 
         o.aabb = Geometry.AABB{Float64}()
         o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
+        o.inside = false
 
         o
     end
@@ -115,6 +117,7 @@ end
 # --------------------------------------------------------
 function Nodes.enter_node(node::OrbitSystemNode, man::Nodes.NodeManager)
     println("enter ", node);
+    node.inside = Nodes.check!(node.detection, node, node.base.world)
     # Register node as a timing target in order to receive updates
     Nodes.register_target(man, node)
     Nodes.register_event_target(man, node);
@@ -136,9 +139,8 @@ function Nodes.draw(node::OrbitSystemNode, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, node.color)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
 
-    inside = Nodes.check!(node.detection, node, context)
     # Nodes.draw(node.detection, context)
-    aabb_color = Nodes.highlight_color(node.detection, inside)
+    aabb_color = Nodes.highlight_color(node.detection, node.inside)
     Rendering.set_draw_color(context, aabb_color)
 
     Geometry.set!(node.aabb, Nodes.get_bucket(node))
@@ -157,9 +159,11 @@ end
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-function Nodes.io_event(node::OrbitSystemNode, event::Events.MouseEvent)
+function Nodes.io_event(node::OrbitSystemNode, event::Events.MouseMotionEvent)
     # println("io_event ", event, ", node: ", node)
     Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
+    node.inside = Nodes.check!(node.detection, node, node.base.world)
+
     Nodes.io_event(node.triangle, event)
 end
 

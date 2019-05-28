@@ -27,9 +27,9 @@ mutable struct Detection
 end
 
 # Typically called from a Nodes.draw
-function check!(detection::Detection, node::Ranger.AbstractNode, context::Rendering.RenderContext)
+function check!(detection::Detection, node::Ranger.AbstractNode, world::Ranger.World)
     # Map device/mouse coords to local-space of node.
-    Nodes.map_device_to_node!(context, 
+    Nodes.map_device_to_node!(world, 
         Int32(detection.device_point.x), Int32(detection.device_point.y),
         node, detection.local_point)
 

@@ -87,8 +87,9 @@ function run(world::Ranger.World)
     step_enabled = false
 
     keyboard = Events.KeyboardEvent()
-    mouse = Events.MouseEvent()
+    mouse = Events.MouseMotionEvent()
     mouse_wheel = Events.MouseWheelEvent()
+    mouse_button = Events.MouseButtonEvent()
 
     # Main game loop
     while running
@@ -135,6 +136,10 @@ function run(world::Ranger.World)
                     Events.set!(mouse_wheel, event)
 
                     Nodes.route_events(manager, mouse_wheel)
+                elseif ev_type == SDL2.MOUSEBUTTONDOWN || ev_type == SDL2.MOUSEBUTTONUP
+                    Events.set!(mouse_button, event)
+
+                    Nodes.route_events(manager, mouse_button)
                 end
             end
         end        
@@ -257,7 +262,7 @@ function draw_space_coords(mx::Int32, my::Int32, world::Ranger.World)
     y = 30
     Rendering.draw_text(manager.context, x, y, text, 2, 2, false)
 
-    Nodes.map_device_to_view(manager.context, mx, my, view_point)
+    Nodes.map_device_to_view(world, mx, my, view_point)
     text = @sprintf("V: %2d, %2d", view_point.x, view_point.y)
     y += 20
     Rendering.draw_text(manager.context, x, y, text, 2, 2, false)

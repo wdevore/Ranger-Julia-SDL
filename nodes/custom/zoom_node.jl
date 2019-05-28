@@ -16,7 +16,7 @@ mutable struct ZoomNode <: Ranger.AbstractNode
     function ZoomNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.zoom = Math.ZoomTransform{Float64}()
         o.children = Array{Ranger.AbstractNode,1}[]
 
@@ -32,15 +32,15 @@ function Nodes.draw(node::ZoomNode, context::Rendering.RenderContext)
     # Zoom node doesn't need to render but it does require the context
     # for space mapping.
 
-    handle_movement(node, context)
+    handle_movement(node)
 
     handle_zoom(node)
 
 end
 
-function handle_movement(node::ZoomNode, context::Rendering.RenderContext)
+function handle_movement(node::ZoomNode)
     # Map window/device-space to zoom-space
-    Nodes.map_device_to_node!(context, 
+    Nodes.map_device_to_node!(node.base.world, 
         Int32(node.mouse_window_position.x), Int32(node.mouse_window_position.y),
         node,
         node.zoom_point)
@@ -113,7 +113,7 @@ end
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-function Nodes.io_event(node::ZoomNode, event::Events.MouseEvent)
+function Nodes.io_event(node::ZoomNode, event::Events.MouseMotionEvent)
     Geometry.set!(node.mouse_window_position, Float64(event.x), Float64(event.y))
 end
 

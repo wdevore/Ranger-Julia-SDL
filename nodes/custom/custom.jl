@@ -17,9 +17,11 @@ include("outlined_rectangle.jl")
 include("outlined_triangle.jl")
 include("outlined_circle.jl")
 include("line_node.jl")
+include("particle_node.jl")
 
 include("anchor_node.jl")
 
 include("zoom_node.jl")
+
 
 end

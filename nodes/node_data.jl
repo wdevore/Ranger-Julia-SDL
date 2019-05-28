@@ -8,6 +8,7 @@ mutable struct NodeData
     name::String
     visible::Bool
     dirty::Bool
+    world::Ranger.World
 
     parent::Ranger.AbstractNode
 
@@ -28,11 +29,11 @@ mutable struct NodeData
         obj
     end
 
-    function NodeData(id::UInt32, name::String, parent::Ranger.AbstractNode)
-        obj = NodeData(id, name)
+    function NodeData(name::String, parent::Ranger.AbstractNode, world::Ranger.World)
+        obj = NodeData(Ranger.gen_id(world), name)
 
         obj.parent = parent
-        
+        obj.world = world
         obj
     end
 end

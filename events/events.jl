@@ -6,7 +6,7 @@ using SimpleDirectMediaLayer
 const SDL2 = SimpleDirectMediaLayer
 
 export
-    KeyboardEvent, MouseEvent, MouseWheelEvent,
+    KeyboardEvent, MouseMotionEvent, MouseWheelEvent, MouseButtonEvent,
     get_key_code_sym, get_scancode, get_modifier, get_repeat,
     poll_event!, get_event_type, set!, print
 
@@ -111,6 +111,9 @@ function print_key_event_sym(event::Array{UInt8})
     println("mod: ($mod) ", to_hex(mod));
 end
 
+# --------------------------------------------------------------
+# Keyboard
+# --------------------------------------------------------------
 function print_keyboard_event(event::Array{UInt8})
     println("*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--")
     println("event: ", event[1:31])
@@ -128,6 +131,37 @@ function print_keyboard_event(event::Array{UInt8})
     println("--------------------------------------------------------------")
 end
 
+mutable struct KeyboardEvent <: Ranger.AbstractIOEvent
+    keycode::UInt32
+    scancode::UInt32
+    modifier::UInt16
+    repeat::UInt8
+    state::UInt8
+
+    function KeyboardEvent()
+        new(0, 0, 0, 0)
+    end
+end
+
+function set!(keyboard::KeyboardEvent, event::Array{UInt8,1})
+    keyboard.keycode = get_key_code_sym(event)
+    keyboard.scancode = get_scancode(event)
+    keyboard.modifier = get_modifier(event)
+    keyboard.repeat = get_repeat(event)
+    keyboard.state = get_state(event)
+end
+
+function print(keyboard::KeyboardEvent)
+    println("key: ", keyboard.keycode,
+    ", scan: ", keyboard.scancode,
+    ", mod: ", keyboard.modifier,
+    ", rep: ", keyboard.repeat,
+    ", state: ", keyboard.state)
+end
+
+# --------------------------------------------------------------
+# Mouse
+# --------------------------------------------------------------
 function print_mouse_event(event::Array{UInt8})
     # mutable struct MouseMotionEvent <: AbstractEvent
     #     _type::Uint32        1:4
@@ -162,35 +196,7 @@ function print_mouse_event(event::Array{UInt8})
     println("--------------------------------------------------------------")
 end
 
-mutable struct KeyboardEvent <: Ranger.AbstractIOEvent
-    keycode::UInt32
-    scancode::UInt32
-    modifier::UInt16
-    repeat::UInt8
-    state::UInt8
-
-    function KeyboardEvent()
-        new(0, 0, 0, 0)
-    end
-end
-
-function set!(keyboard::KeyboardEvent, event::Array{UInt8,1})
-    keyboard.keycode = get_key_code_sym(event)
-    keyboard.scancode = get_scancode(event)
-    keyboard.modifier = get_modifier(event)
-    keyboard.repeat = get_repeat(event)
-    keyboard.state = get_state(event)
-end
-
-function print(keyboard::KeyboardEvent)
-    println("key: ", keyboard.keycode,
-    ", scan: ", keyboard.scancode,
-    ", mod: ", keyboard.modifier,
-    ", rep: ", keyboard.repeat,
-    ", state: ", keyboard.state)
-end
-
-mutable struct MouseEvent <: Ranger.AbstractIOEvent
+mutable struct MouseMotionEvent <: Ranger.AbstractIOEvent
     type::UInt32
     which::UInt32
     state::UInt32
@@ -199,12 +205,12 @@ mutable struct MouseEvent <: Ranger.AbstractIOEvent
     xrel::Int32
     yrel::Int32
 
-    function MouseEvent()
+    function MouseMotionEvent()
         new(0, 0, 0, 0, 0, 0)
     end
 end
 
-function set!(mouse::MouseEvent, event::Array{UInt8,1})
+function set!(mouse::MouseMotionEvent, event::Array{UInt8,1})
     mouse.type = extract_4byte_host(1, event)
     mouse.which = extract_4byte_host(13, event)
     mouse.state = extract_4byte_host(17, event)
@@ -234,5 +240,39 @@ function set!(mouse::MouseWheelEvent, event::Array{UInt8,1})
     mouse.direction = signed(extract_4byte_host(25, event))
 end
 
+mutable struct MouseButtonEvent <: Ranger.AbstractIOEvent
+    type::UInt32
+    which::UInt32
+    button::UInt8
+    state::UInt8
+    clicks::UInt8
+    # padding1 UInt8
+    x::Int32
+    y::Int32
+
+    function MouseButtonEvent()
+        new(0, 0, 0, 0, 0, 0, 0)
+    end
+end
+
+function set!(mouse::MouseButtonEvent, event::Array{UInt8,1})
+    mouse.type = extract_4byte_host(1, event)
+    mouse.which = extract_4byte_host(13, event)
+    mouse.button = event[17]
+
+    mouse.state = event[18]
+    mouse.clicks = event[19]
+    # padding at 20
+    mouse.x = signed(extract_4byte_host(21, event))
+    mouse.y = signed(extract_4byte_host(25, event))
+end
+
+function is_left_mouse_down(mouse::MouseButtonEvent)
+    mouse.button == 1 && mouse.state == 1
+end
+
+function is_left_mouse_up(mouse::MouseButtonEvent)
+    mouse.button == 1 && mouse.state == 0
+end
 
 end # Module ------------------------------------------------------------

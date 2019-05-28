@@ -1,9 +1,3 @@
-export 
-    OutlinedTriangle,
-    set!
-
-import ..Nodes.draw
-
 mutable struct OutlinedTriangle <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
@@ -15,11 +9,12 @@ mutable struct OutlinedTriangle <: Ranger.AbstractNode
     aabb::Geometry.AABB{Float64}
 
     detection::Nodes.Detection
+    inside::Bool
 
     function OutlinedTriangle(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
-        o.base = Nodes.NodeData(Ranger.gen_id(world), name, parent)
+        o.base = Nodes.NodeData(name, parent, world)
         o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
 
@@ -27,7 +22,8 @@ mutable struct OutlinedTriangle <: Ranger.AbstractNode
 
         o.aabb = Geometry.AABB{Float64}()
         o.detection = Nodes.Detection(Rendering.Lime(), Rendering.Red())
-        
+        o.inside = false
+
         Geometry.add_vertex!(o.polygon, -0.5, 0.5)
         Geometry.add_vertex!(o.polygon, 0.5, 0.5)
         Geometry.add_vertex!(o.polygon, 0.0, -0.5)
@@ -56,8 +52,7 @@ function Nodes.draw(node::OutlinedTriangle, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, node.color)
     Rendering.render_outlined_polygon(context, node.polygon, Rendering.CLOSED);
 
-    inside = Nodes.check!(node.detection, node, context)
-    aabb_color = Nodes.highlight_color(node.detection, inside)
+    aabb_color = Nodes.highlight_color(node.detection, node.inside)
     Rendering.set_draw_color(context, aabb_color)
 
     Geometry.set!(node.aabb, Nodes.get_bucket(node))
@@ -67,9 +62,10 @@ end
 # --------------------------------------------------------
 # Events
 # --------------------------------------------------------
-function Nodes.io_event(node::OutlinedTriangle, event::Events.MouseEvent)
+function Nodes.io_event(node::OutlinedTriangle, event::Events.MouseMotionEvent)
     # println("io_event ", event, ", node: ", node)
     Nodes.set_device_point!(node.detection, Float64(event.x), Float64(event.y))
+    node.inside = Nodes.check!(node.detection, node, node.base.world)
 end
 
 function set!(node::OutlinedTriangle, v1::Point{Float64}, v2::Point{Float64}, v3::Point{Float64})
