@@ -50,7 +50,7 @@ mutable struct HostNode <: Ranger.AbstractNode
         # Create and activate particle system.
         o.particle_system = Particles.ParticleSystem(activator)
         o.particle_system.active = true
-        # o.particle_system.auto_trigger = true
+        o.particle_system.auto_trigger = true
 
         # Add a few particles to the system.
         for i in 1:Particles.MAX_PARTICLES
@@ -60,6 +60,7 @@ mutable struct HostNode <: Ranger.AbstractNode
             # Add a particle node to the parent (i.e. a visual).
             pnode = BasicParticleNode(world, "ParticleNode:" * string(i), parent)
             p.visual = pnode
+            pnode.color = Rendering.Red()
             pnode.base.id = i # assign an id for lookups.
             Nodes.set_scale!(pnode, Particles.MAX_PARTICE_SIZE) # an initial size
 
@@ -110,6 +111,9 @@ end
 function Nodes.update(node::HostNode, dt::Float64)
     Nodes.update!(node.detection, node)
     Particles.update!(node.particle_system, dt)
+    
+    pos = node.transform.position
+    Particles.set_position!(node.particle_system, pos.x, pos.y)
 end
 
 # Called during visit/rendering which is AFTER update()
@@ -170,13 +174,24 @@ function Nodes.io_event(node::HostNode, event::Events.KeyboardEvent)
         Particles.explode!(node.particle_system)
     end
 
+    if (event.keycode == Events.KEY_W && event.state == Events.KEY_PRESSED)
+        node.particle_system.auto_trigger = !node.particle_system.auto_trigger
+        if node.particle_system.auto_trigger
+            println("Autotrigger ON")
+        else
+            println("Autotrigger OFF")
+        end
+    end
+
     set_state!(node.keystate, event)
 end
 
 function Nodes.io_event(node::HostNode, event::Events.MouseMotionEvent)
     set_motion_state!(node.drag, event.x, event.y, node)
 
-    if is_dragging(node.drag) && node.inside
+    dragging = is_dragging(node.drag)
+    # println(dragging, ", ", node.inside)
+    if dragging && node.inside
         pos = node.transform.position
         Nodes.set_position!(node, pos.x + node.drag.delta.x, pos.y + node.drag.delta.y)
     end

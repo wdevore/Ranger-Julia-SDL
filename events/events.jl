@@ -66,6 +66,7 @@ const KEY_A = SDL2.SDLK_a
 const KEY_E = SDL2.SDLK_e
 const KEY_F = SDL2.SDLK_f
 const KEY_S = SDL2.SDLK_s
+const KEY_W = SDL2.SDLK_w
 const KEY_UP = SDL2.SDLK_UP
 const KEY_DOWN = SDL2.SDLK_DOWN
 const KEY_LEFT = SDL2.SDLK_LEFT

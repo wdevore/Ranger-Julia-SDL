@@ -1,7 +1,7 @@
 export Palette,
     Gray
     
-struct Palette
+mutable struct Palette
     # SDL requires Int64 not UInt8
     r::Int64
     g::Int64
@@ -28,6 +28,22 @@ struct Palette
         a = Integer(color & 0x000000ff)
         new(Int64(r), Int64(g), Int64(b), Int64(a))
     end
+end
+
+function set_red!(color::Palette, r::Int64)
+    color.r = r
+end
+
+function set_green!(color::Palette, g::Int64)
+    color.g = g
+end
+
+function set_blue!(color::Palette, b::Int64)
+    color.b = b
+end
+
+function set_alpha!(color::Palette, a::Int64)
+    color.a = a
 end
 
 function White()

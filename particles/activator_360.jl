@@ -26,6 +26,10 @@ function activate!(activator::Activator360, particle::AbstractParticle, x::Float
     lifespan = rand(1)[1] * (activator.max_life * 1000.0)
     particle.lifespan = lifespan
 
+    shade = clamp(Int64(round(rand(1)[1] * 32.0 * speed)), 0, 255)
+
+    particle.visual.color.r = shade
+
     # Reset counter for this lifespan.
     particle.elapsed = 0.0
 

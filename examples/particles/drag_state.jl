@@ -17,6 +17,8 @@ mutable struct DragState
         o.delta = Geometry.Point{Float64}()
         o.position = Geometry.Point{Float64}()
         o.map_point = Geometry.Point{Float64}()
+        o.dragging = false
+        o.down = false
         o
     end
 end
