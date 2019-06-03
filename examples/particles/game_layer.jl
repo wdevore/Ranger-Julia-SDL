@@ -13,7 +13,7 @@ mutable struct GameLayer <: Ranger.AbstractNode
     buc_max::Geometry.Point{Float64}
 
     host_node::HostNode
-
+    
     function GameLayer(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
@@ -41,8 +41,7 @@ function build(layer::GameLayer, world::Ranger.World)
     Geometry.set!(layer.max, hw, hh)
 
     layer.host_node = HostNode(world, "HostNode", layer)
-    Nodes.set_scale!(layer.host_node, 50.0)
-    # Nodes.set_position!(layer.host_node, 100.0, -100.0)
+    Nodes.set_scale!(layer.host_node, 150.0)
     push!(layer.children, layer.host_node);
 
 end
@@ -66,7 +65,7 @@ function Nodes.draw(layer::GameLayer, context::Rendering.RenderContext)
     Rendering.set_draw_color(context, RangerGame.darkgray)
     Rendering.render_aa_rectangle(context, layer.buc_min, layer.buc_max, Rendering.FILLED)
 
-    # Draw debug layer name
+    # Draw layer name
     Rendering.set_draw_color(context, RangerGame.white)
     Rendering.draw_text(context, 10, 10, layer.base.name, 2, 2, false)
 end
@@ -82,7 +81,6 @@ function Nodes.enter_node(layer::GameLayer, man::Nodes.NodeManager)
 
     # Register host so it too can get updates
     Nodes.register_target(man, layer.host_node)
-
 
     # Register for io events such as keyboard or mouse
     Nodes.register_event_target(man, layer)

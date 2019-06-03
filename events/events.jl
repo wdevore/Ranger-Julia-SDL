@@ -63,6 +63,7 @@ end
 # Key maps
 # --------------------------------------------------------------
 const KEY_A = SDL2.SDLK_a
+const KEY_F = SDL2.SDLK_f
 const KEY_S = SDL2.SDLK_s
 const KEY_UP = SDL2.SDLK_UP
 const KEY_DOWN = SDL2.SDLK_DOWN

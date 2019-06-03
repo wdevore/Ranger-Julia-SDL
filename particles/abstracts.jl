@@ -1,3 +1,3 @@
 abstract type AbstractParticle{T <: AbstractFloat} end
 
-abstract type AbstractActivator end
+abstract type AbstractParticleActivator end

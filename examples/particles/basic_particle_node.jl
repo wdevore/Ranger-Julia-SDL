@@ -1,23 +1,20 @@
-mutable struct ParticleNode <: Ranger.AbstractNode
+mutable struct BasicParticleNode <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
 
     color::Rendering.Palette
 
-    # The shape of the particle
     polygon::Geometry.Polygon
 
-    particle::Particles.Particle{Float64}
-
-    function ParticleNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
+    function BasicParticleNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
         o.base = Nodes.NodeData(name, parent, world)
+        o.base.visible = false
         o.transform = Nodes.TransformProperties{Float64}()
         o.color = Rendering.White()
 
         o.polygon = Geometry.Polygon{Float64}()
-        o.particle::Particles.Particle{Float64}()
 
         Geometry.add_vertex!(o.polygon, -0.5, 0.5)
         Geometry.add_vertex!(o.polygon, 0.5, 0.5)
@@ -34,11 +31,10 @@ end
 # --------------------------------------------------------
 # Timing: either called by NodeManager or by a parent node
 # --------------------------------------------------------
-function Nodes.update(node::ParticleNode, dt::Float64)
-    # Update particle system
+function Nodes.update(node::BasicParticleNode, dt::Float64)
 end
 
-function Nodes.draw(node::ParticleNode, context::Rendering.RenderContext)
+function Nodes.draw(node::BasicParticleNode, context::Rendering.RenderContext)
     if Nodes.is_dirty(node)
         Rendering.transform!(context, node.polygon)
         Nodes.set_dirty!(node, false)

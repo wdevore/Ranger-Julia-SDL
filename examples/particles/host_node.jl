@@ -1,5 +1,4 @@
 include("keystate.jl")
-# include("vector_motion.jl")
 
 mutable struct HostNode <: Ranger.AbstractNode
     base::Nodes.NodeData
@@ -25,6 +24,8 @@ mutable struct HostNode <: Ranger.AbstractNode
     drag::DragState
     node_point::Geometry.Point{Float64}
 
+    particle_system::Particles.ParticleSystem
+
     function HostNode(world::Ranger.World, name::String, parent::Ranger.AbstractNode)
         o = new()
 
@@ -42,15 +43,55 @@ mutable struct HostNode <: Ranger.AbstractNode
         o.drag = DragState()
         o.node_point = Geometry.Point{Float64}()
 
+        # Setup ParticleSystem
+        activator = Particles.Activator360()
+
+        o.particle_system = Particles.ParticleSystem(activator)
+        o.particle_system.active = true
+
+        # Add a few particles to the system.
+        for i in 1:50
+            p = Particles.Particle{Float64}()
+            Particles.add_particle!(o.particle_system, p)
+
+            # Add a particle node the parent.
+            pnode = BasicParticleNode(world, "ParticleNode:" * string(i), parent)
+            p.visual = pnode
+            pnode.base.id = i
+            Nodes.set_scale!(pnode, 10.0)
+            push!(Nodes.get_children(parent), pnode)
+        end
+
         build(o, world)
         o
     end
 end
 
 function build(node::HostNode, world::Ranger.World)
-    Geometry.add_vertex!(node.polygon, -0.5, 0.5)
-    Geometry.add_vertex!(node.polygon, 0.5, 0.5)
-    Geometry.add_vertex!(node.polygon, 0.0, -0.5)
+    Geometry.add_vertex!(node.polygon, 0.05, -0.05)
+    Geometry.add_vertex!(node.polygon, 0.05, -0.15)
+    Geometry.add_vertex!(node.polygon, 0.0, -0.25)
+    Geometry.add_vertex!(node.polygon, -0.05, -0.25)
+    Geometry.add_vertex!(node.polygon, -0.05, -0.15)
+    Geometry.add_vertex!(node.polygon, -0.05, -0.05)
+
+    Geometry.add_vertex!(node.polygon, -0.15, -0.05)
+    Geometry.add_vertex!(node.polygon, -0.25, 0.0)
+    Geometry.add_vertex!(node.polygon, -0.25, 0.05)
+    Geometry.add_vertex!(node.polygon, -0.15, 0.05)
+    Geometry.add_vertex!(node.polygon, -0.05, 0.05)
+
+    Geometry.add_vertex!(node.polygon, -0.05, 0.15)
+    Geometry.add_vertex!(node.polygon, 0.0, 0.25)
+    Geometry.add_vertex!(node.polygon, 0.05, 0.25)
+    Geometry.add_vertex!(node.polygon, 0.05, 0.15)
+    Geometry.add_vertex!(node.polygon, 0.05, 0.05)
+
+    Geometry.add_vertex!(node.polygon, 0.15, 0.05)
+    Geometry.add_vertex!(node.polygon, 0.25, 0.0)
+    Geometry.add_vertex!(node.polygon, 0.25, -0.05)
+    Geometry.add_vertex!(node.polygon, 0.15, -0.05)
+    Geometry.add_vertex!(node.polygon, 0.05, -0.05)
 
     Geometry.build!(node.polygon)
 
@@ -62,6 +103,7 @@ end
 # --------------------------------------------------------
 function Nodes.update(node::HostNode, dt::Float64)
     Nodes.update!(node.detection, node)
+    Particles.update!(node.particle_system, dt)
 end
 
 # Called during visit/rendering which is AFTER update()
@@ -95,6 +137,7 @@ end
 function Nodes.enter_node(node::HostNode, man::Nodes.NodeManager)
     println("enter ", node);
     Nodes.register_event_target(man, node);
+
     node.inside = Nodes.check!(node.detection, node, node.base.world)
 end
 
@@ -108,7 +151,12 @@ end
 # --------------------------------------------------------
 # Here we elect to receive keyboard events.
 function Nodes.io_event(node::HostNode, event::Events.KeyboardEvent)
-    Events.print(event)
+    # Events.print(event)
+    if (event.keycode == Events.KEY_F && event.state == Events.KEY_PRESSED)
+        pos = node.transform.position
+        Particles.set_position!(node.particle_system, pos.x, pos.y)
+        Particles.trigger_oneshot!(node.particle_system)
+    end
 
     set_state!(node.keystate, event)
 end

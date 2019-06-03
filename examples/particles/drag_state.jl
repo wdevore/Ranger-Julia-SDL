@@ -29,7 +29,7 @@ function set_motion_state!(drag::DragState, x::Int32, y::Int32, node::Ranger.Abs
     if drag.down
         drag.dragging = true
         # We need to map to parent space for dragging because the parent may contain
-        # a scaling factor. Using view-space will result is drifting from scale difference.
+        # a scaling factor. Using view-space will result in drifting from scale difference.
         Nodes.map_device_to_node!(node.base.world, x, y, node.base.parent, drag.map_point)
 
         Geometry.set!(drag.delta, drag.map_point.x - drag.position.x, drag.map_point.y - drag.position.y)

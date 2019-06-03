@@ -12,6 +12,7 @@ using ..Ranger.Nodes.Scenes
 using ..Ranger.Nodes.Custom
 using ..Ranger.Animation
 using ..Ranger.Nodes.Filters
+using ..Ranger.Particles
 
 orange = Rendering.Orange()
 white = Rendering.White()
@@ -27,6 +28,7 @@ lightpurple = Rendering.LightPurple()
 peach = Rendering.Peach()
 
 include("drag_state.jl")
+include("basic_particle_node.jl")
 include("host_node.jl")
 include("game_layer.jl")
 include("game_scene.jl")
