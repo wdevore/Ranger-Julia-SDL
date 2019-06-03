@@ -1,26 +1,32 @@
 # Set the properties of a particle.
 # It generates a random direction from 0 to 360 degrees.
 mutable struct Activator360 <: AbstractParticleActivator
+    max_life::Float64
+    max_speed::Float64
+
     function Activator360()
         o = new()
+        o.max_life = MAX_PARTICLE_LIFETIME
+        o.max_speed = MAX_PARTICLE_SPEED
         o
     end
 end
 
 function activate!(activator::Activator360, particle::AbstractParticle, x::Float64, y::Float64)
-    # Create a new direction
-    degrees = Float64(round(rand(1)[1] * 360.0))
-    speed = rand(1)[1] * 10.0
+    # Create new velocity components
+    direction = Float64(round(rand(1)[1] * 360.0))
+    speed = rand(1)[1] * activator.max_speed
 
-    Math.set_direction!(particle.velocity, degrees)
-    Math.increase_speed!(particle.velocity, speed)
+    Math.set_velocity!(particle.velocity, direction, speed)
     
+    # The location of where the particle is emitted
     set_position!(particle, x, y)
 
-    lifespan = rand(1)[1] * (3.0 * 1000.0)
-    # println("activating :", particle.id, ", lifespan: ", lifespan, ", speed: ", speed, ", velocity: ", particle.velocity)
-
+    # A random lifetime ranging from 0.0 to max_life
+    lifespan = rand(1)[1] * (activator.max_life * 1000.0)
     particle.lifespan = lifespan
+
+    # Reset counter for this lifespan.
     particle.elapsed = 0.0
 
     activate!(particle)

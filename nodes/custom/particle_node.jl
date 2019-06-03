@@ -1,3 +1,4 @@
+# A very basic particle visual. Use it for debugging, testing or as a template.
 mutable struct ParticleNode <: Ranger.AbstractNode
     base::Nodes.NodeData
     transform::Nodes.TransformProperties{Float64}
@@ -29,13 +30,6 @@ mutable struct ParticleNode <: Ranger.AbstractNode
 
         o
     end
-end
-
-# --------------------------------------------------------
-# Timing: either called by NodeManager or by a parent node
-# --------------------------------------------------------
-function Nodes.update(node::ParticleNode, dt::Float64)
-    # Update particle system
 end
 
 function Nodes.draw(node::ParticleNode, context::Rendering.RenderContext)

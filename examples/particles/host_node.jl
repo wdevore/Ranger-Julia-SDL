@@ -43,22 +43,28 @@ mutable struct HostNode <: Ranger.AbstractNode
         o.drag = DragState()
         o.node_point = Geometry.Point{Float64}()
 
-        # Setup ParticleSystem
+        # Setup particle activator
         activator = Particles.Activator360()
+        activator.max_life = 3.0
 
+        # Create and activate particle system.
         o.particle_system = Particles.ParticleSystem(activator)
         o.particle_system.active = true
+        # o.particle_system.auto_trigger = true
 
         # Add a few particles to the system.
-        for i in 1:50
+        for i in 1:Particles.MAX_PARTICLES
             p = Particles.Particle{Float64}()
             Particles.add_particle!(o.particle_system, p)
 
-            # Add a particle node the parent.
+            # Add a particle node to the parent (i.e. a visual).
             pnode = BasicParticleNode(world, "ParticleNode:" * string(i), parent)
             p.visual = pnode
-            pnode.base.id = i
-            Nodes.set_scale!(pnode, 10.0)
+            pnode.base.id = i # assign an id for lookups.
+            Nodes.set_scale!(pnode, Particles.MAX_PARTICE_SIZE) # an initial size
+
+            # Important! We are adding the node to the parent and NOT this host node.
+            # We want the particle to be independent of the emitter.
             push!(Nodes.get_children(parent), pnode)
         end
 
@@ -156,6 +162,12 @@ function Nodes.io_event(node::HostNode, event::Events.KeyboardEvent)
         pos = node.transform.position
         Particles.set_position!(node.particle_system, pos.x, pos.y)
         Particles.trigger_oneshot!(node.particle_system)
+    end
+
+    if (event.keycode == Events.KEY_E && event.state == Events.KEY_PRESSED)
+        pos = node.transform.position
+        Particles.set_position!(node.particle_system, pos.x, pos.y)
+        Particles.explode!(node.particle_system)
     end
 
     set_state!(node.keystate, event)

@@ -18,8 +18,7 @@ mutable struct Particle{T} <: AbstractParticle{T}
         o.elapsed = 0.0
         o.lifespan = 0.0
         o.velocity = Math.Velocity{Float64}()
-        Math.set_magnitude_range!(o.velocity, 0.0, 10.0)
-        Math.set_magnitude!(o.velocity, 5.0)
+        Math.set_magnitude_range!(o.velocity, 0.0, MAX_PARTICLE_SPEED)
         o.position = Geometry.Point{Float64}()
 
         o

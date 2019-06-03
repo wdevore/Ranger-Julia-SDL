@@ -83,6 +83,11 @@ function decrease_speed!(v::Velocity{T}, acceleration::T) where {T <: AbstractFl
     end
 end
 
+function set_velocity!(v::Velocity{T}, degrees::T, speed::T) where {T <: AbstractFloat}
+    set_direction!(v.direction, degrees)
+    set_magnitude!(v, speed);
+end
+
 function set_direction!(v::Velocity{T}, degrees::T) where {T <: AbstractFloat}
     set_direction!(v.direction, degrees);
 end
