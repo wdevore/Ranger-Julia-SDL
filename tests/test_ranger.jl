@@ -1,4 +1,4 @@
-include("ranger.jl")
+include("../ranger.jl")
 
 using Base.Math: deg2rad
 
