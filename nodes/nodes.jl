@@ -49,6 +49,7 @@ include("transform_properties.jl")
 
 include("node_data.jl")
 include("node_nil.jl")
+include("node_trivial.jl")
 include("node_stack.jl")
 
 include("scenes/scenes.jl")

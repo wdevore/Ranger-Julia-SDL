@@ -11,5 +11,6 @@ const EASE_IN = 0
 const EASE_OUT = 1
 const EASE_INOUT = 2
 
+include("linear.jl")
 include("expo.jl")
 include("quad.jl")

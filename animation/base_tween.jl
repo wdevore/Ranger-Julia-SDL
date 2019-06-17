@@ -1,6 +1,5 @@
 mutable struct BaseTween
     target::Ranger.AbstractNode
-    field_id::Int64 # (aka tween_type)
 
     auto_start::Bool
     auto_remove::Bool
@@ -25,7 +24,10 @@ mutable struct BaseTween
     finished::Bool # true when all repetitions are done
     killed::Bool # true if kill() was called
     paused::Bool # true if pause() was called
-  
+
+    state_callback::Function
+    callback_triggers::UInt64 # Bit flags
+
     function BaseTween()
         o = new()
         reset!(o)
@@ -34,8 +36,8 @@ mutable struct BaseTween
 end
 
 function start!(base::BaseTween)
-    if base.auto_start
-    end
+    base.current_time = 0
+    base.started = true
 end
 
 function reset!(base::BaseTween)
@@ -55,6 +57,9 @@ function reset!(base::BaseTween)
     base.finished = false
     base.killed = false
     base.paused = false
+
+    # base.state_callback = nothing
+    base.callback_triggers = TWEEN_CALLBACK_COMPLETE
 
     base.auto_start = true
     base.auto_remove = true
@@ -111,3 +116,24 @@ function kill_target()
     
 end
 
+# Updates the tween or timeline state. **You may want to use a
+# TweenManager to update objects for you.**
+#
+# Slow motion, fast motion and backward play can be easily achieved by
+# tweaking this delta time. Multiply it by -1 to play the animation
+# backward, or by 0.5 to play it twice slower than its normal speed.
+#
+# [delta] The time between now and the last call, in seconds.
+function update!(base::BaseTween, delta::Float64)
+    println("BaseTween updating")
+
+    if (!base.started || base.paused || base.killed)
+        return
+    end
+    
+    base.delta_time = delta
+
+    if !base.initialized
+        initialize!(base)
+    end
+end
